@@ -40,7 +40,11 @@ These systems will have controls automatically mapped.
 
 ### muOS Setup
 
-Grout has only been tested on muOS 2508.1 Canada Goose on an Anbernic RG35XXSP.
+Grout has been tested on the following devices running muOS 2508.4 Loose Goose.
+
+- RG35XXSP
+- RG34XX
+- TrimUI Smart Pro
 
 Please help by verifying if it works on other devices!
 
