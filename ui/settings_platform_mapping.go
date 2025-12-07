@@ -1,174 +1,248 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
-	"grout/client"
 	"grout/models"
-	"grout/state"
 	"grout/utils"
-	"path/filepath"
+	"os"
 	"slices"
+	"strings"
+	"time"
 
 	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
-	"qlova.tech/sum"
+	"github.com/brandonkowalski/go-romm"
 )
 
-type PlatformMappingScreen struct {
+// PlatformMappingInput contains data needed to render the platform mapping screen
+type PlatformMappingInput struct {
 	Host           models.Host
-	AutoSelect     bool
-	HideBackButton bool
+	ApiTimeout     time.Duration
+	CFW            models.CFW
+	RomDirectory   string // Base ROM directory path
+	AutoSelect     bool   // Auto-select "Create" option when no match found
+	HideBackButton bool   // Hide the back/cancel button
 }
 
-func InitPlatformMappingScreen(host models.Host, autoSelect bool, hideBackButton bool) PlatformMappingScreen {
-	return PlatformMappingScreen{
-		Host:           host,
-		AutoSelect:     autoSelect,
-		HideBackButton: hideBackButton,
-	}
+// PlatformMappingOutput contains the result of the platform mapping screen
+type PlatformMappingOutput struct {
+	Mappings map[string]models.DirectoryMapping
 }
 
-func (p PlatformMappingScreen) Name() sum.Int[models.ScreenName] {
-	return models.ScreenNames.SettingsPlatformMapping
+// PlatformMappingScreen displays platform to directory mapping configuration
+type PlatformMappingScreen struct{}
+
+func NewPlatformMappingScreen() *PlatformMappingScreen {
+	return &PlatformMappingScreen{}
 }
 
-func (p PlatformMappingScreen) Draw() (interface{}, int, error) {
+func (s *PlatformMappingScreen) Draw(input PlatformMappingInput) (gaba.ScreenResult[PlatformMappingOutput], error) {
 	logger := gaba.GetLogger()
-	config := state.GetAppState().Config
+	output := PlatformMappingOutput{Mappings: make(map[string]models.DirectoryMapping)}
 
-	c := client.NewRomMClient(p.Host, config.ApiTimeout)
-
-	rommPlatforms, err := c.GetPlatforms()
+	// Fetch RomM platforms
+	rommPlatforms, err := s.fetchPlatforms(input)
 	if err != nil {
-		logger.Error("Error loading fetching RomM Platforms", "error", err)
-		return nil, 0, err
+		logger.Error("Error fetching RomM Platforms", "error", err)
+		return gaba.WithCode(output, gaba.ExitCodeError), err
 	}
 
-	fb := utils.NewFileBrowser(logger)
-	err = fb.CWD(utils.GetRomDirectory(), false)
+	// Get local ROM directories
+	romDirectories, err := s.getRomDirectories(input.RomDirectory)
 	if err != nil {
-		logger.Error("Error loading fetching ROM directories", "error", err)
-		return nil, 1, err
+		logger.Error("Error fetching ROM directories", "error", err)
+		return gaba.WithCode(output, gaba.ExitCodeBack), err
 	}
 
-	unmapped := gaba.Option{
-		DisplayName: "Skip",
-		Value:       "",
-	}
+	// Build mapping options
+	mappingOptions := s.buildMappingOptions(rommPlatforms, romDirectories, input)
 
-	var mappingOptions []gaba.ItemWithOptions
-
-	for _, platform := range rommPlatforms {
-		options := []gaba.Option{unmapped}
-
-		rdi := slices.IndexFunc(fb.Items, func(item models.Item) bool {
-			switch utils.GetCFW() {
-			case models.NEXTUI:
-				return utils.ParseTag(utils.RomMSlugToCFW(platform.Slug)) == utils.RomFolderBase(item)
-			case models.MUOS:
-				return utils.RomMSlugToCFW(platform.Slug) == utils.RomFolderBase(item)
-			default:
-				return utils.RomMSlugToCFW(platform.Slug) == utils.RomFolderBase(item)
-			}
-		})
-
-		canCreate := false
-
-		if rdi == -1 {
-			dn := utils.RomMSlugToCFW(platform.Slug)
-
-			if utils.GetCFW() == models.NEXTUI {
-				dn = utils.ParseTag(dn)
-			}
-
-			if dn != "" {
-				options = append(options, gaba.Option{
-					DisplayName: fmt.Sprintf("Create '%s'", dn),
-					Value:       utils.RomMSlugToCFW(platform.Slug),
-				})
-
-				canCreate = true
-			}
-		}
-
-		selectedIndex := 0
-
-		for _, romDirectory := range fb.Items {
-			dn := filepath.Base(romDirectory.Path)
-
-			if utils.GetCFW() == models.NEXTUI {
-				dn = utils.ParseTag(dn)
-			}
-
-			options = append(options, gaba.Option{
-				DisplayName: fmt.Sprintf("/%s", dn),
-				Value:       filepath.Base(romDirectory.Path),
-			})
-
-			switch utils.GetCFW() {
-			case models.NEXTUI:
-				if utils.ParseTag(utils.RomMSlugToCFW(platform.Slug)) == utils.RomFolderBase(romDirectory) {
-					selectedIndex = len(options) - 1
-				}
-			case models.MUOS:
-				if utils.RomMSlugToCFW(platform.Slug) == utils.RomFolderBase(romDirectory) {
-					selectedIndex = len(options) - 1
-				}
-			}
-
-		}
-
-		if selectedIndex == 0 && len(options) > 1 && (len(fb.Items) == 0 || (canCreate && p.AutoSelect)) {
-			selectedIndex = 1
-		}
-
-		mappingOptions = append(mappingOptions, gaba.ItemWithOptions{
-			Item: gaba.MenuItem{
-				Text:     platform.DisplayName,
-				Metadata: platform.Slug,
-			},
-			Options:        options,
-			SelectedOption: selectedIndex,
-		})
-
-	}
-
-	fhi := []gaba.FooterHelpItem{
+	// Configure footer
+	footerItems := []gaba.FooterHelpItem{
 		{ButtonName: "←→", HelpText: "Cycle"},
 		{ButtonName: "Start", HelpText: "Save"},
 	}
-
-	if !p.HideBackButton {
-		fhi = slices.Insert(fhi, 0, gaba.FooterHelpItem{ButtonName: "B", HelpText: "Cancel"})
+	if !input.HideBackButton {
+		footerItems = slices.Insert(footerItems, 0, gaba.FooterHelpItem{ButtonName: "B", HelpText: "Cancel"})
 	}
 
+	// Show options list
 	result, err := gaba.OptionsList(
 		"Rom Directory Mapping",
 		gaba.OptionListSettings{
-			FooterHelpItems:   fhi,
-			DisableBackButton: p.HideBackButton},
+			FooterHelpItems:   footerItems,
+			DisableBackButton: input.HideBackButton,
+		},
 		mappingOptions,
 	)
 
 	if err != nil {
-		// TODO might need logging
-		return nil, 1, nil
+		if errors.Is(err, gaba.ErrCancelled) {
+			return gaba.Back(PlatformMappingOutput{}), nil
+		}
+		return gaba.WithCode(PlatformMappingOutput{}, gaba.ExitCodeError), err
 	}
 
+	// Build mappings from result
+	output.Mappings = s.buildMappingsFromResult(result.Items)
+
+	return gaba.Success(output), nil
+}
+
+func (s *PlatformMappingScreen) fetchPlatforms(input PlatformMappingInput) ([]romm.Platform, error) {
+	client := romm.NewClient(
+		input.Host.URL(),
+		romm.WithBasicAuth(input.Host.Username, input.Host.Password),
+		romm.WithTimeout(input.ApiTimeout),
+	)
+	return client.GetPlatforms()
+}
+
+func (s *PlatformMappingScreen) getRomDirectories(romDir string) ([]os.DirEntry, error) {
+	entries, err := os.ReadDir(romDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read ROM directory: %w", err)
+	}
+
+	var dirs []os.DirEntry
+	for _, entry := range entries {
+		if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
+			dirs = append(dirs, entry)
+		}
+	}
+
+	return dirs, nil
+}
+
+func (s *PlatformMappingScreen) buildMappingOptions(
+	platforms []romm.Platform,
+	romDirectories []os.DirEntry,
+	input PlatformMappingInput,
+) []gaba.ItemWithOptions {
+	options := make([]gaba.ItemWithOptions, 0, len(platforms))
+
+	for _, platform := range platforms {
+		platformOptions, selectedIndex := s.buildPlatformOptions(platform, romDirectories, input)
+
+		options = append(options, gaba.ItemWithOptions{
+			Item: gaba.MenuItem{
+				Text:     platform.Name,
+				Metadata: platform.Slug,
+			},
+			Options:        platformOptions,
+			SelectedOption: selectedIndex,
+		})
+	}
+
+	return options
+}
+
+func (s *PlatformMappingScreen) buildPlatformOptions(
+	platform romm.Platform,
+	romDirectories []os.DirEntry,
+	input PlatformMappingInput,
+) ([]gaba.Option, int) {
+	// Start with "Skip" option
+	options := []gaba.Option{{DisplayName: "Skip", Value: ""}}
+	selectedIndex := 0
+	canCreate := false
+
+	// Check if we can auto-match or need to create
+	matchIndex := s.findMatchingDirectory(platform, romDirectories, input.CFW)
+
+	if matchIndex == -1 {
+		// No match found - add "Create" option if possible
+		displayName := s.getCreateDisplayName(platform.Slug, input.CFW)
+		if displayName != "" {
+			options = append(options, gaba.Option{
+				DisplayName: fmt.Sprintf("Create '%s'", displayName),
+				Value:       utils.RomMSlugToCFW(platform.Slug),
+			})
+			canCreate = true
+		}
+	}
+
+	// Add all existing ROM directories as options
+	for _, romDir := range romDirectories {
+		dirName := romDir.Name()
+		displayName := dirName
+		if input.CFW == models.NEXTUI {
+			displayName = utils.ParseTag(dirName)
+		}
+
+		options = append(options, gaba.Option{
+			DisplayName: fmt.Sprintf("/%s", displayName),
+			Value:       dirName,
+		})
+
+		// Check if this directory matches the platform
+		if s.directoryMatchesPlatform(platform, romDir.Name(), input.CFW) {
+			selectedIndex = len(options) - 1
+		}
+	}
+
+	// Auto-select "Create" if appropriate
+	if selectedIndex == 0 && len(options) > 1 && (len(romDirectories) == 0 || (canCreate && input.AutoSelect)) {
+		selectedIndex = 1
+	}
+
+	return options, selectedIndex
+}
+
+func (s *PlatformMappingScreen) findMatchingDirectory(
+	platform romm.Platform,
+	romDirectories []os.DirEntry,
+	cfw models.CFW,
+) int {
+	for i, entry := range romDirectories {
+		if s.directoryMatchesPlatform(platform, entry.Name(), cfw) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (s *PlatformMappingScreen) directoryMatchesPlatform(
+	platform romm.Platform,
+	dirName string,
+	cfw models.CFW,
+) bool {
+	cfwSlug := utils.RomMSlugToCFW(platform.Slug)
+	romFolderBase := utils.RomFolderBase(dirName)
+
+	switch cfw {
+	case models.NEXTUI:
+		return utils.ParseTag(cfwSlug) == romFolderBase
+	default:
+		return cfwSlug == romFolderBase
+	}
+}
+
+func (s *PlatformMappingScreen) getCreateDisplayName(slug string, cfw models.CFW) string {
+	displayName := utils.RomMSlugToCFW(slug)
+	if cfw == models.NEXTUI {
+		displayName = utils.ParseTag(displayName)
+	}
+	return displayName
+}
+
+func (s *PlatformMappingScreen) buildMappingsFromResult(items []gaba.ItemWithOptions) map[string]models.DirectoryMapping {
 	mappings := make(map[string]models.DirectoryMapping)
 
-	for _, m := range result.Items {
-		rp := m.Item.Metadata.(string)
-		rfd := m.Options[m.SelectedOption].Value.(string)
+	for _, item := range items {
+		rommSlug := item.Item.Metadata.(string)
+		relativePath := item.Options[item.SelectedOption].Value.(string)
 
-		if rfd == "" {
+		// Skip empty mappings
+		if relativePath == "" {
 			continue
 		}
 
-		mappings[rp] = models.DirectoryMapping{
-			RomMSlug:     rp,
-			RelativePath: rfd,
+		mappings[rommSlug] = models.DirectoryMapping{
+			RomMSlug:     rommSlug,
+			RelativePath: relativePath,
 		}
 	}
 
-	return mappings, 0, nil
+	return mappings
 }

@@ -1,82 +1,87 @@
 package ui
 
 import (
-	"fmt"
-	"grout/models"
+	"errors"
 
-	"github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
-	"qlova.tech/sum"
+	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
+	"github.com/brandonkowalski/go-romm"
 )
 
-type PlatformSelection struct {
-	Host       models.Host
-	QuitOnBack bool
+// PlatformSelectionInput contains data needed to render the platform selection screen
+type PlatformSelectionInput struct {
+	Platforms  []romm.Platform
+	QuitOnBack bool // If true, back button quits the app; if false, it navigates back
 }
 
-func InitPlatformSelection(host models.Host, quitOnBack bool) PlatformSelection {
-	return PlatformSelection{
-		Host:       host,
-		QuitOnBack: quitOnBack,
+// PlatformSelectionOutput contains the result of the platform selection screen
+type PlatformSelectionOutput struct {
+	SelectedPlatform romm.Platform
+}
+
+// PlatformSelectionScreen displays a list of platforms to choose from
+type PlatformSelectionScreen struct{}
+
+func NewPlatformSelectionScreen() *PlatformSelectionScreen {
+	return &PlatformSelectionScreen{}
+}
+
+func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (gaba.ScreenResult[PlatformSelectionOutput], error) {
+	// Handle empty platforms
+	if len(input.Platforms) == 0 {
+		return gaba.WithCode(PlatformSelectionOutput{}, gaba.ExitCode(404)), nil
 	}
-}
 
-func (ps PlatformSelection) Name() sum.Int[models.ScreenName] {
-	return models.ScreenNames.PlatformSelection
-}
-
-func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
-	if len(ps.Host.Platforms) == 0 {
-		return models.Platform{}, 404, nil
-	}
-
-	var menuItems []gabagool.MenuItem
-	for _, platform := range ps.Host.Platforms {
-		platform.Host = ps.Host
-		menuItems = append(menuItems, gabagool.MenuItem{
+	// Build menu items
+	menuItems := make([]gaba.MenuItem, len(input.Platforms))
+	for i, platform := range input.Platforms {
+		menuItems[i] = gaba.MenuItem{
 			Text:     platform.Name,
 			Selected: false,
 			Focused:  false,
 			Metadata: platform,
-		})
+		}
 	}
 
-	var fhi []gabagool.FooterHelpItem
-
-	if ps.QuitOnBack {
-		fhi = []gabagool.FooterHelpItem{
+	// Configure footer based on navigation mode
+	var footerItems []gaba.FooterHelpItem
+	if input.QuitOnBack {
+		footerItems = []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 			{ButtonName: "X", HelpText: "Settings"},
 			{ButtonName: "A", HelpText: "Select"},
 		}
 	} else {
-		fhi = []gabagool.FooterHelpItem{
+		footerItems = []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Back"},
 			{ButtonName: "A", HelpText: "Select"},
 		}
 	}
 
-	title := "Grout"
+	// Configure list options
+	options := gaba.DefaultListOptions("Grout", menuItems)
+	options.EnableAction = input.QuitOnBack
+	options.FooterHelpItems = footerItems
 
-	if ps.Host.DisplayName != "" {
-		title = fmt.Sprintf("Grout | %s", ps.Host.DisplayName)
-	}
-
-	options := gabagool.DefaultListOptions(title, menuItems)
-	options.EnableAction = ps.QuitOnBack
-	options.FooterHelpItems = fhi
-
-	selection, err := gabagool.List(options)
-
+	sel, err := gaba.List(options)
 	if err != nil {
-		return models.Platform{}, 2, err
+		if errors.Is(err, gaba.ErrCancelled) {
+			return gaba.Back(PlatformSelectionOutput{}), nil
+		}
+		return gaba.WithCode(PlatformSelectionOutput{}, gaba.ExitCodeError), err
 	}
 
-	if selection.Action == gabagool.ListActionTriggered && ps.QuitOnBack {
-		return nil, 4, nil
-	} else if selection.Action == gabagool.ListActionSelected {
-		return selection.Items[selection.Selected[0]].Metadata.(models.Platform), 0, nil
+	switch sel.Action {
+	case gaba.ListActionSelected:
+		platform := sel.Items[sel.Selected[0]].Metadata.(romm.Platform)
+		return gaba.Success(PlatformSelectionOutput{SelectedPlatform: platform}), nil
+
+	case gaba.ListActionTriggered:
+		// Settings action (X button) - only available when QuitOnBack is true
+		if input.QuitOnBack {
+			return gaba.WithCode(PlatformSelectionOutput{}, gaba.ExitCodeSettings), nil
+		}
 	}
 
-	return nil, 2, nil
-
+	// Back/cancel
+	return gaba.WithCode(PlatformSelectionOutput{}, gaba.ExitCodeBack), nil
 }

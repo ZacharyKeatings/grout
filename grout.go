@@ -6,32 +6,61 @@ import (
 	"grout/ui"
 	"grout/utils"
 	"log/slog"
-	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	_ "github.com/UncleJunVIP/certifiable"
 	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
+	"github.com/brandonkowalski/go-romm"
+)
+
+const (
+	PlatformSelection       = "platform_selection"
+	GameList                = "game_list"
+	Search                  = "search"
+	Settings                = "settings"
+	SettingsPlatformMapping = "platform_mapping"
+)
+
+const (
+	KeyConfig          = "config"
+	KeyCFW             = "cfw"
+	KeyHost            = "host"
+	KeyPlatforms       = "platforms"
+	KeyQuitOnBack      = "quit_on_back"
+	KeyCurrentPlatform = "current_platform"
+	KeyCurrentGames    = "current_games"
+	KeyFullGamesList   = "full_games_list"
+	KeySearchFilter    = "search_filter"
+	KeySelectedGames   = "selected_games"
+	KeyNewConfig       = "new_config"
+	KeyNewMappings     = "new_mappings"
+	KeySearchQuery     = "search_query"
+)
+
+const (
+	ExitCodeEditMappings gaba.ExitCode = 100
+	ExitCodeNoResults    gaba.ExitCode = 404
 )
 
 func init() {
+	cfw := utils.GetCFW()
+
 	gaba.Init(gaba.Options{
 		WindowTitle:          "Grout",
 		PrimaryThemeColorHex: 0x007C77,
 		ShowBackground:       true,
-		IsNextUI:             utils.GetCFW() == models.NEXTUI,
+		IsNextUI:             cfw == models.NEXTUI,
 		LogFilename:          "grout.log",
 	})
 
 	gaba.SetLogLevel(slog.LevelDebug)
 
 	if !utils.IsConnectedToInternet() {
-		_, err := gaba.ConfirmationMessage("No Internet Connection!\nMake sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
+		_, _ = gaba.ConfirmationMessage("No Internet Connection!\nMake sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 		}, gaba.MessageOptions{})
 		defer cleanup()
-		utils.LogStandardFatal("No Internet Connection", err)
+		utils.LogStandardFatal("No Internet Connection", nil)
 	}
 
 	gaba.ProcessMessage("", gaba.ProcessMessageOptions{
@@ -46,7 +75,11 @@ func init() {
 	config, err := utils.LoadConfig()
 	if err != nil {
 		gaba.GetLogger().Debug("No RomM Host Configured")
-		config = ui.HandleLogin(models.Host{})
+		loginConfig, loginErr := ui.LoginFlow(models.Host{})
+		if loginErr != nil {
+			utils.LogStandardFatal("Login failed", loginErr)
+		}
+		config = loginConfig
 		utils.SaveConfig(config)
 	}
 
@@ -57,23 +90,24 @@ func init() {
 	}
 
 	if config.DirectoryMappings == nil || len(config.DirectoryMappings) == 0 {
-		pms := ui.InitPlatformMappingScreen(config.Hosts[0], true, true)
-		mappings, code, err := pms.Draw()
-		if err != nil {
-			return
-		}
+		screen := ui.NewPlatformMappingScreen()
+		result, err := screen.Draw(ui.PlatformMappingInput{
+			Host:           config.Hosts[0],
+			ApiTimeout:     config.ApiTimeout,
+			CFW:            cfw,
+			RomDirectory:   utils.GetRomDirectory(),
+			AutoSelect:     false,
+			HideBackButton: true,
+		})
 
-		if code == 0 {
-			config.DirectoryMappings = mappings.(map[string]models.DirectoryMapping)
+		if err == nil && result.ExitCode == gaba.ExitCodeSuccess {
+			config.DirectoryMappings = result.Value.Mappings
 			utils.SaveConfig(config)
+			state.SetConfig(config)
 		}
 	}
 
-	config.Hosts[0].Platforms = utils.GetMappedPlatforms(config.Hosts[0], config.DirectoryMappings)
-
 	gaba.GetLogger().Debug("Configuration Loaded!", "config", config.ToLoggable())
-
-	state.SetConfig(config)
 }
 
 func cleanup() {
@@ -84,162 +118,187 @@ func main() {
 	defer cleanup()
 
 	logger := gaba.GetLogger()
-
 	logger.Debug("Starting Grout")
 
-	var screen models.Screen
+	config := state.GetAppState().Config
+	cfw := utils.GetCFW()
+	quitOnBack := len(config.Hosts) == 1
+	platforms := utils.GetMappedPlatforms(config.Hosts[0], config.DirectoryMappings)
 
-	quitOnBack := len(state.GetAppState().Config.Hosts) == 1
+	fsm := buildFSM(config, cfw, platforms, quitOnBack)
 
-	if quitOnBack {
-		screen = ui.InitPlatformSelection(state.GetAppState().Config.Hosts[0], quitOnBack)
-	} else {
-		screen = ui.InitMainMenu(state.GetAppState().Config.Hosts)
+	if err := fsm.Run(); err != nil {
+		logger.Error("FSM error", "error", err)
 	}
+}
 
-	for {
-		res, code, _ := screen.Draw()
+func buildFSM(config *models.Config, cfw models.CFW, platforms []romm.Platform, quitOnBack bool) *gaba.FSM {
+	builder := gaba.NewFSMBuilder()
 
-		switch screen.Name() {
-		case ui.Screens.MainMenu:
-			switch code {
-			case 0:
-				host := res.(models.Host)
-				screen = ui.InitPlatformSelection(host, quitOnBack)
-			case 4:
-				screen = ui.InitSettingsScreen()
-			case 1, 2:
-				os.Exit(0)
+	builder.
+		WithData(KeyConfig, config).
+		WithData(KeyCFW, cfw).
+		WithData(KeyHost, config.Hosts[0]).
+		WithData(KeyPlatforms, platforms).
+		WithData(KeyQuitOnBack, quitOnBack).
+		WithData(KeySearchFilter, "").
+		StartWith(PlatformSelection)
+
+	// Platform Selection
+	gaba.RegisterScreenWithHandler(builder, PlatformSelection,
+		ui.NewPlatformSelectionScreen(),
+		func(ctx *gaba.FSMContext) ui.PlatformSelectionInput {
+			platforms, _ := gaba.Get[[]romm.Platform](ctx, KeyPlatforms)
+			quitOnBack, _ := gaba.Get[bool](ctx, KeyQuitOnBack)
+			return ui.PlatformSelectionInput{Platforms: platforms, QuitOnBack: quitOnBack}
+		},
+		func(ctx *gaba.FSMContext, output ui.PlatformSelectionOutput) {
+			ctx.Set(KeyCurrentPlatform, output.SelectedPlatform)
+		})
+
+	// Game List
+	gaba.RegisterScreenWithHandler(builder, GameList,
+		ui.NewGameListScreen(),
+		func(ctx *gaba.FSMContext) ui.GameListInput {
+			host, _ := gaba.Get[models.Host](ctx, KeyHost)
+			platform, _ := gaba.Get[romm.Platform](ctx, KeyCurrentPlatform)
+			games, _ := gaba.Get[[]romm.SimpleRom](ctx, KeyCurrentGames)
+			filter, _ := gaba.Get[string](ctx, KeySearchFilter)
+			return ui.GameListInput{Host: host, Platform: platform, Games: games, SearchFilter: filter}
+		},
+		func(ctx *gaba.FSMContext, output ui.GameListOutput) {
+			ctx.Set(KeySelectedGames, output.SelectedGames)
+			ctx.Set(KeyFullGamesList, output.AllGames)
+			ctx.Set(KeySearchFilter, output.SearchFilter)
+		})
+
+	// Search
+	gaba.RegisterScreenWithHandler(builder, Search,
+		ui.NewSearchScreen(),
+		func(ctx *gaba.FSMContext) ui.SearchInput {
+			filter, _ := gaba.Get[string](ctx, KeySearchFilter)
+			return ui.SearchInput{InitialText: filter}
+		},
+		func(ctx *gaba.FSMContext, output ui.SearchOutput) {
+			ctx.Set(KeySearchQuery, output.Query)
+		})
+
+	// Settings
+	gaba.RegisterScreenWithHandler(builder, Settings,
+		ui.NewSettingsScreen(),
+		func(ctx *gaba.FSMContext) ui.SettingsInput {
+			config, _ := gaba.Get[*models.Config](ctx, KeyConfig)
+			cfw, _ := gaba.Get[models.CFW](ctx, KeyCFW)
+			host, _ := gaba.Get[models.Host](ctx, KeyHost)
+			return ui.SettingsInput{Config: config, CFW: cfw, Host: host}
+		},
+		func(ctx *gaba.FSMContext, output ui.SettingsOutput) {
+			ctx.Set(KeyNewConfig, output.Config)
+		})
+
+	// Platform Mapping
+	gaba.RegisterScreenWithHandler(builder, SettingsPlatformMapping,
+		ui.NewPlatformMappingScreen(),
+		func(ctx *gaba.FSMContext) ui.PlatformMappingInput {
+			host, _ := gaba.Get[models.Host](ctx, KeyHost)
+			config, _ := gaba.Get[*models.Config](ctx, KeyConfig)
+			cfw, _ := gaba.Get[models.CFW](ctx, KeyCFW)
+			return ui.PlatformMappingInput{
+				Host: host, ApiTimeout: config.ApiTimeout, CFW: cfw,
+				RomDirectory: utils.GetRomDirectory(), AutoSelect: false, HideBackButton: false,
 			}
-		case ui.Screens.Settings:
-			if code != 404 {
-				if len(state.GetAppState().Config.Hosts) == 1 {
-					screen = ui.InitPlatformSelection(state.GetAppState().Config.Hosts[0], quitOnBack)
-				} else {
-					screen = ui.InitMainMenu(state.GetAppState().Config.Hosts)
-				}
-			}
-		case ui.Screens.PlatformSelection:
+		},
+		func(ctx *gaba.FSMContext, output ui.PlatformMappingOutput) {
+			ctx.Set(KeyNewMappings, output.Mappings)
+		})
+
+	builder.
+		On(PlatformSelection, gaba.ExitCodeSuccess).
+		Before(func(ctx *gaba.FSMContext) error {
+			ctx.Set(KeySearchFilter, "")
+			ctx.Set(KeyCurrentGames, []romm.SimpleRom(nil))
 			state.SetLastSelectedPosition(0, 0)
-			switch code {
-			case 0:
-				platform := res.(models.Platform)
-				screen = ui.InitGamesList(platform, models.Items{}, "")
-			case 1, 2:
-				if quitOnBack {
-					os.Exit(0)
-				}
-				screen = ui.InitMainMenu(state.GetAppState().Config.Hosts)
-			case 4:
-				screen = ui.InitSettingsScreen()
-			case 404:
-				screen = ui.InitMainMenu(state.GetAppState().Config.Hosts)
-			case -1:
-				screen = ui.InitMainMenu(state.GetAppState().Config.Hosts)
+			return nil
+		}).GoTo(GameList).
+		On(PlatformSelection, gaba.ExitCodeSettings).GoTo(Settings).
+		On(PlatformSelection, gaba.ExitCodeBack).Exit()
+
+	builder.
+		On(GameList, gaba.ExitCodeSuccess).
+		Before(func(ctx *gaba.FSMContext) error {
+			games, _ := gaba.Get[[]romm.SimpleRom](ctx, KeySelectedGames)
+			config, _ := gaba.Get[*models.Config](ctx, KeyConfig)
+			host, _ := gaba.Get[models.Host](ctx, KeyHost)
+			downloadGames(host, config, games)
+			fullGames, _ := gaba.Get[[]romm.SimpleRom](ctx, KeyFullGamesList)
+			state.SetCurrentFullGamesList(fullGames)
+			ctx.Set(KeyCurrentGames, []romm.SimpleRom(nil))
+			return nil
+		}).GoTo(GameList).
+		On(GameList, gaba.ExitCodeSearch).GoTo(Search).
+		On(GameList, gaba.ExitCodeBack).
+		Before(func(ctx *gaba.FSMContext) error {
+			filter, _ := gaba.Get[string](ctx, KeySearchFilter)
+			if filter != "" {
+				ctx.Set(KeySearchFilter, "")
+				fullGames, _ := gaba.Get[[]romm.SimpleRom](ctx, KeyFullGamesList)
+				ctx.Set(KeyCurrentGames, fullGames)
+			} else {
+				ctx.Set(KeyCurrentGames, []romm.SimpleRom(nil))
 			}
-		case ui.Screens.GameList:
-			gl := screen.(ui.GameList)
+			return nil
+		}).GoTo(PlatformSelection).
+		On(GameList, ExitCodeNoResults).GoTo(Search)
 
-			switch code {
-			case 0:
-				games := res.(models.Items)
-				screen = ui.InitDownloadScreen(gl.Platform, gl.Games, games, gl.SearchFilter)
-			case 2:
-				if gl.SearchFilter != "" {
-					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "")
-				} else {
-					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
-				}
+	builder.
+		On(Search, gaba.ExitCodeSuccess).
+		Before(func(ctx *gaba.FSMContext) error {
+			query, _ := gaba.Get[string](ctx, KeySearchQuery)
+			ctx.Set(KeySearchFilter, query)
+			fullGames, _ := gaba.Get[[]romm.SimpleRom](ctx, KeyFullGamesList)
+			ctx.Set(KeyCurrentGames, fullGames)
+			state.SetLastSelectedPosition(0, 0)
+			return nil
+		}).GoTo(GameList).
+		On(Search, gaba.ExitCodeBack).
+		Before(func(ctx *gaba.FSMContext) error {
+			ctx.Set(KeySearchFilter, "")
+			fullGames, _ := gaba.Get[[]romm.SimpleRom](ctx, KeyFullGamesList)
+			ctx.Set(KeyCurrentGames, fullGames)
+			return nil
+		}).
+		GoTo(GameList)
 
-			case 4:
-				screen = ui.InitSearch(gl.Platform, gl.SearchFilter)
+	builder.
+		On(Settings, gaba.ExitCodeSuccess).
+		Before(func(ctx *gaba.FSMContext) error {
+			newConfig, _ := gaba.Get[*models.Config](ctx, KeyNewConfig)
+			utils.SaveConfig(newConfig)
+			state.SetConfig(newConfig)
+			ctx.Set(KeyConfig, newConfig)
+			return nil
+		}).GoTo(PlatformSelection).
+		On(Settings, ExitCodeEditMappings).GoTo(SettingsPlatformMapping).
+		On(Settings, gaba.ExitCodeBack).GoTo(PlatformSelection)
 
-			case 404:
-				if gl.SearchFilter != "" {
-					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "")
-				} else {
-					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
-				}
-			}
-		case ui.Screens.SearchBox:
-			sb := screen.(ui.Search)
-			switch code {
-			case 0:
-				query := res.(string)
-				state.SetLastSelectedPosition(0, 0)
-				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, query)
-			default:
-				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, "")
-			}
-		case ui.Screens.Download:
-			ds := screen.(ui.DownloadScreen)
-			switch code {
-			case 0:
-				downloadedGames := res.([]models.Item)
+	builder.
+		On(SettingsPlatformMapping, gaba.ExitCodeSuccess).
+		Before(func(ctx *gaba.FSMContext) error {
+			mappings, _ := gaba.Get[map[string]models.DirectoryMapping](ctx, KeyNewMappings)
+			config, _ := gaba.Get[*models.Config](ctx, KeyConfig)
+			host, _ := gaba.Get[models.Host](ctx, KeyHost)
+			config.DirectoryMappings = mappings
+			utils.SaveConfig(config)
+			state.SetConfig(config)
+			ctx.Set(KeyConfig, config)
+			ctx.Set(KeyPlatforms, utils.GetMappedPlatforms(host, mappings))
+			return nil
+		}).GoTo(Settings).
+		On(SettingsPlatformMapping, gaba.ExitCodeBack).GoTo(Settings)
 
-				for _, game := range downloadedGames {
-					isMultiDisc := utils.IsMultiDisc(ds.Platform, game)
+	return builder.Build()
+}
 
-					if filepath.Ext(game.Filename) == ".zip" {
-						isBinCue := utils.HasBinCue(ds.Platform, game)
-
-						if isMultiDisc && state.GetAppState().Config.GroupMultiDisc {
-							utils.GroupMultiDisk(ds.Platform, game)
-						} else if state.GetAppState().Config.GroupBinCue && isBinCue {
-							utils.GroupBinCue(ds.Platform, game)
-						} else if state.GetAppState().Config.UnzipDownloads {
-							utils.UnzipGame(ds.Platform, game)
-						}
-					} else if state.GetAppState().Config.GroupMultiDisc && isMultiDisc {
-						utils.GroupMultiDisk(ds.Platform, game)
-					}
-				}
-
-				if state.GetAppState().Config.DownloadArt {
-					seenBaseNames := make(map[string]bool)
-
-					// Create a pruned list for art downloads that only includes one instance of each multi-disk game
-					prunedGamesForArt := make([]models.Item, 0, len(downloadedGames))
-
-					for _, game := range downloadedGames {
-						// Get base name by trimming at "(Disk" or "(Disc"
-						baseName := game.DisplayName
-						diskIndex := strings.Index(baseName, "(Disk")
-						discIndex := strings.Index(baseName, "(Disc")
-
-						trimIndex := -1
-						if diskIndex != -1 && discIndex != -1 {
-							trimIndex = min(diskIndex, discIndex)
-						} else if diskIndex != -1 {
-							trimIndex = diskIndex
-						} else if discIndex != -1 {
-							trimIndex = discIndex
-						}
-
-						if trimIndex != -1 {
-							baseName = baseName[:trimIndex]
-						}
-						baseName = strings.TrimSpace(baseName)
-
-						// If we haven't seen this base name before, add it to the pruned list
-						if !seenBaseNames[baseName] {
-							seenBaseNames[baseName] = true
-							prunedGamesForArt = append(prunedGamesForArt, game)
-						}
-					}
-
-					screen = ui.InitDownloadArtScreen(ds.Platform, prunedGamesForArt, ds.SearchFilter)
-				} else {
-					screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
-				}
-			case 1:
-				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
-			default:
-				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
-			}
-		case ui.Screens.DownloadArt:
-			da := screen.(ui.DownloadArtScreen)
-			screen = ui.InitGamesList(da.Platform, state.GetAppState().CurrentFullGamesList, da.SearchFilter)
-		}
-	}
+func downloadGames(host models.Host, config *models.Config, games []romm.SimpleRom) {
+	// TODO
 }

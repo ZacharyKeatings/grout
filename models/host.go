@@ -1,6 +1,9 @@
 package models
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type Host struct {
 	DisplayName string `yaml:"display_name,omitempty" json:"display_name,omitempty"`
@@ -9,8 +12,6 @@ type Host struct {
 
 	Username string `yaml:"username,omitempty" json:"username,omitempty"`
 	Password string `yaml:"password,omitempty" json:"password,omitempty"`
-
-	Platforms Platforms `yaml:"-" json:"-"`
 }
 type Hosts []Host
 
@@ -21,8 +22,14 @@ func (h Host) ToLoggable() map[string]any {
 		"port":         h.Port,
 		"username":     h.Username,
 		"password":     strings.Repeat("*", len(h.Password)),
-		"platforms":    h.Platforms.ToLoggable(),
 	}
 
 	return temp
+}
+
+func (h Host) URL() string {
+	if h.Port != 0 {
+		return fmt.Sprintf("%s:%d", h.RootURI, h.Port)
+	}
+	return h.RootURI
 }

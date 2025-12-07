@@ -2,36 +2,37 @@ package ui
 
 import (
 	"errors"
-	"grout/models"
 
 	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
-	"qlova.tech/sum"
 )
 
-type Search struct {
-	Platform    models.Platform
-	InitialText string
+// SearchInput contains data needed to render the search screen
+type SearchInput struct {
+	InitialText string // Pre-populate the keyboard with this text
 }
 
-func InitSearch(platform models.Platform, initialText string) Search {
-	return Search{
-		Platform:    platform,
-		InitialText: initialText,
-	}
+// SearchOutput contains the result of the search screen
+type SearchOutput struct {
+	Query string
 }
 
-func (s Search) Name() sum.Int[models.ScreenName] {
-	return models.ScreenNames.SearchBox
+// SearchScreen displays a keyboard for entering search queries
+type SearchScreen struct{}
+
+func NewSearchScreen() *SearchScreen {
+	return &SearchScreen{}
 }
 
-func (s Search) Draw() (value interface{}, exitCode int, e error) {
-	res, err := gaba.Keyboard(s.InitialText)
+func (s *SearchScreen) Draw(input SearchInput) (gaba.ScreenResult[SearchOutput], error) {
+	res, err := gaba.Keyboard(input.InitialText)
 	if err != nil {
-		if !errors.Is(err, gaba.ErrCancelled) {
-			gaba.GetLogger().Error("Error with keyboard", "error", err)
+		if errors.Is(err, gaba.ErrCancelled) {
+			// User cancelled - not an error, just go back
+			return gaba.Back[SearchOutput](), nil
 		}
-		return nil, 2, err
+		gaba.GetLogger().Error("Error with keyboard", "error", err)
+		return gaba.WithCode(SearchOutput{}, gaba.ExitCodeError), err
 	}
 
-	return res.Text, 0, nil
+	return gaba.Success(SearchOutput{Query: res.Text}), nil
 }

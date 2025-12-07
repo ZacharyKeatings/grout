@@ -4,6 +4,7 @@ import (
 	"grout/models"
 	"sync"
 
+	"github.com/brandonkowalski/go-romm"
 	"go.uber.org/atomic"
 )
 
@@ -33,7 +34,7 @@ func SetConfig(config *models.Config) {
 	UpdateAppState(temp)
 }
 
-func SetCurrentFullGamesList(games models.Items) {
+func SetCurrentFullGamesList(games []romm.SimpleRom) {
 	temp := GetAppState()
 	temp.CurrentFullGamesList = games
 	UpdateAppState(temp)
