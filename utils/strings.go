@@ -32,8 +32,8 @@ func ParseTag(input string) string {
 	return foundTag
 }
 
-func ItemNameCleaner(filename string, stripTag bool) (string, string) {
-	cleaned := filepath.Clean(filename)
+func NameCleaner(name string, stripTag bool) (string, string) {
+	cleaned := filepath.Clean(name)
 
 	tags := constants.TagRegex.FindAllStringSubmatch(cleaned, -1)
 
@@ -74,8 +74,10 @@ func PrepareRomNames(games []romm.Rom) []romm.Rom {
 	for i := range games {
 		regions := strings.Join(games[i].Regions, ", ")
 
+		cleanedName, _ := NameCleaner(games[i].Name, true)
+
 		if len(regions) > 0 {
-			games[i].Name = fmt.Sprintf("%s (%s)", games[i].Name, regions)
+			games[i].Name = fmt.Sprintf("%s (%s)", cleanedName, regions)
 		}
 	}
 

@@ -77,7 +77,7 @@ func RomFolderBase(path string) string {
 	case constants.MUOS:
 		return path
 	case constants.NEXTUI:
-		_, tag := ItemNameCleaner(path, true)
+		_, tag := NameCleaner(path, true)
 		return tag
 	default:
 		return path

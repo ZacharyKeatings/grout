@@ -199,3 +199,9 @@ func (c *Client) DownloadRoms(romIDs []int) ([]byte, error) {
 	path := "/api/roms/download" + buildQueryString(params)
 	return c.doRequestRaw("GET", path, nil)
 }
+
+// DownloadMultiFileRom downloads a multi-file ROM as a zip archive
+// The zip contains all ROM files and a m3u playlist file
+func (c *Client) DownloadMultiFileRom(romID int) ([]byte, error) {
+	return c.DownloadRoms([]int{romID})
+}

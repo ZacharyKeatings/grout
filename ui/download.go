@@ -2,9 +2,11 @@ package ui
 
 import (
 	"encoding/base64"
+	"fmt"
 	"grout/models"
 	"grout/utils"
 	"net/url"
+	"os"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -108,6 +110,71 @@ func (s *DownloadScreen) Draw(input DownloadInput) (ScreenResult[DownloadOutput]
 		return WithCode(output, gaba.ExitCodeError), nil
 	}
 
+	// Process multi-file ROM downloads: extract zips and clean up temp files
+	for _, g := range input.SelectedGames {
+		if !g.Multi {
+			continue
+		}
+
+		// Check if this multi-file ROM was successfully downloaded
+		completed := slices.ContainsFunc(res.Completed, func(d gaba.Download) bool {
+			return d.DisplayName == g.Name
+		})
+		if !completed {
+			continue
+		}
+
+		// Get the platform for this game
+		gamePlatform := input.Platform
+		if input.Platform.ID == 0 && g.PlatformID != 0 {
+			gamePlatform = romm.Platform{
+				ID:   g.PlatformID,
+				Slug: g.PlatformSlug,
+				Name: g.PlatformDisplayName,
+			}
+		}
+
+		// Extract the multi-file ROM with a progress message
+		tmpZipPath := filepath.Join(os.TempDir(), fmt.Sprintf("grout_multirom_%d.zip", g.ID))
+		romDirectory := utils.GetPlatformRomDirectory(input.Config, gamePlatform)
+		extractDir := filepath.Join(romDirectory, g.Name)
+
+		_, err := gaba.ProcessMessage(
+			fmt.Sprintf("Extracting %s...", g.Name),
+			gaba.ProcessMessageOptions{ShowThemeBackground: true},
+			func() (interface{}, error) {
+				// Read the downloaded zip file
+				zipData, err := os.ReadFile(tmpZipPath)
+				if err != nil {
+					logger.Error("Failed to read multi-file ROM zip", "game", g.Name, "error", err)
+					return nil, err
+				}
+
+				logger.Debug("Extracting multi-file ROM", "game", g.Name, "dest", extractDir)
+
+				// Extract the zip
+				if err := utils.ExtractZip(zipData, extractDir); err != nil {
+					logger.Error("Failed to extract multi-file ROM", "game", g.Name, "error", err)
+					// Clean up the temp zip file even on error
+					os.Remove(tmpZipPath)
+					return nil, err
+				}
+
+				// Clean up the temp zip file
+				if err := os.Remove(tmpZipPath); err != nil {
+					logger.Warn("Failed to remove temp zip file", "path", tmpZipPath, "error", err)
+				}
+
+				logger.Info("Successfully extracted multi-file ROM", "game", g.Name, "dest", extractDir)
+				return nil, nil
+			},
+		)
+
+		if err != nil {
+			continue
+		}
+	}
+
 	downloadedGames := make([]romm.Rom, 0, len(res.Completed))
 	for _, g := range input.SelectedGames {
 		if slices.ContainsFunc(res.Completed, func(d gaba.Download) bool {
@@ -142,7 +209,11 @@ func (s *DownloadScreen) buildDownloads(config models.Config, host models.Host, 
 		sourceURL := ""
 
 		if g.Multi {
-			// TODO Fill this shit out
+			// For multi-file ROMs, download as zip to temp location
+			// The zip will be extracted to a folder named after the game
+			tmpDir := os.TempDir()
+			downloadLocation = filepath.Join(tmpDir, fmt.Sprintf("grout_multirom_%d.zip", g.ID))
+			sourceURL, _ = url.JoinPath(host.URL(), "/api/roms/", strconv.Itoa(g.ID), "content", g.Name)
 		} else {
 			downloadLocation = filepath.Join(romDirectory, g.Files[0].FileName)
 			sourceURL, _ = url.JoinPath(host.URL(), "/api/roms/", strconv.Itoa(g.ID), "content", g.Files[0].FileName)
