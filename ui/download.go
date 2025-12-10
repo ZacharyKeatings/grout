@@ -331,13 +331,15 @@ func (s *DownloadScreen) buildDownloads(config utils.Config, host romm.Host, pla
 		})
 
 		// Add art download if enabled and art is available
-		if config.DownloadArt && (g.PathCoverSmall != "" || g.URLCover != "") {
+		if config.DownloadArt && (g.PathCoverLarge != "" || g.PathCoverSmall != "" || g.URLCover != "") {
 			artDir := utils.GetArtDirectory(config, gamePlatform)
 			artFileName := g.FsNameNoExt + ".png"
 			artLocation := filepath.Join(artDir, artFileName)
 
 			var coverPath string
 			if g.PathCoverLarge != "" {
+				coverPath = g.PathCoverLarge
+			} else if g.PathCoverSmall != "" {
 				coverPath = g.PathCoverSmall
 			} else if g.URLCover != "" {
 				coverPath = g.URLCover

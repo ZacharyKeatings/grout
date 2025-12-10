@@ -201,7 +201,10 @@ func (s *GameDetailsScreen) fetchCoverImage(host romm.Host, game romm.Rom) []byt
 	var coverPath string
 	if game.PathCoverLarge != "" {
 		coverPath = game.PathCoverLarge
-	} else if game.URLCover != "" {
+	} else if game.PathCoverSmall != "" {
+		coverPath = game.PathCoverSmall
+	}
+	if game.URLCover != "" {
 		coverPath = game.URLCover
 	} else {
 		return nil
