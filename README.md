@@ -28,8 +28,6 @@ Grout is a RomM Client for [NextUI](https://nextui.loveretro.games) and [muOS](h
 
 It allows you to connect to a RomM instance, browse the library, and download ROMs with Box Art right on your device.
 
----
-
 ## Features
 
 - Download ROM Files
@@ -39,9 +37,7 @@ It allows you to connect to a RomM instance, browse the library, and download RO
 - Optional Game Details Screen
 - Optional Unzipping
 
----
-
-## How do I setup Grout?
+## Installation
 
 ### NextUI Setup
 
@@ -49,10 +45,9 @@ It allows you to connect to a RomM instance, browse the library, and download RO
 2. Connect your device to a Wi-Fi network.
 3. The preferred Grout installation method is to use the NextUI Pak Store. You can find the Pak Store in the
    `Tools` menu. Once in the Pak Store, Grout can be found under the `ROM Management` category.
-    - Alternatively, download the [latest Grout release](https://github.com/rommapp/grout/releases/latest) for
-      NextUI (look for
-      `Grout.pak.zip`)
-    - For manual downloads, extract the release zip and place the `Grout.pak` directory into `SD_ROOT/Tools/tg5040`.
+    - Alternatively, download the [latest Grout release](https://github.com/rommapp/grout/releases/latest/download/Grout.pak.zip) for
+      NextUI
+    - For manual downloads, unzip the release zip and place the `Grout.pak` directory into `SD_ROOT/Tools/tg5040`.
 4. Launch `Grout` from the `Tools` menu and enjoy!
 
 **Note:** NextUI is only currently supported on the TrimUI Smart Pro and TrimUI Brick.
@@ -64,8 +59,8 @@ These systems will have controls automatically mapped.
 Grout has been tested on the following devices running muOS 2508.4 Loose Goose.
 
 - Anbernic Devices
-    - RG35XXSP
     - RG34XX
+    - RG35XXSP
     - RG40XXV
 
 - TrimUI Devices
@@ -75,31 +70,27 @@ Grout has been tested on the following devices running muOS 2508.4 Loose Goose.
 Please help by verifying if it works on other devices!
 
 1. Own a supported device running muOS.
-2. Download the [latest Grout release](https://github.com/rommapp/grout/releases/latest) for muOS (look for
-   `Grout.muxapp`).
-3. Transfer the `Grout.muxapp` file to SD1 `(mmc)/ARCHIVE` on your device.
+2. Download the [latest Grout release](https://github.com/rommapp/grout/releases/latest/download/Grout.muxapp) for muOS.
+3. Transfer the `Grout.muxapp` file an `ARCHIVE` folder on your device.
+    - `/mnt/mmc/ARCHIVE` or `/mnt/sdcard/ARCHIVE`
 4. Go to Applications and launch Archive Manager.
-5. Select [SD1-APP] Grout from the list and let it extract to your applications directory.
+5. Select `[SDX-APP] Grout` from the list and let it extract to your applications directory.
 6. Exit Archive Manager.
 7. Find an [input mapping config](/.github/resources/input_mappings) for your device.
     - If one does not exist, please try one for a different device.
     - If that does not work,
       please [create an issue](https://github.com/rommapp/grout/issues/new?template=button-mapping-request.md).
-    - A first launch setup process is in the works but is not ready for prime-time.
-8. Save the input mapping JSON file as `input_mapping.json` and transfer it to SD1 `(mmc)/Applications/Grout` on your
-   device.
+    - A first launch setup process is in the works but is not ready for primetime.
+8. Save the input mapping JSON file as `input_mapping.json` and transfer it to `/MUOS/application/Grout`.
+    - `/mnt/mmc/MUOS/application` or `/mnt/sdcard/MUOS/application`
 9. Select `Apps` on the Main Menu, launch Grout, and enjoy!
 
 **Note:** Grout does not support downloading art on muOS. This will be added in a future release.
-
----
 
 ## Need Help? Find a Bug? Have an Idea?
 
 Please [create an issue](https://github.com/rommapp/grout/issues/new/choose). Be sure to fill out the template
 completely!
-
----
 
 ## Spread joy!
 
