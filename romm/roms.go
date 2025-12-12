@@ -1,10 +1,7 @@
 package romm
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"net/url"
 	"strconv"
 	"time"
@@ -44,6 +41,7 @@ type Rom struct {
 	PathManual          string       `json:"path_manual,omitempty"`
 	URLManual           string       `json:"url_manual,omitempty"`
 	UserScreenshots     []Screenshot `json:"user_screenshots,omitempty"`
+	UserSaves           []Save       `json:"user_saves,omitempty"`
 	MergedScreenshots   []string     `json:"merged_screenshots,omitempty"`
 	IsIdentifying       bool         `json:"is_identifying,omitempty"`
 	IsUnidentified      bool         `json:"is_unidentified,omitempty"`
@@ -153,29 +151,6 @@ func (c *Client) GetRoms(opts *GetRomsOptions) (*PaginatedRoms, error) {
 	return &result, err
 }
 
-func (c *Client) AddRom(platformID int, file io.Reader, filename string) error {
-	var body bytes.Buffer
-	writer := multipart.NewWriter(&body)
-
-	// Add platform ID
-	if err := writer.WriteField("platform_id", strconv.Itoa(platformID)); err != nil {
-		return fmt.Errorf("failed to write platform_id field: %w", err)
-	}
-
-	// Add file
-	part, err := writer.CreateFormFile("file", filename)
-	if err != nil {
-		return fmt.Errorf("failed to create file form field: %w", err)
-	}
-	if _, err := io.Copy(part, file); err != nil {
-		return fmt.Errorf("failed to write file data: %w", err)
-	}
-
-	writer.Close()
-
-	return c.doMultipartRequest("POST", EndpointRoms, &body, writer.FormDataContentType(), nil)
-}
-
 func (c *Client) GetRom(id int) (*Rom, error) {
 	var rom Rom
 	path := fmt.Sprintf(EndpointRomByID, id)
@@ -219,8 +194,6 @@ func (c *Client) DownloadRoms(romIDs []int) ([]byte, error) {
 	return c.doRequestRaw("GET", path, nil)
 }
 
-// DownloadMultiFileRom downloads a multi-file ROM as a zip archive
-// The zip contains all ROM files and a m3u playlist file
 func (c *Client) DownloadMultiFileRom(romID int) ([]byte, error) {
 	return c.DownloadRoms([]int{romID})
 }

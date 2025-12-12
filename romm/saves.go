@@ -1,6 +1,7 @@
 package romm
 
 import (
+	"os"
 	"time"
 )
 
@@ -51,4 +52,40 @@ func (c *Client) GetSaves(query SaveQuery) (*[]Save, error) {
 	var saves []Save
 	err := c.doRequest("GET", EndpointSaves, query, nil, &saves)
 	return &saves, err
+}
+
+func (c *Client) GetSavesByRomForPlatform(platformID int) (map[int]*[]Save, error) {
+	saves, err := c.GetSaves(SaveQuery{PlatformID: platformID})
+	if err != nil {
+		return nil, err
+	}
+
+	res := make(map[int]*[]Save)
+
+	for _, save := range *saves {
+		ptr := res[save.RomID]
+		if ptr == nil {
+			var s []Save
+			res[save.RomID] = &s
+			ptr = res[save.RomID]
+		}
+		*ptr = append(*ptr, save)
+	}
+
+	return res, nil
+}
+
+func (c *Client) UploadSave(romID int, savePath string) (*Save, error) {
+	file, err := os.Open(savePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var res *Save
+	err = c.doMultipartRequest("POST", EndpointSaves, SaveQuery{RomID: romID}, file, "", res)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

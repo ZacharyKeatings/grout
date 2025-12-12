@@ -41,20 +41,33 @@ func GetRomDirectory() string {
 }
 
 func GetSaveDirectory() string {
+	switch GetCFW() {
+	case constants.MuOS:
+		return filepath.Join(GetMuOSBasePath(), "save", "file")
 
+	case constants.NextUI:
+		return constants.NextUISavesFolder
+	}
+
+	return ""
+}
+
+func GetMuOSBasePath() string {
+	if os.Getenv("MUOS_BASE_PATH") != "" {
+		return os.Getenv("MUOS_BASE_PATH")
+	}
+
+	// Hack to see if there is actually content
+	sd2InfoDir := filepath.Join(constants.MuOSSD2, "MuOS", "info")
+	if _, err := os.Stat(sd2InfoDir); err == nil {
+		return constants.MuOSSD2
+	}
+
+	return constants.MuOSSD1
 }
 
 func GetMuOSInfoDirectory() string {
-	if os.Getenv("MUOS_INFO_DIR") != "" {
-		return os.Getenv("MUOS_INFO_DIR")
-	}
-
-	sd2InfoDir := filepath.Join(constants.MuOSSD2, "MuOS", "info")
-	if _, err := os.Stat(sd2InfoDir); err == nil {
-		return sd2InfoDir
-	}
-
-	return filepath.Join(constants.MuOSSD1, "MuOS", "info")
+	return filepath.Join(GetMuOSBasePath(), "info")
 }
 
 func GetPlatformRomDirectory(config Config, platform romm.Platform) string {

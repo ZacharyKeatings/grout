@@ -71,7 +71,7 @@ func (c *Client) doRequest(method string, path string, queryParams QueryParam, b
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	if queryParams.Valid() {
+	if queryParams != nil && queryParams.Valid() {
 		values, err := qs.NewEncoder().Values(queryParams)
 		if err == nil {
 			req.URL.RawQuery = values.Encode()
@@ -148,7 +148,7 @@ func (c *Client) doRequestRaw(method, path string, body interface{}) ([]byte, er
 	return bodyBytes, nil
 }
 
-func (c *Client) doMultipartRequest(method, path string, body io.Reader, contentType string, result interface{}) error {
+func (c *Client) doMultipartRequest(method, path string, queryParams QueryParam, body io.Reader, contentType string, result interface{}) error {
 	u := c.baseURL + path
 	req, err := http.NewRequest(method, u, body)
 	if err != nil {
@@ -159,6 +159,13 @@ func (c *Client) doMultipartRequest(method, path string, body io.Reader, content
 
 	if c.username != "" && c.password != "" {
 		req.SetBasicAuth(c.username, c.password)
+	}
+
+	if queryParams != nil && queryParams.Valid() {
+		values, err := qs.NewEncoder().Values(queryParams)
+		if err == nil {
+			req.URL.RawQuery = values.Encode()
+		}
 	}
 
 	resp, err := c.httpClient.Do(req)

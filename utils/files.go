@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bufio"
 	"fmt"
-	"grout/constants"
 	"io"
 	"os"
 	"path/filepath"
@@ -218,8 +217,4 @@ func OrganizeMultiFileRomForMuOS(extractDir, romDirectory, gameName string) erro
 	logger.Debug("Renamed directory for muOS", "from", extractDir, "to", underscoreDir)
 
 	return nil
-}
-
-func FindSaveFiles(cfw constants.CFW) []os.FileInfo {
-
 }
