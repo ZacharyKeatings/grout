@@ -13,7 +13,6 @@ import (
 	"go.uber.org/atomic"
 )
 
-// progressWriter wraps a writer and updates progress as bytes are written
 type progressWriter struct {
 	writer         io.Writer
 	totalBytes     uint64
@@ -37,6 +36,36 @@ func TempDir() string {
 	}
 
 	return filepath.Join(wd, ".tmp")
+}
+
+func CopyFile(src, dest string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("failed to open source file: %w", err)
+	}
+	defer sourceFile.Close()
+
+	if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
+		return fmt.Errorf("failed to create destination directory: %w", err)
+	}
+
+	destinationFile, err := os.Create(dest)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer destinationFile.Close()
+
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		return fmt.Errorf("failed to copy file contents: %w", err)
+	}
+
+	err = destinationFile.Sync()
+	if err != nil {
+		return fmt.Errorf("failed to sync destination file: %w", err)
+	}
+
+	return nil
 }
 
 func DeleteFile(path string) bool {
