@@ -1,7 +1,11 @@
 package romm
 
 import (
+	"bytes"
+	"io"
+	"mime/multipart"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -40,8 +44,8 @@ type Save struct {
 }
 
 type SaveQuery struct {
-	RomID      int `json:"rom_id,omitempty"`
-	PlatformID int `json:"platform_id,omitempty"`
+	RomID      int `qs:"rom_id"`
+	PlatformID int `qs:"platform_id"`
 }
 
 func (sq SaveQuery) Valid() bool {
@@ -75,17 +79,38 @@ func (c *Client) GetSavesByRomForPlatform(platformID int) (map[int]*[]Save, erro
 	return res, nil
 }
 
+func (c *Client) DownloadSave(downloadPath string) ([]byte, error) {
+	return c.doRequestRaw("GET", downloadPath, nil)
+}
+
 func (c *Client) UploadSave(romID int, savePath string) (*Save, error) {
 	file, err := os.Open(savePath)
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
-	var res *Save
-	err = c.doMultipartRequest("POST", EndpointSaves, SaveQuery{RomID: romID}, file, "", res)
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+
+	part, err := writer.CreateFormFile("saveFile", filepath.Base(savePath))
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	if _, err := io.Copy(part, file); err != nil {
+		return nil, err
+	}
+
+	if err := writer.Close(); err != nil {
+		return nil, err
+	}
+
+	var res Save
+	err = c.doMultipartRequest("POST", EndpointSaves, SaveQuery{RomID: romID}, &buf, writer.FormDataContentType(), &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }

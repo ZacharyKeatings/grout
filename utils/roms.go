@@ -38,12 +38,27 @@ func (lrf LocalRomFile) SyncAction() SyncAction {
 		return Download
 	}
 
-	switch lrf.SaveFile.LastModified.Compare(lrf.LastRemoteSave().UpdatedAt) {
+	// Compare local file modification time with remote UpdatedAt
+	logger := gaba.GetLogger()
+	lastRemote := lrf.LastRemoteSave()
+
+	localTime := lrf.SaveFile.LastModified
+	remoteTime := lastRemote.UpdatedAt
+
+	logger.Debug("Comparing save times",
+		"rom", lrf.FileName,
+		"localTime", localTime,
+		"remoteTime", remoteTime)
+
+	switch localTime.Compare(remoteTime) {
 	case -1:
+		logger.Debug("Action: DOWNLOAD (local older than remote)")
 		return Download
 	case 0:
+		logger.Debug("Action: SKIP")
 		return Skip
 	case 1:
+		logger.Debug("Action: UPLOAD (local newer than remote)")
 		return Upload
 	default:
 		return Skip
@@ -51,8 +66,12 @@ func (lrf LocalRomFile) SyncAction() SyncAction {
 }
 
 func (lrf LocalRomFile) LastRemoteSave() romm.Save {
+	if len(lrf.RemoteSaves) == 0 {
+		return romm.Save{}
+	}
+
 	slices.SortFunc(lrf.RemoteSaves, func(s1 romm.Save, s2 romm.Save) int {
-		return s1.UpdatedAt.Compare(s2.UpdatedAt)
+		return s2.UpdatedAt.Compare(s1.UpdatedAt)
 	})
 
 	return lrf.RemoteSaves[0]
@@ -86,7 +105,6 @@ func ScanAllRoms() map[string][]LocalRomFile {
 		romDir := filepath.Join(baseRomDir, romFolderName)
 
 		if _, err := os.Stat(romDir); os.IsNotExist(err) {
-			logger.Debug("ROM directory does not exist", "slug", slug, "path", romDir)
 			continue
 		}
 

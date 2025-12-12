@@ -11,7 +11,7 @@ import (
 	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
 )
 
-const ROMM_ISO8601 = "2006-01-02 15-04-05-000"
+const BACKUP_TIMESTAMP_FORMAT = "2006-01-02 15-04-05"
 
 type LocalSave struct {
 	Slug         string
@@ -19,18 +19,18 @@ type LocalSave struct {
 	LastModified time.Time
 }
 
-func (lc LocalSave) Backup() error {
+func (lc LocalSave) TimestampedFilename() string {
 	ext := filepath.Ext(lc.Path)
 	base := strings.ReplaceAll(filepath.Base(lc.Path), ext, "")
 
-	lm := lc.LastModified.Format(ROMM_ISO8601)
+	// Format timestamp for backup filename
+	lm := lc.LastModified.Format(BACKUP_TIMESTAMP_FORMAT)
 
-	bfn := fmt.Sprintf("%s [%s]%s", base, lm, ext)
-	bfn = strings.ReplaceAll(bfn, ":", "-")
+	return fmt.Sprintf("%s [%s]%s", base, lm, ext)
+}
 
-	bsd := filepath.Dir(lc.Path)
-	dest := filepath.Join(bsd, ".backup", bfn)
-
+func (lc LocalSave) Backup() error {
+	dest := filepath.Join(filepath.Dir(lc.Path), ".backup", lc.TimestampedFilename())
 	return CopyFile(lc.Path, dest)
 }
 
@@ -61,7 +61,6 @@ func FindSaveFiles(slug string) []LocalSave {
 		sd := filepath.Join(bsd, saveFolder)
 
 		if _, err := os.Stat(sd); os.IsNotExist(err) {
-			logger.Debug("Save directory does not exist", "path", sd)
 			continue
 		}
 
