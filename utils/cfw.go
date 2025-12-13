@@ -75,7 +75,7 @@ func getNextUIBasePath() string {
 }
 
 func getMuOSInfoDirectory() string {
-	return filepath.Join(getMuOSBasePath(), "info")
+	return filepath.Join(getMuOSBasePath(), "MUOS", "info")
 }
 
 func GetPlatformRomDirectory(config Config, platform romm.Platform) string {

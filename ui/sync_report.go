@@ -32,7 +32,7 @@ func (s *SyncReportScreen) draw(input syncReportInput) (ScreenResult[syncReportO
 	options.ShowThemeBackground = false
 	options.ShowScrollbar = true
 
-	result, err := gaba.DetailScreen("Save Sync Report", options, []gaba.FooterHelpItem{
+	result, err := gaba.DetailScreen("Save Sync Summary", options, []gaba.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Close"},
 	})
 
