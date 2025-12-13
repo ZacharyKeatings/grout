@@ -126,8 +126,6 @@ func main() {
 
 	config := setup()
 
-	time.Sleep(time.Second * 5)
-
 	logger := gaba.GetLogger()
 	logger.Debug("Starting Grout")
 

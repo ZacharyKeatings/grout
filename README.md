@@ -17,16 +17,15 @@ A RomM Client for <a href="https://nextui.loveretro.games">NextUI</a> and <a hre
 [![downloads-badge-img]][downloads-badge]
 [![discord-badge-img]][discord-badge]
 
-<video controls width="800" autoplay muted>
-  <source src=".github/resources/mp4/preview.mp4" type="video/mp4" />
-</video>
+![Grout preview, collection flow](.github/resources/webp/preview.webp "Grout preview, collection flow")
+
 
 </div>
 
 ## Features
 
 - Download games wirelessly from your RomM instance
-    - Ability to select multiple games at once
+  - Ability to select multiple games at once
 - Download box art
 - Multi-file games with automatic M3U file creation
 - Save sync
@@ -37,6 +36,9 @@ A RomM Client for <a href="https://nextui.loveretro.games">NextUI</a> and <a hre
 ---
 
 ### Save Sync
+
+![Save Sync, with summary](.github/resources/webp/save_sync.webp "Save Sync, with summary")
+
 
 Save Sync allows you to store game saves on your RomM instance and use them across multiple devices.
 
@@ -65,7 +67,7 @@ Grout scans your local ROM and save directories on your device.
 - Grout **does not** sync save states.
     - If you use save states with autoloading enabled, you will need to reset your emulator to load a downloaded save
       file.
-
+  
 ---
 
 ## Installation
