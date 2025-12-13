@@ -18,7 +18,7 @@ A RomM Client for <a href="https://nextui.loveretro.games">NextUI</a> and <a hre
 [![discord-badge-img]][discord-badge]
 
 <video controls width="800" autoplay muted>
-  <source src=".github/resources/webm/preview.webp" type="video/webm" />
+  <source src=".github/resources/mp4/preview.mp4" type="video/mp4" />
 </video>
 
 </div>
