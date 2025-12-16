@@ -177,6 +177,12 @@ func (s *SaveSyncScreen) Draw(input SaveSyncInput) (ScreenResult[SaveSyncOutput]
 			gaba.GetLogger().Debug("Syncing save file", "save_info", s)
 			result := s.Execute(input.Host)
 			results = append(results, result)
+			gaba.GetLogger().Debug("Added result to list",
+				"resultsCount", len(results),
+				"action", result.Action,
+				"success", result.Success,
+				"gameName", result.GameName,
+				"romDisplayName", result.RomDisplayName)
 			if !result.Success {
 				gaba.GetLogger().Error("Unable to sync save!", "game", s.GetGameBase(), "error", result.Error)
 			} else {

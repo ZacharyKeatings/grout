@@ -25,17 +25,29 @@ type localRomFile struct {
 }
 
 func (lrf localRomFile) syncAction() syncAction {
+	logger := gaba.GetLogger()
+
+	hasLocalSave := lrf.SaveFile != nil
+	remoteCount := len(lrf.RemoteSaves)
+
+	logger.Debug("Determining sync action",
+		"rom", lrf.FileName,
+		"hasLocalSave", hasLocalSave,
+		"remoteCount", remoteCount)
+
 	if lrf.SaveFile == nil && len(lrf.RemoteSaves) == 0 {
+		logger.Debug("Action: SKIP (no local, no remote)")
 		return Skip
 	}
 	if lrf.SaveFile != nil && len(lrf.RemoteSaves) == 0 {
+		logger.Debug("Action: UPLOAD (has local, no remote)")
 		return Upload
 	}
 	if lrf.SaveFile == nil && len(lrf.RemoteSaves) > 0 {
+		logger.Debug("Action: DOWNLOAD (no local, has remote)")
 		return Download
 	}
 
-	logger := gaba.GetLogger()
 	lastRemote := lrf.lastRemoteSave()
 
 	// Truncate to second precision to avoid timestamp precision issues

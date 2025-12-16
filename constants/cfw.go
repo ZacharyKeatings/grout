@@ -136,7 +136,7 @@ var NextUISaves = map[string][]string{
 	"galaksija":                          {},
 	"gamegear":                           {"GG"},
 	"gb":                                 {"GB"},
-	"gba":                                {"MGBA", "GBA"},
+	"gba":                                {"GBA", "MGBA"},
 	"gbc":                                {"GBC"},
 	"genesis":                            {"MD"},
 	"intellivision":                      {},

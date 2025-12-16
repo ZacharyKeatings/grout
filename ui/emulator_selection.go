@@ -42,14 +42,11 @@ func (s *EmulatorSelectionScreen) Draw(input EmulatorSelectionInput) (ScreenResu
 		LastSelectedPosition: input.LastSelectedPosition,
 	}
 
-	// Sort choices: default first, then alphabetical
 	sortedChoices := make([]EmulatorChoice, len(input.EmulatorChoices))
 
-	// First item is always the default - keep it first
 	if len(input.EmulatorChoices) > 0 {
 		sortedChoices[0] = input.EmulatorChoices[0]
 
-		// Sort the rest alphabetically
 		rest := make([]EmulatorChoice, len(input.EmulatorChoices)-1)
 		copy(rest, input.EmulatorChoices[1:])
 
@@ -57,13 +54,11 @@ func (s *EmulatorSelectionScreen) Draw(input EmulatorSelectionInput) (ScreenResu
 			return strings.ToLower(rest[i].DirectoryName) < strings.ToLower(rest[j].DirectoryName)
 		})
 
-		// Copy sorted rest back
 		copy(sortedChoices[1:], rest)
 	} else {
 		copy(sortedChoices, input.EmulatorChoices)
 	}
 
-	// Build menu items
 	var menuItems []gaba.MenuItem
 	for _, choice := range sortedChoices {
 		displayText := choice.DisplayName
@@ -75,7 +70,7 @@ func (s *EmulatorSelectionScreen) Draw(input EmulatorSelectionInput) (ScreenResu
 			Text:     displayText,
 			Selected: false,
 			Focused:  false,
-			Metadata: choice.DirectoryName, // Store directory name for return
+			Metadata: choice.DirectoryName,
 		})
 	}
 

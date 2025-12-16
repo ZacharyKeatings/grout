@@ -53,6 +53,9 @@ func (s *SyncReportScreen) draw(input syncReportInput) (ScreenResult[syncReportO
 }
 
 func (s *SyncReportScreen) buildSections(results []utils.SyncResult, unmatched []utils.UnmatchedSave) []gaba.Section {
+	logger := gaba.GetLogger()
+	logger.Debug("Building sync report", "totalResults", len(results), "unmatched", len(unmatched))
+
 	sections := make([]gaba.Section, 0)
 
 	uploadedCount := 0
@@ -128,6 +131,11 @@ func (s *SyncReportScreen) buildSections(results []utils.SyncResult, unmatched [
 				if displayName == "" {
 					displayName = filepath.Base(r.FilePath)
 				}
+				logger.Debug("Upload result for report",
+					"gameName", r.GameName,
+					"romDisplayName", r.RomDisplayName,
+					"filePath", r.FilePath,
+					"displayName", displayName)
 				uploadedFiles += displayName
 			}
 		}

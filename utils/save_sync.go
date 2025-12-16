@@ -66,17 +66,32 @@ type UnmatchedSave struct {
 }
 
 func (s *SaveSync) Execute(host romm.Host) SyncResult {
+	logger := gaba.GetLogger()
+
+	// Strip file extension from ROM name for cleaner display
+	displayName := s.RomName
+	if displayName != "" {
+		displayName = strings.TrimSuffix(displayName, filepath.Ext(displayName))
+	}
+
 	result := SyncResult{
 		GameName:       s.GameBase,
-		RomDisplayName: s.RomName,
+		RomDisplayName: displayName,
 		Action:         s.Action,
 		Success:        false,
 	}
+
+	logger.Debug("Executing sync",
+		"action", s.Action,
+		"gameBase", s.GameBase,
+		"romName", s.RomName,
+		"romID", s.RomID)
 
 	var err error
 	switch s.Action {
 	case Upload:
 		result.FilePath, err = s.upload(host)
+		logger.Debug("Upload complete", "filePath", result.FilePath, "err", err)
 	case Download:
 		if s.Local != nil {
 			err = s.Local.backup()
@@ -196,25 +211,10 @@ func (s *SaveSync) upload(host romm.Host) (string, error) {
 	return s.Local.Path, nil
 }
 
-func lookupRomID(romFile *localRomFile, cache *RomHashCache, rc *romm.Client) (int, string, error) {
+func lookupRomID(romFile *localRomFile, rc *romm.Client) (int, string, error) {
 	logger := gaba.GetLogger()
 
-	// Check cache first
-	if romID, found := cache.lookup(romFile.Slug, romFile.SHA1); found {
-		logger.Debug("Cache hit for ROM", "slug", romFile.Slug, "sha1", romFile.SHA1[:8], "romID", romID)
-		// We don't cache the name, so we need to fetch it from API
-		rom, err := rc.GetRomByHash(romm.GetRomByHashQuery{
-			Sha1Hash: romFile.SHA1,
-		})
-		if err != nil {
-			logger.Debug("Failed to get ROM name from API", "sha1", romFile.SHA1[:8], "error", err)
-			return romID, "", nil
-		}
-		return romID, rom.Name, nil
-	}
-
-	// Cache miss - lookup via API
-	logger.Debug("Cache miss, querying API", "slug", romFile.Slug, "sha1", romFile.SHA1[:8])
+	logger.Debug("Looking up ROM by hash", "slug", romFile.Slug, "sha1", romFile.SHA1[:8])
 	rom, err := rc.GetRomByHash(romm.GetRomByHashQuery{
 		Sha1Hash: romFile.SHA1,
 	})
@@ -224,10 +224,7 @@ func lookupRomID(romFile *localRomFile, cache *RomHashCache, rc *romm.Client) (i
 		return 0, "", nil
 	}
 
-	// Cache the result
-	cache.set(romFile.Slug, romFile.SHA1, rom.ID)
-	logger.Debug("API lookup successful, cached result", "slug", romFile.Slug, "sha1", romFile.SHA1[:8], "romID", rom.ID, "name", rom.Name)
-
+	logger.Debug("ROM lookup successful", "slug", romFile.Slug, "sha1", romFile.SHA1[:8], "romID", rom.ID, "name", rom.Name)
 	return rom.ID, rom.Name, nil
 }
 
@@ -236,13 +233,6 @@ func FindSaveSyncs(host romm.Host) ([]SaveSync, []UnmatchedSave, error) {
 	rc := GetRommClient(host)
 
 	logger.Debug("FindSaveSyncs: Starting save sync discovery")
-
-	// Load cache from disk
-	cache, err := loadRomHashCache()
-	if err != nil {
-		logger.Warn("Failed to load cache, using empty", "error", err)
-		cache = &RomHashCache{Cache: make(map[string]map[string]int)}
-	}
 
 	// Scan all local ROMs
 	scanLocal := scanRoms()
@@ -262,14 +252,14 @@ func FindSaveSyncs(host romm.Host) ([]SaveSync, []UnmatchedSave, error) {
 		savesByRomID[s.RomID] = append(savesByRomID[s.RomID], s)
 	}
 
-	// Process each ROM and lookup ROM IDs using cache
+	// Process each ROM and lookup ROM IDs
 	var unmatched []UnmatchedSave
 	for slug, localRoms := range scanLocal {
 		logger.Debug("FindSaveSyncs: Processing platform", "slug", slug, "localRomCount", len(localRoms))
 
 		for idx := range localRoms {
-			// Lookup ROM ID using cache-first approach
-			romID, romName, err := lookupRomID(&scanLocal[slug][idx], cache, rc)
+			// Lookup ROM ID from API
+			romID, romName, err := lookupRomID(&scanLocal[slug][idx], rc)
 			if err != nil {
 				logger.Warn("Error looking up ROM ID", "rom", localRoms[idx].FileName, "error", err)
 			}
@@ -301,20 +291,36 @@ func FindSaveSyncs(host romm.Host) ([]SaveSync, []UnmatchedSave, error) {
 		}
 	}
 
-	// Save cache to disk
-	if err := cache.save(); err != nil {
-		logger.Error("Failed to save cache", "error", err)
-		// Don't fail sync on cache save error
-	}
-
 	// Build sync list from ROMs that need syncing
-	var syncs []SaveSync
+	// Use a map to deduplicate by save file path (multiple slugs may share saves)
+	syncMap := make(map[string]SaveSync) // key: save file path or romID for downloads
 	for slug, roms := range scanLocal {
 		for _, r := range roms {
 			action := r.syncAction()
 			if action == Upload || action == Download {
 				baseName := strings.TrimSuffix(r.FileName, filepath.Ext(r.FileName))
-				syncs = append(syncs, SaveSync{
+
+				// Create unique key for deduplication
+				var key string
+				if r.SaveFile != nil {
+					// For uploads, key by local save path to avoid duplicates
+					key = r.SaveFile.Path
+				} else {
+					// For downloads, key by romID to avoid duplicate downloads
+					key = fmt.Sprintf("download_%d", r.RomID)
+				}
+
+				// Skip if already added (happens when multiple slugs share same save dir)
+				if _, exists := syncMap[key]; exists {
+					logger.Debug("Skipping duplicate sync",
+						"rom", r.FileName,
+						"slug", slug,
+						"action", action,
+						"key", key)
+					continue
+				}
+
+				syncMap[key] = SaveSync{
 					RomID:    r.RomID,
 					RomName:  r.RomName,
 					Slug:     slug,
@@ -322,7 +328,7 @@ func FindSaveSyncs(host romm.Host) ([]SaveSync, []UnmatchedSave, error) {
 					Local:    r.SaveFile,
 					Remote:   r.lastRemoteSave(),
 					Action:   action,
-				})
+				}
 				logger.Debug("Sync action added",
 					"rom", r.FileName,
 					"romName", r.RomName,
@@ -331,6 +337,12 @@ func FindSaveSyncs(host romm.Host) ([]SaveSync, []UnmatchedSave, error) {
 					"action", action)
 			}
 		}
+	}
+
+	// Convert map to slice
+	var syncs []SaveSync
+	for _, sync := range syncMap {
+		syncs = append(syncs, sync)
 	}
 
 	// Log unmatched saves summary
