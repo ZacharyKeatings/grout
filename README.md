@@ -328,9 +328,9 @@ Choose the emulator you're actually using, and Grout will sync saves from that d
 
 **Sync Results:**
 
-When the sync completes, you'll see a summary showing:
-
 ![Grout preview, sync summary](.github/resources/user_guide/sync_summary.png "Grout preview, sync summary")
+
+When the sync completes, you'll see a summary showing:
 
 - Games that had saves downloaded
 - Games that had saves uploaded
