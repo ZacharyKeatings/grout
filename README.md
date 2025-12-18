@@ -376,7 +376,7 @@ Grout has been tested on the following devices running muOS 2508.4 Loose Goose:
 - Brick
 - Smart Pro
 
-Please help verify compatibility on other devices by reporting your results!
+**Please help verify compatibility on other devices by reporting your results!**
 
 **Installation Steps:**
 
@@ -405,6 +405,8 @@ Grout has been tested on the following devices running Knulli Gladiator II:
 **Anbernic:**
 
 - RG34XX
+
+**Please help verify compatibility on other devices by reporting your results!**
 
 **Installation Steps:**
 
