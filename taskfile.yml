@@ -82,3 +82,16 @@ tasks:
       - adb push config-platformless.json /mnt/sdcard/MUOS/application/Grout/config.json
       - adb push .github/resources/input_mappings/muOS/anbernic_mapping.json /mnt/sdcard/MUOS/application/Grout/input_mapping.json
     silent: true
+
+  i18n-extract:
+    desc: Extract new translation template for a language (e.g., task i18n-extract -- es)
+    cmds:
+      - cd locales && go run github.com/nicksnyder/go-i18n/v2/goi18n@latest extract -format toml
+      - cd locales && go run github.com/nicksnyder/go-i18n/v2/goi18n@latest merge active.en.toml translate.{{.CLI_ARGS}}.toml
+    silent: false
+
+  i18n-merge:
+    desc: Merge translated file to create active translation (e.g., task i18n-merge -- es)
+    cmds:
+      - cd locales && go run github.com/nicksnyder/go-i18n/v2/goi18n@latest merge active.en.toml translate.{{.CLI_ARGS}}.toml
+    silent: false

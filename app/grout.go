@@ -11,6 +11,7 @@ import (
 	"grout/romm"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 	_ "github.com/UncleJunVIP/certifiable"
 )
 
@@ -72,6 +73,10 @@ func setup() *utils.Config {
 		LogFilename:          "grout.log",
 	})
 
+	if err := i18n.InitI18N([]string{"locales/active.en.toml", "locales/active.es.toml"}); err != nil {
+		utils.LogStandardFatal("Failed to initialize i18n", err)
+	}
+
 	gaba.SetLogLevel(slog.LevelDebug)
 
 	gaba.ProcessMessage("", gaba.ProcessMessageOptions{
@@ -96,6 +101,12 @@ func setup() *utils.Config {
 
 	if config.LogLevel != "" {
 		gaba.SetRawLogLevel(config.LogLevel)
+	}
+
+	if config.Language != "" {
+		if err := i18n.SetWithCode(config.Language); err != nil {
+			gaba.GetLogger().Error("Failed to set language", "error", err, "language", config.Language)
+		}
 	}
 
 	if config.DirectoryMappings == nil || len(config.DirectoryMappings) == 0 {

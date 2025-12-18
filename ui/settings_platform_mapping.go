@@ -14,6 +14,7 @@ import (
 	"grout/romm"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type PlatformMappingInput struct {
@@ -54,15 +55,15 @@ func (s *PlatformMappingScreen) Draw(input PlatformMappingInput) (ScreenResult[P
 	mappingOptions := s.buildMappingOptions(rommPlatforms, romDirectories, input)
 
 	footerItems := []gaba.FooterHelpItem{
-		{ButtonName: "←→", HelpText: "Cycle"},
-		{ButtonName: "Start", HelpText: "Save"},
+		{ButtonName: "←→", HelpText: i18n.GetString("button_cycle")},
+		{ButtonName: "Start", HelpText: i18n.GetString("button_save")},
 	}
 	if !input.HideBackButton {
-		footerItems = slices.Insert(footerItems, 0, gaba.FooterHelpItem{ButtonName: "B", HelpText: "Cancel"})
+		footerItems = slices.Insert(footerItems, 0, gaba.FooterHelpItem{ButtonName: "B", HelpText: i18n.GetString("button_cancel")})
 	}
 
 	result, err := gaba.OptionsList(
-		"Rom Directory Mapping",
+		i18n.GetString("platform_mapping_title"),
 		gaba.OptionListSettings{
 			FooterHelpItems:   footerItems,
 			DisableBackButton: input.HideBackButton,
@@ -99,8 +100,8 @@ func (s *PlatformMappingScreen) fetchPlatforms(input PlatformMappingInput) ([]ro
 func (s *PlatformMappingScreen) getRomDirectories(romDir string) ([]os.DirEntry, error) {
 	entries, err := os.ReadDir(romDir)
 	if err != nil {
-		gaba.ConfirmationMessage("ROM Directory Could Not Be Found!", []gaba.FooterHelpItem{
-			{ButtonName: "B", HelpText: "Quit"},
+		gaba.ConfirmationMessage(i18n.GetString("platform_mapping_directory_not_found"), []gaba.FooterHelpItem{
+			{ButtonName: "B", HelpText: i18n.GetString("button_quit")},
 		}, gaba.MessageOptions{})
 		return nil, fmt.Errorf("failed to read ROM directory: %w", err)
 	}
@@ -143,7 +144,7 @@ func (s *PlatformMappingScreen) buildPlatformOptions(
 	romDirectories []os.DirEntry,
 	input PlatformMappingInput,
 ) ([]gaba.Option, int) {
-	options := []gaba.Option{{DisplayName: "Skip", Value: ""}}
+	options := []gaba.Option{{DisplayName: i18n.GetString("common_skip"), Value: ""}}
 	selectedIndex := 0
 
 	cfwDirectories := s.getCFWDirectoriesForPlatform(platform.Slug, input.CFW)
@@ -164,7 +165,7 @@ func (s *PlatformMappingScreen) buildPlatformOptions(
 				displayName = utils.ParseTag(cfwDir)
 			}
 			options = append(options, gaba.Option{
-				DisplayName: fmt.Sprintf("Create '%s'", displayName),
+				DisplayName: i18n.GetStringWithData("platform_mapping_create", map[string]interface{}{"Name": displayName}),
 				Value:       cfwDir,
 			})
 			createOptionAdded = true
@@ -181,7 +182,7 @@ func (s *PlatformMappingScreen) buildPlatformOptions(
 			}
 
 			options = append(options, gaba.Option{
-				DisplayName: fmt.Sprintf("/%s", displayName),
+				DisplayName: i18n.GetStringWithData("platform_mapping_path_prefix", map[string]interface{}{"Name": displayName}),
 				Value:       dirName,
 			})
 

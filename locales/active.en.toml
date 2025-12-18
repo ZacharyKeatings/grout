@@ -1,0 +1,415 @@
+[app_title]
+description = "Application title"
+other = "Grout"
+
+[button_back]
+description = "Back button"
+other = "Back"
+
+[button_cancel]
+description = "Cancel button"
+other = "Cancel"
+
+[button_close]
+description = "Close button"
+other = "Close"
+
+[button_continue]
+description = "Continue button"
+other = "Continue"
+
+[button_cycle]
+description = "Cycle button"
+other = "Cycle"
+
+[button_download]
+description = "Download button"
+other = "Download"
+
+[button_login]
+description = "Login button"
+other = "Login"
+
+[button_multi]
+description = "Multi select button"
+other = "Multi"
+
+[button_quit]
+description = "Quit button"
+other = "Quit"
+
+[button_save]
+description = "Save button"
+other = "Save"
+
+[button_search]
+description = "Search button"
+other = "Search"
+
+[button_select]
+description = "Select button"
+other = "Select"
+
+[button_settings]
+description = "Settings button"
+other = "Settings"
+
+[collection_platform_no_mapped]
+description = "No mapped platforms message"
+other = "No platforms with mapped games in {{.Name}}"
+
+[collection_platform_title]
+description = "Collection platform selection title"
+other = "{{.Name}} - Platforms"
+
+[common_false]
+description = "False value"
+other = "False"
+
+[common_skip]
+description = "Skip option"
+other = "Skip"
+
+[common_true]
+description = "True value"
+other = "True"
+
+[download_artwork]
+description = "Downloading artwork message"
+other = "Downloading artwork..."
+
+[download_extracting]
+description = "Extracting ROM message"
+other = "Extracting {{.Name}}..."
+
+[emulator_default]
+description = "Default emulator suffix"
+other = " (Default)"
+
+[emulator_saves_count]
+description = "Emulator saves count suffix"
+other = " ({{.Count}} saves)"
+
+[emulator_selection_title]
+description = "Emulator selection title"
+other = "Select {{.Platform}} Emulator"
+
+[game_details_average_rating]
+description = "Average rating label"
+other = "Average Rating"
+
+[game_details_companies]
+description = "Companies label"
+other = "Companies"
+
+[game_details_file_size]
+description = "File size label"
+other = "File Size"
+
+[game_details_game]
+description = "Game label"
+other = "Game"
+
+[game_details_game_modes]
+description = "Game modes label"
+other = "Game Modes"
+
+[game_details_genres]
+description = "Genres label"
+other = "Genres"
+
+[game_details_languages]
+description = "Languages label"
+other = "Languages"
+
+[game_details_multi_file_rom]
+description = "Multi-file ROM value"
+other = "Multi-file ROM"
+
+[game_details_platform]
+description = "Platform label"
+other = "Platform"
+
+[game_details_qr_section]
+description = "QR code section title"
+other = "RomM Game Listing"
+
+[game_details_regions]
+description = "Regions label"
+other = "Regions"
+
+[game_details_release_date]
+description = "Release date label"
+other = "Release Date"
+
+[game_details_type]
+description = "Type label"
+other = "Type"
+
+[games_list_filtered_out]
+description = "All games filtered out message"
+other = "No games in {{.Name}} match your platform mappings"
+
+[games_list_loading]
+description = "Loading games message"
+other = "Loading {{.Name}}..."
+
+[games_list_no_games]
+description = "No games found message"
+other = "No games found for {{.Name}}"
+
+[games_list_no_results]
+description = "No search results message"
+other = "No results found for \"{{.Query}}\""
+
+[games_list_search_prefix]
+description = "Search prefix in title"
+other = "[Search: \"{{.Query}}\"]"
+
+[log_level_debug]
+description = "Debug log level"
+other = "Debug"
+
+[log_level_error]
+description = "Error log level"
+other = "Error"
+
+[login_error_connection]
+description = "Connection error message"
+other = "Could not connect to RomM!\nPlease check the hostname and port."
+
+[login_error_credentials]
+description = "Invalid credentials error"
+other = "Invalid Username or Password."
+
+[login_error_unexpected]
+description = "Unexpected error message"
+other = "Something unexpected happened!\nCheck the logs for more info."
+
+[login_hostname]
+description = "Hostname field label"
+other = "Hostname"
+
+[login_logging_in]
+description = "Logging in progress message"
+other = "Logging in..."
+
+[login_password]
+description = "Password field label"
+other = "Password"
+
+[login_port]
+description = "Port field label"
+other = "Port (optional)"
+
+[login_protocol]
+description = "Protocol field label"
+other = "Protocol"
+
+[login_protocol_http]
+description = "HTTP protocol option"
+other = "HTTP"
+
+[login_protocol_https]
+description = "HTTPS protocol option"
+other = "HTTPS"
+
+[login_title]
+description = "Login screen title"
+other = "Login to RomM"
+
+[login_username]
+description = "Username field label"
+other = "Username"
+
+[platform_mapping_create]
+description = "Create directory option"
+other = "Create '{{.Name}}'"
+
+[platform_mapping_directory_not_found]
+description = "ROM directory not found error"
+other = "ROM Directory Could Not Be Found!"
+
+[platform_mapping_path_prefix]
+description = "Directory path prefix"
+other = "/{{.Name}}"
+
+[platform_mapping_title]
+description = "Platform mapping screen title"
+other = "Rom Directory Mapping"
+
+[platform_selection_collections]
+description = "Collections menu item"
+other = "Collections"
+
+[save_sync_downloaded]
+description = "Downloaded label"
+other = "Downloaded"
+
+[save_sync_failed]
+description = "Failed label"
+other = "Failed"
+
+[save_sync_rom_not_found]
+description = "ROM not found message"
+other = "{{.Name}} (ROM not found in RomM)"
+
+[save_sync_scanning]
+description = "Scanning save files message"
+other = "Scanning save files..."
+
+[save_sync_skipped]
+description = "Skipped label"
+other = "Skipped"
+
+[save_sync_summary]
+description = "Save sync summary title"
+other = "Save Sync Summary"
+
+[save_sync_summary_section]
+description = "Summary section title"
+other = "Summary"
+
+[save_sync_total_processed]
+description = "Total processed label"
+other = "Total Processed"
+
+[save_sync_unknown_error]
+description = "Unknown error message"
+other = "Unknown error"
+
+[save_sync_unmatched_saves]
+description = "Unmatched saves section title"
+other = "Unmatched Saves"
+
+[save_sync_up_to_date]
+description = "Everything up to date message"
+other = "Everything is up to date!\nGo play some games!"
+
+[save_sync_uploaded]
+description = "Uploaded label"
+other = "Uploaded"
+
+[settings_api_timeout]
+description = "API timeout option"
+other = "API Timeout"
+
+[settings_auto_sync_saves]
+description = "Auto sync saves option"
+other = "Auto Sync Saves"
+
+[settings_download_art]
+description = "Download art option"
+other = "Download Art"
+
+[settings_download_timeout]
+description = "Download timeout option"
+other = "Download Timeout"
+
+[settings_edit_mappings]
+description = "Edit directory mappings option"
+other = "Edit Directory Mappings"
+
+[settings_language]
+description = "Language option"
+other = "Language"
+
+[settings_language_english]
+description = "English language option"
+other = "English"
+
+[settings_language_spanish]
+description = "Spanish language option"
+other = "Español"
+
+[settings_log_level]
+description = "Log level option"
+other = "Log Level"
+
+[settings_show_game_details]
+description = "Show game details option"
+other = "Show Game Details"
+
+[settings_sync_saves]
+description = "Sync saves option"
+other = "Sync Saves"
+
+[settings_title]
+description = "Settings screen title"
+other = "Settings"
+
+[settings_unzip_downloads]
+description = "Unzip downloads option"
+other = "Unzip Downloads"
+
+[time_105_minutes]
+description = "105 minutes"
+other = "105 Minutes"
+
+[time_120_minutes]
+description = "120 minutes"
+other = "120 Minutes"
+
+[time_120_seconds]
+description = "120 seconds"
+other = "120 Seconds"
+
+[time_15_minutes]
+description = "15 minutes"
+other = "15 Minutes"
+
+[time_15_seconds]
+description = "15 seconds"
+other = "15 Seconds"
+
+[time_180_seconds]
+description = "180 seconds"
+other = "180 Seconds"
+
+[time_240_seconds]
+description = "240 seconds"
+other = "240 Seconds"
+
+[time_300_seconds]
+description = "300 seconds"
+other = "300 Seconds"
+
+[time_30_minutes]
+description = "30 minutes"
+other = "30 Minutes"
+
+[time_30_seconds]
+description = "30 seconds"
+other = "30 Seconds"
+
+[time_45_minutes]
+description = "45 minutes"
+other = "45 Minutes"
+
+[time_45_seconds]
+description = "45 seconds"
+other = "45 Seconds"
+
+[time_60_minutes]
+description = "60 minutes"
+other = "60 Minutes"
+
+[time_60_seconds]
+description = "60 seconds"
+other = "60 Seconds"
+
+[time_75_minutes]
+description = "75 minutes"
+other = "75 Minutes"
+
+[time_75_seconds]
+description = "75 seconds"
+other = "75 Seconds"
+
+[time_90_minutes]
+description = "90 minutes"
+other = "90 Minutes"
+
+[time_90_seconds]
+description = "90 seconds"
+other = "90 Seconds"

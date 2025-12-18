@@ -6,6 +6,7 @@ import (
 	"grout/romm"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type PlatformSelectionInput struct {
@@ -42,7 +43,7 @@ func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (ScreenResu
 
 	if input.ShowCollections {
 		menuItems = append(menuItems, gaba.MenuItem{
-			Text:     "Collections",
+			Text:     i18n.GetString("platform_selection_collections"),
 			Selected: false,
 			Focused:  false,
 			Metadata: romm.Platform{Slug: "collections"},
@@ -61,14 +62,14 @@ func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (ScreenResu
 	var footerItems []gaba.FooterHelpItem
 	if input.QuitOnBack {
 		footerItems = []gaba.FooterHelpItem{
-			{ButtonName: "B", HelpText: "Quit"},
-			{ButtonName: "X", HelpText: "Settings"},
-			{ButtonName: "A", HelpText: "Select"},
+			{ButtonName: "B", HelpText: i18n.GetString("button_quit")},
+			{ButtonName: "X", HelpText: i18n.GetString("button_settings")},
+			{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 		}
 	} else {
 		footerItems = []gaba.FooterHelpItem{
-			{ButtonName: "B", HelpText: "Back"},
-			{ButtonName: "A", HelpText: "Select"},
+			{ButtonName: "B", HelpText: i18n.GetString("button_back")},
+			{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 		}
 	}
 

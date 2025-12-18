@@ -2,11 +2,11 @@ package ui
 
 import (
 	"errors"
-	"fmt"
 	"sort"
 	"strings"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type EmulatorSelectionInput struct {
@@ -63,7 +63,7 @@ func (s *EmulatorSelectionScreen) Draw(input EmulatorSelectionInput) (ScreenResu
 	for _, choice := range sortedChoices {
 		displayText := choice.DisplayName
 		if choice.HasExistingSaves {
-			displayText = fmt.Sprintf("%s (%d saves)", choice.DisplayName, choice.SaveCount)
+			displayText = choice.DisplayName + i18n.GetStringWithData("emulator_saves_count", map[string]interface{}{"Count": choice.SaveCount})
 		}
 
 		menuItems = append(menuItems, gaba.MenuItem{
@@ -75,11 +75,11 @@ func (s *EmulatorSelectionScreen) Draw(input EmulatorSelectionInput) (ScreenResu
 	}
 
 	footerItems := []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Cancel"},
-		{ButtonName: "A", HelpText: "Select"},
+		{ButtonName: "B", HelpText: i18n.GetString("button_cancel")},
+		{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 	}
 
-	title := fmt.Sprintf("Select %s Emulator", input.PlatformName)
+	title := i18n.GetStringWithData("emulator_selection_title", map[string]interface{}{"Platform": input.PlatformName})
 	options := gaba.DefaultListOptions(title, menuItems)
 	options.SmallTitle = true
 	options.FooterHelpItems = footerItems

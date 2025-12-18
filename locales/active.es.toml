@@ -1,0 +1,519 @@
+[app_title]
+description = "Application title"
+hash = "sha1-21ad2f19002ffdfd10df4befb6891f5c6e1ca771"
+other = "Grout"
+
+[button_back]
+description = "Back button"
+hash = "sha1-f750c1a93e7159a57615993b8cc80ac1c150a084"
+other = "Atrás"
+
+[button_cancel]
+description = "Cancel button"
+hash = "sha1-e84f4e196b3fc633b784628ec564a877a3c659be"
+other = "Cancelar"
+
+[button_close]
+description = "Close button"
+hash = "sha1-247d1e79fac03870ebcf4657ac07f2a299bf9ad7"
+other = "Cerrar"
+
+[button_continue]
+description = "Continue button"
+hash = "sha1-38657fb0c449b7301e78131f246e393ad3abf187"
+other = "Continuar"
+
+[button_cycle]
+description = "Cycle button"
+hash = "sha1-c1d3aeb7548b57a3742e0ddec8d13be3e8270110"
+other = "Alternar"
+
+[button_download]
+description = "Download button"
+hash = "sha1-d91cc87f172330513439f1e1896f36d0279e383e"
+other = "Descargar"
+
+[button_login]
+description = "Login button"
+hash = "sha1-a2ecd2a462562e91fda00d2c1a3afbe2aefa5fc7"
+other = "Iniciar sesión"
+
+[button_multi]
+description = "Multi select button"
+hash = "sha1-53e09a835195b421620e35e453983b46dbe435f6"
+other = "Múltiple"
+
+[button_quit]
+description = "Quit button"
+hash = "sha1-c4a17eb20cc36c071c5d5f0f4d1beabaa28a9c4f"
+other = "Salir"
+
+[button_save]
+description = "Save button"
+hash = "sha1-f8ff3477079d71372a279cbd7801694a48daf6ea"
+other = "Guardar"
+
+[button_search]
+description = "Search button"
+hash = "sha1-624418ccb859a5879cbb5ba87c17640385db8e13"
+other = "Buscar"
+
+[button_select]
+description = "Select button"
+hash = "sha1-30e1716b2609e0a103bfe9ec91f5595227b95581"
+other = "Seleccionar"
+
+[button_settings]
+description = "Settings button"
+hash = "sha1-f89f46a3fa8dd703600f162702649b3a3ea6b691"
+other = "Configuración"
+
+[collection_platform_no_mapped]
+description = "No mapped platforms message"
+hash = "sha1-dcc78ca555b07c1ec46de15b86ae30fb5a93259b"
+other = "No hay plataformas con juegos mapeados en {{.Name}}"
+
+[collection_platform_title]
+description = "Collection platform selection title"
+hash = "sha1-ef694dbd3cd7d7efab20fa22908897ef0e4c0fd7"
+other = "{{.Name}} - Plataformas"
+
+[common_false]
+description = "False value"
+hash = "sha1-264c4a2dae9767990348836621bdb761e0d47ddc"
+other = "Falso"
+
+[common_skip]
+description = "Skip option"
+hash = "sha1-3bd0989f51afb534b996e3136e12c0534a116fbc"
+other = "Omitir"
+
+[common_true]
+description = "True value"
+hash = "sha1-00ebe8ed117ff21213bc7e283d2c06b00d19928b"
+other = "Verdadero"
+
+[download_artwork]
+description = "Downloading artwork message"
+hash = "sha1-824dc9afd3d7948c2341ebabf9ce9af8a879b2c7"
+other = "Descargando artwork..."
+
+[download_extracting]
+description = "Extracting ROM message"
+hash = "sha1-cac48c906de8b81fc9d4f36caa53b0b2aa883817"
+other = "Extrayendo {{.Name}}..."
+
+[emulator_default]
+description = "Default emulator suffix"
+hash = "sha1-bd04fbeff34a4ba1857cd6bd3876d3bb82a3d7fc"
+other = " (Predeterminado)"
+
+[emulator_saves_count]
+description = "Emulator saves count suffix"
+hash = "sha1-b78f2a9eb1682dbf351de26956e9219e1890a0dd"
+other = " ({{.Count}} guardados)"
+
+[emulator_selection_title]
+description = "Emulator selection title"
+hash = "sha1-9ad3649640465b8b87ff7b7cf4e89d86b6200318"
+other = "Seleccionar Emulador de {{.Platform}}"
+
+[game_details_average_rating]
+description = "Average rating label"
+hash = "sha1-2b3048f6e2770420f60ffb7022c758e3eaed1c72"
+other = "Puntuación Media"
+
+[game_details_companies]
+description = "Companies label"
+hash = "sha1-85a8bac95b01826c0ecb48dd7b54dbe02dce936e"
+other = "Compañías"
+
+[game_details_file_size]
+description = "File size label"
+hash = "sha1-63ad9e90dca751d02e1c26781d996e76e9975660"
+other = "Tamaño del Archivo"
+
+[game_details_game]
+description = "Game label"
+hash = "sha1-dbe953aba3653dc8fb7630af5f1f088939e2408b"
+other = "Juego"
+
+[game_details_game_modes]
+description = "Game modes label"
+hash = "sha1-8abcdf687bc193e64ab080de49abd0797506d41d"
+other = "Modos de Juego"
+
+[game_details_genres]
+description = "Genres label"
+hash = "sha1-cdc6a72c437752391549ef5ef593d3d652025bdc"
+other = "Géneros"
+
+[game_details_languages]
+description = "Languages label"
+hash = "sha1-133ec0e4c9fa6e1efce21697f5503517905add22"
+other = "Idiomas"
+
+[game_details_multi_file_rom]
+description = "Multi-file ROM value"
+hash = "sha1-b4d5064a2aa0254e3af86155279493ac4d1bc156"
+other = "ROM de múltiples archivos"
+
+[game_details_platform]
+description = "Platform label"
+hash = "sha1-fefb3e7c41664e4cc9e34e33543238304d40ed35"
+other = "Plataforma"
+
+[game_details_qr_section]
+description = "QR code section title"
+hash = "sha1-3d6a54e2f94c76d23e1936d633be3f18c9e5ba7b"
+other = "Listado de Juegos RomM"
+
+[game_details_regions]
+description = "Regions label"
+hash = "sha1-5ad21a913a0d587f4c3e9dfb52a18936364915e7"
+other = "Regiones"
+
+[game_details_release_date]
+description = "Release date label"
+hash = "sha1-265104a3ed5017e042dc45622894156f8934d375"
+other = "Fecha de Lanzamiento"
+
+[game_details_type]
+description = "Type label"
+hash = "sha1-23873b24ec0a09607008726a2c1653a7cdbce013"
+other = "Tipo"
+
+[games_list_filtered_out]
+description = "All games filtered out message"
+hash = "sha1-859d5f801b747640d97a7d7861832ba6ae1f0a3a"
+other = "Ningún juego en {{.Name}} coincide con tus mapeos de plataforma"
+
+[games_list_loading]
+description = "Loading games message"
+hash = "sha1-527325dc6081c1e5ab51d04098cb3330abaa2c7f"
+other = "Cargando {{.Name}}..."
+
+[games_list_no_games]
+description = "No games found message"
+hash = "sha1-2c06f062db59fd37e32ff742c8ac69bc85394828"
+other = "No se encontraron juegos para {{.Name}}"
+
+[games_list_no_results]
+description = "No search results message"
+hash = "sha1-93b210e05c46ea3af2946ee36cccea3e5d648068"
+other = "No results found for \"{{.Query}}\""
+
+[games_list_search_prefix]
+description = "Search prefix in title"
+hash = "sha1-538a7cda06f5dec7cadd858ea7afc4205bae8371"
+other = "[Search: \"{{.Query}}\"]"
+
+[log_level_debug]
+description = "Debug log level"
+hash = "sha1-7b25054507859fc71900d3a3720f8b92dbbe85cc"
+other = "Depuración"
+
+[log_level_error]
+description = "Error log level"
+hash = "sha1-a9e929d1a328e1fddad3285d950ed4d8e1d9df2e"
+other = "Error"
+
+[login_error_connection]
+description = "Connection error message"
+hash = "sha1-4abcba96d269fe7f29ab9c34627dbbe686f6b3ff"
+other = "Could not connect to RomM!\nPlease check the hostname and port."
+
+[login_error_credentials]
+description = "Invalid credentials error"
+hash = "sha1-598c23dab764fd9c5078926c541833c00f41ba7e"
+other = "Nombre de usuario o contraseña inválidos."
+
+[login_error_unexpected]
+description = "Unexpected error message"
+hash = "sha1-bbe54d32ae1098fce3b3b803b12eaaec4dc5be73"
+other = "Something unexpected happened!\nCheck the logs for more info."
+
+[login_hostname]
+description = "Hostname field label"
+hash = "sha1-bba62d86adeeaecf96cb3e82c8985969e0c10a65"
+other = "Hostname"
+
+[login_logging_in]
+description = "Logging in progress message"
+hash = "sha1-c315a2fd526939a50c93f82c3763cf9280b6830b"
+other = "Iniciando sesión..."
+
+[login_password]
+description = "Password field label"
+hash = "sha1-11980b54ab615dcb709c33aba663bc1283181e65"
+other = "Contraseña"
+
+[login_port]
+description = "Port field label"
+hash = "sha1-02b1bfa20febadbd4d68534091d04a2d3c1ef118"
+other = "Puerto (opcional)"
+
+[login_protocol]
+description = "Protocol field label"
+hash = "sha1-a9a787c082c780bc2757d04be594c2941995675e"
+other = "Protocolo"
+
+[login_protocol_http]
+description = "HTTP protocol option"
+hash = "sha1-495665d621997f98906e07cc32df89e2d3dd5772"
+other = "HTTP"
+
+[login_protocol_https]
+description = "HTTPS protocol option"
+hash = "sha1-786745427d2e9f1dcb5e1e4ec3c7b3f1d474a222"
+other = "HTTPS"
+
+[login_title]
+description = "Login screen title"
+hash = "sha1-eaa6b431247197af5a2940d8fcbb45bb945afcdc"
+other = "Iniciar sesión en RomM"
+
+[login_username]
+description = "Username field label"
+hash = "sha1-03cf6144adf5910dec569fe8cbbf9e7c92078682"
+other = "Nombre de usuario"
+
+[platform_mapping_create]
+description = "Create directory option"
+hash = "sha1-0723d192e489e30a99ff95179bd764378d025000"
+other = "Crear '{{.Name}}'"
+
+[platform_mapping_directory_not_found]
+description = "ROM directory not found error"
+hash = "sha1-a454da39fa50d0c4b8f5ac12e0ccf32373970e7e"
+other = "¡No se pudo encontrar el directorio de ROMs!"
+
+[platform_mapping_path_prefix]
+description = "Directory path prefix"
+hash = "sha1-ab6cc1448f5e2f18c3075342e2b1f5ed1bd4a5ad"
+other = "/{{.Name}}"
+
+[platform_mapping_title]
+description = "Platform mapping screen title"
+hash = "sha1-2e3ebf359f2154c546d2d8030991ffd23ce9fdfb"
+other = "Mapeo de Directorio de ROMs"
+
+[platform_selection_collections]
+description = "Collections menu item"
+hash = "sha1-34992827bb04acd448d67abe438c36069ba6aa06"
+other = "Colecciones"
+
+[save_sync_downloaded]
+description = "Downloaded label"
+hash = "sha1-5a0a8ba274de8464add81973700c72c6987465a3"
+other = "Descargado"
+
+[save_sync_failed]
+description = "Failed label"
+hash = "sha1-a41c50ea05b8bf897448944b9e629edfb833d194"
+other = "Fallido"
+
+[save_sync_rom_not_found]
+description = "ROM not found message"
+hash = "sha1-2eb9db5ab5428d49f0f65136deba20d6a2dc3f27"
+other = "{{.Name}} (ROM no encontrado en RomM)"
+
+[save_sync_scanning]
+description = "Scanning save files message"
+hash = "sha1-94dca1192cbb17b21b24b9b0ee2b0149ea5e23ec"
+other = "Escaneando archivos de guardado..."
+
+[save_sync_skipped]
+description = "Skipped label"
+hash = "sha1-0ccccd8c323170ea5c2a33186e7f7bd55100517d"
+other = "Omitido"
+
+[save_sync_summary]
+description = "Save sync summary title"
+hash = "sha1-d584b202f966e19386e7b34c6cf0c0252962a4ae"
+other = "Resumen de Sincronización de Guardados"
+
+[save_sync_summary_section]
+description = "Summary section title"
+hash = "sha1-3f2664fe0c00a50ea3dd938a89c609c07b62747f"
+other = "Resumen"
+
+[save_sync_total_processed]
+description = "Total processed label"
+hash = "sha1-7e630ed5cc1e078e0ae04e5e833b19bdec278a2d"
+other = "Total Procesado"
+
+[save_sync_unknown_error]
+description = "Unknown error message"
+hash = "sha1-6c4727dde79bbd1d793a94cb719d4bd87d3392eb"
+other = "Error desconocido"
+
+[save_sync_unmatched_saves]
+description = "Unmatched saves section title"
+hash = "sha1-ebad4802c05d38a76fcf2d159e0b74d6540fc67f"
+other = "Guardados Sin Coincidir"
+
+[save_sync_up_to_date]
+description = "Everything up to date message"
+hash = "sha1-884b9ff8391879a2e8a855ac79f5b38afa534870"
+other = "Everything is up to date!\nGo play some games!"
+
+[save_sync_uploaded]
+description = "Uploaded label"
+hash = "sha1-e5bf6e3900bff41b38bcf3368ec0bbbbe050683f"
+other = "Subido"
+
+[settings_api_timeout]
+description = "API timeout option"
+hash = "sha1-b7191d059565644a98778e579e160ab5e91aca3e"
+other = "Tiempo de Espera de API"
+
+[settings_auto_sync_saves]
+description = "Auto sync saves option"
+hash = "sha1-7ad1c82bb23b2b9bd159d04bf5d127090c9e0d56"
+other = "Sincronización Automática de Guardados"
+
+[settings_download_art]
+description = "Download art option"
+hash = "sha1-e16f1580e1cda0280388a2f80826d977f98975f1"
+other = "Descargar Arte"
+
+[settings_download_timeout]
+description = "Download timeout option"
+hash = "sha1-5859619d51d182c0c1164f95eedb59132de7c090"
+other = "Tiempo de Espera de Descarga"
+
+[settings_edit_mappings]
+description = "Edit directory mappings option"
+hash = "sha1-20f27e7ddbb59e668d6c538ac1cc33228abd74a6"
+other = "Editar Mapeos de Directorio"
+
+[settings_language]
+description = "Language option"
+hash = "sha1-a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0"
+other = "Idioma"
+
+[settings_language_english]
+description = "English language option"
+hash = "sha1-b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0"
+other = "English"
+
+[settings_language_spanish]
+description = "Spanish language option"
+hash = "sha1-c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0"
+other = "Español"
+
+[settings_log_level]
+description = "Log level option"
+hash = "sha1-d4b9f81b67c0923ee427be359a66fdfa670bb6da"
+other = "Nivel de Log"
+
+[settings_show_game_details]
+description = "Show game details option"
+hash = "sha1-497138b5c11902c4ce86469b37a653906f8b22d3"
+other = "Mostrar Detalles de Juego"
+
+[settings_sync_saves]
+description = "Sync saves option"
+hash = "sha1-e1df38fb283bcabf244aad41aed6f40c077b4a41"
+other = "Sincronizar Guardados"
+
+[settings_title]
+description = "Settings screen title"
+hash = "sha1-e97fdd3939cbb11631f2ddf4efdca54e03d22ec1"
+other = "Configuración"
+
+[settings_unzip_downloads]
+description = "Unzip downloads option"
+hash = "sha1-76f0da64a3b4e7233a7f7f404f1b16769a4339b9"
+other = "Descomprimir Descargas"
+
+[time_105_minutes]
+description = "105 minutes"
+hash = "sha1-96f6037f06f739b5b0ac9c0ab9d8e42826c9168c"
+other = "105 Minutos"
+
+[time_120_minutes]
+description = "120 minutes"
+hash = "sha1-86c8af18cd280ee55da0d6a4a370a8cb274a5506"
+other = "120 Minutos"
+
+[time_120_seconds]
+description = "120 seconds"
+hash = "sha1-5b60a316bc717aa44934e83dba8253259113270e"
+other = "120 Segundos"
+
+[time_15_minutes]
+description = "15 minutes"
+hash = "sha1-4066074d402fac5bdda1adc7795e315f6f481fdb"
+other = "15 Minutos"
+
+[time_15_seconds]
+description = "15 seconds"
+hash = "sha1-4e53fd2a381942eb259be45b5e0580aacb05fe0d"
+other = "15 Segundos"
+
+[time_180_seconds]
+description = "180 seconds"
+hash = "sha1-a6b89d68821d3d1274cc468e88f3e87969ed0735"
+other = "180 Segundos"
+
+[time_240_seconds]
+description = "240 seconds"
+hash = "sha1-627799657c100bec1c729bf3f8a2cad14c3164fc"
+other = "240 Segundos"
+
+[time_300_seconds]
+description = "300 seconds"
+hash = "sha1-d5c67eb5f5979d4b54354904f667c796c4d9eb06"
+other = "300 Segundos"
+
+[time_30_minutes]
+description = "30 minutes"
+hash = "sha1-9c2b3fd22e41c5dbebcb185eacdc7ce950d400a1"
+other = "30 Minutos"
+
+[time_30_seconds]
+description = "30 seconds"
+hash = "sha1-14ec8d0a8aaed6a58a909b509440e40fc71d2d68"
+other = "30 Segundos"
+
+[time_45_minutes]
+description = "45 minutes"
+hash = "sha1-681a5e2a0db430fe977fa313534d738fb6ce787b"
+other = "45 Minutos"
+
+[time_45_seconds]
+description = "45 seconds"
+hash = "sha1-2e89fec4aa96568ac543cde1b8601f0dafa4be75"
+other = "45 Segundos"
+
+[time_60_minutes]
+description = "60 minutes"
+hash = "sha1-0d0514af67557d8c987aeed1c14d13fcdf02b5db"
+other = "60 Minutos"
+
+[time_60_seconds]
+description = "60 seconds"
+hash = "sha1-ec6f76219fb8523d2c4e6f6b159d0b66a445ac87"
+other = "60 Segundos"
+
+[time_75_minutes]
+description = "75 minutes"
+hash = "sha1-64bba20487c92de71e5b7fd6de8b9310f951a80d"
+other = "75 Minutos"
+
+[time_75_seconds]
+description = "75 seconds"
+hash = "sha1-61ce76d5472cd57f728c8226f561790c1daad223"
+other = "75 Segundos"
+
+[time_90_minutes]
+description = "90 minutes"
+hash = "sha1-49cfbea0e8670866cf736efbfae530007140113c"
+other = "90 Minutos"
+
+[time_90_seconds]
+description = "90 seconds"
+hash = "sha1-cd78e99bd717a3c94f31ad76b298204dc66771af"
+other = "90 Segundos"

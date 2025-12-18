@@ -11,6 +11,7 @@ import (
 	"time"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type fetchType int
@@ -132,10 +133,10 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 	options.EnableAction = true
 	options.EnableMultiSelect = true
 	options.FooterHelpItems = []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "X", HelpText: "Search"},
-		{ButtonName: "Select", HelpText: "Multi"},
-		{ButtonName: "A", HelpText: "Select"},
+		{ButtonName: "B", HelpText: i18n.GetString("button_back")},
+		{ButtonName: "X", HelpText: i18n.GetString("button_search")},
+		{ButtonName: "Select", HelpText: i18n.GetString("button_multi")},
+		{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 	}
 
 	options.SelectedIndex = input.LastSelectedIndex
@@ -207,7 +208,7 @@ func (s *GameListScreen) loadGames(input GameListInput) ([]romm.Rom, error) {
 	var loadErr error
 
 	_, err := gaba.ProcessMessage(
-		fmt.Sprintf("Loading %s...", displayName),
+		i18n.GetStringWithData("games_list_loading", map[string]interface{}{"Name": displayName}),
 		gaba.ProcessMessageOptions{ShowThemeBackground: true},
 		func() (interface{}, error) {
 			roms, err := fetchList(config, host, id, ft)
@@ -231,9 +232,9 @@ func (s *GameListScreen) loadGames(input GameListInput) ([]romm.Rom, error) {
 func (s *GameListScreen) showEmptyMessage(platformName, searchFilter string) {
 	var message string
 	if searchFilter != "" {
-		message = fmt.Sprintf("No results found for \"%s\"", searchFilter)
+		message = i18n.GetStringWithData("games_list_no_results", map[string]interface{}{"Query": searchFilter})
 	} else {
-		message = fmt.Sprintf("No games found for %s", platformName)
+		message = i18n.GetStringWithData("games_list_no_games", map[string]interface{}{"Name": platformName})
 	}
 
 	gaba.ProcessMessage(
@@ -247,7 +248,7 @@ func (s *GameListScreen) showEmptyMessage(platformName, searchFilter string) {
 }
 
 func (s *GameListScreen) showFilteredOutMessage(collectionName string) {
-	message := fmt.Sprintf("No games in %s match your platform mappings", collectionName)
+	message := i18n.GetStringWithData("games_list_filtered_out", map[string]interface{}{"Name": collectionName})
 
 	gaba.ProcessMessage(
 		message,

@@ -15,6 +15,7 @@ import (
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
 	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/constants"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type GameDetailsInput struct {
@@ -51,8 +52,8 @@ func (s *GameDetailsScreen) Draw(input GameDetailsInput) (ScreenResult[GameDetai
 	options.ShowScrollbar = true
 
 	result, err := gaba.DetailScreen(input.Game.Name, options, []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "A", HelpText: "Download"},
+		{ButtonName: "B", HelpText: i18n.GetString("button_back")},
+		{ButtonName: "A", HelpText: i18n.GetString("button_download")},
 	})
 
 	if err != nil {
@@ -107,64 +108,64 @@ func (s *GameDetailsScreen) buildSections(input GameDetailsInput) []gaba.Section
 	if game.Metadatum.FirstReleaseDate > 0 {
 		releaseDate := time.Unix(game.Metadatum.FirstReleaseDate/1000, 0)
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Release Date",
+			Label: i18n.GetString("game_details_release_date"),
 			Value: releaseDate.Format("January 2, 2006"),
 		})
 	}
 
 	if game.Metadatum.AverageRating > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Average Rating",
+			Label: i18n.GetString("game_details_average_rating"),
 			Value: fmt.Sprintf("%.1f/100", game.Metadatum.AverageRating),
 		})
 	}
 
 	if len(game.Metadatum.Genres) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Genres",
+			Label: i18n.GetString("game_details_genres"),
 			Value: strings.Join(game.Metadatum.Genres, ", "),
 		})
 	}
 
 	if len(game.Metadatum.Companies) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Companies",
+			Label: i18n.GetString("game_details_companies"),
 			Value: strings.Join(game.Metadatum.Companies, ", "),
 		})
 	}
 
 	if len(game.Metadatum.GameModes) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Game Modes",
+			Label: i18n.GetString("game_details_game_modes"),
 			Value: strings.Join(game.Metadatum.GameModes, ", "),
 		})
 	}
 
 	if len(game.Regions) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Regions",
+			Label: i18n.GetString("game_details_regions"),
 			Value: strings.Join(game.Regions, ", "),
 		})
 	}
 
 	if len(game.Languages) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Languages",
+			Label: i18n.GetString("game_details_languages"),
 			Value: strings.Join(game.Languages, ", "),
 		})
 	}
 
 	if game.FsSizeBytes > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "File Size",
+			Label: i18n.GetString("game_details_file_size"),
 			Value: utils.FormatBytes(game.FsSizeBytes),
 		})
 	}
 
 	if game.Multi {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Type",
-			Value: "Multi-file ROM",
+			Label: i18n.GetString("game_details_type"),
+			Value: i18n.GetString("game_details_multi_file_rom"),
 		})
 	}
 
@@ -175,15 +176,15 @@ func (s *GameDetailsScreen) buildSections(input GameDetailsInput) []gaba.Section
 	if len(sections) == 0 {
 		logger.Warn("No sections available for game", "game", game.Name)
 		sections = append(sections, gaba.NewInfoSection("", []gaba.MetadataItem{
-			{Label: "Game", Value: game.Name},
-			{Label: "Platform", Value: game.PlatformDisplayName},
+			{Label: i18n.GetString("game_details_game"), Value: game.Name},
+			{Label: i18n.GetString("game_details_platform"), Value: game.PlatformDisplayName},
 		}))
 	}
 
 	qrcode, err := utils.CreateTempQRCode(game.GetGamePage(input.Host), 256)
 	if err == nil {
 		sections = append(sections, gaba.NewImageSection(
-			"RomM Game Listing",
+			i18n.GetString("game_details_qr_section"),
 			qrcode,
 			int32(256),
 			int32(256),

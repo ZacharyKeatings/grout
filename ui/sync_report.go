@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type syncReportInput struct {
@@ -33,8 +34,8 @@ func (s *SyncReportScreen) draw(input syncReportInput) (ScreenResult[syncReportO
 	options.ShowThemeBackground = false
 	options.ShowScrollbar = true
 
-	result, err := gaba.DetailScreen("Save Sync Summary", options, []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Close"},
+	result, err := gaba.DetailScreen(i18n.GetString("save_sync_summary"), options, []gaba.FooterHelpItem{
+		{ButtonName: "B", HelpText: i18n.GetString("button_close")},
 	})
 
 	if err != nil {
@@ -79,29 +80,29 @@ func (s *SyncReportScreen) buildSections(results []utils.SyncResult, unmatched [
 	}
 
 	summary := []gaba.MetadataItem{
-		{Label: "Total Processed", Value: fmt.Sprintf("%d", len(results))},
+		{Label: i18n.GetString("save_sync_total_processed"), Value: fmt.Sprintf("%d", len(results))},
 	}
 
 	if downloadedCount > 0 {
-		summary = append(summary, gaba.MetadataItem{Label: "Downloaded", Value: fmt.Sprintf("%d", downloadedCount)})
+		summary = append(summary, gaba.MetadataItem{Label: i18n.GetString("save_sync_downloaded"), Value: fmt.Sprintf("%d", downloadedCount)})
 	}
 
 	if uploadedCount > 0 {
 		summary = append(summary, gaba.MetadataItem{
-			Label: "Uploaded", Value: fmt.Sprintf("%d", uploadedCount)})
+			Label: i18n.GetString("save_sync_uploaded"), Value: fmt.Sprintf("%d", uploadedCount)})
 	}
 
 	if skippedCount > 0 {
 		summary = append(summary, gaba.MetadataItem{
-			Label: "Skipped", Value: fmt.Sprintf("%d", skippedCount)})
+			Label: i18n.GetString("save_sync_skipped"), Value: fmt.Sprintf("%d", skippedCount)})
 	}
 
 	if failedCount > 0 {
 		summary = append(summary, gaba.MetadataItem{
-			Label: "Failed", Value: fmt.Sprintf("%d", failedCount)})
+			Label: i18n.GetString("save_sync_failed"), Value: fmt.Sprintf("%d", failedCount)})
 	}
 
-	sections = append(sections, gaba.NewInfoSection("Summary", summary))
+	sections = append(sections, gaba.NewInfoSection(i18n.GetString("save_sync_summary_section"), summary))
 
 	if downloadedCount > 0 {
 		downloadedFiles := ""
@@ -117,7 +118,7 @@ func (s *SyncReportScreen) buildSections(results []utils.SyncResult, unmatched [
 				downloadedFiles += displayName
 			}
 		}
-		sections = append(sections, gaba.NewDescriptionSection("Downloaded", downloadedFiles))
+		sections = append(sections, gaba.NewDescriptionSection(i18n.GetString("save_sync_downloaded"), downloadedFiles))
 	}
 
 	if uploadedCount > 0 {
@@ -139,7 +140,7 @@ func (s *SyncReportScreen) buildSections(results []utils.SyncResult, unmatched [
 				uploadedFiles += displayName
 			}
 		}
-		sections = append(sections, gaba.NewDescriptionSection("Uploaded", uploadedFiles))
+		sections = append(sections, gaba.NewDescriptionSection(i18n.GetString("save_sync_uploaded"), uploadedFiles))
 	}
 
 	if failedCount > 0 {
@@ -151,7 +152,7 @@ func (s *SyncReportScreen) buildSections(results []utils.SyncResult, unmatched [
 				}
 				errorMsg := r.Error
 				if errorMsg == "" {
-					errorMsg = "Unknown error"
+					errorMsg = i18n.GetString("save_sync_unknown_error")
 				}
 				displayName := r.RomDisplayName
 				if displayName == "" {
@@ -160,7 +161,7 @@ func (s *SyncReportScreen) buildSections(results []utils.SyncResult, unmatched [
 				failedFiles += fmt.Sprintf("%s (%s): %s", displayName, r.Action, errorMsg)
 			}
 		}
-		sections = append(sections, gaba.NewDescriptionSection("Failed", failedFiles))
+		sections = append(sections, gaba.NewDescriptionSection(i18n.GetString("save_sync_failed"), failedFiles))
 	}
 
 	// Display unmatched saves (ROM not found in RomM)
@@ -170,9 +171,9 @@ func (s *SyncReportScreen) buildSections(results []utils.SyncResult, unmatched [
 			if unmatchedText != "" {
 				unmatchedText += "\n"
 			}
-			unmatchedText += fmt.Sprintf("%s (ROM not found in RomM)", filepath.Base(u.SavePath))
+			unmatchedText += i18n.GetStringWithData("save_sync_rom_not_found", map[string]interface{}{"Name": filepath.Base(u.SavePath)})
 		}
-		sections = append(sections, gaba.NewDescriptionSection("Unmatched Saves", unmatchedText))
+		sections = append(sections, gaba.NewDescriptionSection(i18n.GetString("save_sync_unmatched_saves"), unmatchedText))
 	}
 
 	return sections

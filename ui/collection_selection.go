@@ -6,6 +6,7 @@ import (
 	"grout/utils"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type CollectionSelectionInput struct {
@@ -53,8 +54,8 @@ func (s *CollectionSelectionScreen) Draw(input CollectionSelectionInput) (Screen
 	}
 
 	footerItems := []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "A", HelpText: "Select"},
+		{ButtonName: "B", HelpText: i18n.GetString("button_back")},
+		{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 	}
 
 	options := gaba.DefaultListOptions("Collections", menuItems)

@@ -19,6 +19,7 @@ import (
 	"grout/romm"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 	"go.uber.org/atomic"
 )
 
@@ -156,7 +157,7 @@ func (s *DownloadScreen) draw(input downloadInput) (ScreenResult[downloadOutput]
 
 		progress := &atomic.Float64{}
 		_, err := gaba.ProcessMessage(
-			fmt.Sprintf("Extracting %s...", g.DisplayName),
+			i18n.GetStringWithData("download_extracting", map[string]interface{}{"Name": g.DisplayName}),
 			gaba.ProcessMessageOptions{
 				ShowThemeBackground: true,
 				ShowProgressBar:     true,
@@ -222,7 +223,7 @@ func (s *DownloadScreen) draw(input downloadInput) (ScreenResult[downloadOutput]
 
 				progress := &atomic.Float64{}
 				_, err := gaba.ProcessMessage(
-					fmt.Sprintf("Extracting %s...", g.Name),
+					i18n.GetStringWithData("download_extracting", map[string]interface{}{"Name": g.Name}),
 					gaba.ProcessMessageOptions{
 						ShowThemeBackground: true,
 						ShowProgressBar:     true,
@@ -270,7 +271,7 @@ func (s *DownloadScreen) draw(input downloadInput) (ScreenResult[downloadOutput]
 	if len(artDownloads) > 0 && len(downloadedGames) > 0 {
 		progress := &atomic.Float64{}
 		_, err := gaba.ProcessMessage(
-			"Downloading artwork...",
+			i18n.GetString("download_artwork"),
 			gaba.ProcessMessageOptions{
 				ShowThemeBackground: true,
 				ShowProgressBar:     true,

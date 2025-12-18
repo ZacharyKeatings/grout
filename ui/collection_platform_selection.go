@@ -10,6 +10,7 @@ import (
 	"time"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type CollectionPlatformSelectionInput struct {
@@ -49,7 +50,7 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 	} else {
 		var loadErr error
 		_, err := gaba.ProcessMessage(
-			fmt.Sprintf("Loading %s...", input.Collection.Name),
+			i18n.GetStringWithData("games_list_loading", map[string]interface{}{"Name": input.Collection.Name}),
 			gaba.ProcessMessageOptions{ShowThemeBackground: true},
 			func() (interface{}, error) {
 				rc := utils.GetRommClient(input.Host)
@@ -89,7 +90,7 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 
 	if len(platformMap) == 0 {
 		gaba.ProcessMessage(
-			fmt.Sprintf("No platforms with mapped games in %s", input.Collection.Name),
+			i18n.GetStringWithData("collection_platform_no_mapped", map[string]interface{}{"Name": input.Collection.Name}),
 			gaba.ProcessMessageOptions{ShowThemeBackground: true},
 			func() (interface{}, error) {
 				time.Sleep(time.Second * 2)
@@ -127,11 +128,11 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 	}
 
 	footerItems := []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "A", HelpText: "Select"},
+		{ButtonName: "B", HelpText: i18n.GetString("button_back")},
+		{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 	}
 
-	title := fmt.Sprintf("%s - Platforms", input.Collection.Name)
+	title := i18n.GetStringWithData("collection_platform_title", map[string]interface{}{"Name": input.Collection.Name})
 	options := gaba.DefaultListOptions(title, menuItems)
 	options.SmallTitle = true
 	options.FooterHelpItems = footerItems

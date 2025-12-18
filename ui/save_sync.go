@@ -6,6 +6,7 @@ import (
 	"time"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type SaveSyncInput struct {
@@ -29,7 +30,7 @@ func (s *SaveSyncScreen) Draw(input SaveSyncInput) (ScreenResult[SaveSyncOutput]
 		Unmatched []utils.UnmatchedSave
 	}
 
-	scanData, _ := gaba.ProcessMessage("Scanning save files...", gaba.ProcessMessageOptions{}, func() (interface{}, error) {
+	scanData, _ := gaba.ProcessMessage(i18n.GetString("save_sync_scanning"), gaba.ProcessMessageOptions{}, func() (interface{}, error) {
 		syncs, unmatched, err := utils.FindSaveSyncs(input.Host)
 		if err != nil {
 			gaba.GetLogger().Error("Unable to scan save files!", "error", err)
@@ -86,7 +87,7 @@ func (s *SaveSyncScreen) Draw(input SaveSyncInput) (ScreenResult[SaveSyncOutput]
 				for i, info := range dirInfos {
 					displayName := info.DirectoryName
 					if i == 0 {
-						displayName = info.DirectoryName + " (Default)"
+						displayName = info.DirectoryName + i18n.GetString("emulator_default")
 					}
 					uiChoices[i] = EmulatorChoice{
 						DirectoryName:    info.DirectoryName,
@@ -170,7 +171,7 @@ func (s *SaveSyncScreen) Draw(input SaveSyncInput) (ScreenResult[SaveSyncOutput]
 			gaba.GetLogger().Error("Error showing sync report", "error", err)
 		}
 	} else {
-		gaba.ProcessMessage("Everything is up to date!\nGo play some games!", gaba.ProcessMessageOptions{}, func() (interface{}, error) {
+		gaba.ProcessMessage(i18n.GetString("save_sync_up_to_date"), gaba.ProcessMessageOptions{}, func() (interface{}, error) {
 			time.Sleep(time.Second * 2)
 			return nil, nil
 		})

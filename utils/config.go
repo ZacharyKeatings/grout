@@ -8,6 +8,7 @@ import (
 	"time"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type Config struct {
@@ -20,6 +21,7 @@ type Config struct {
 	ApiTimeout        time.Duration               `json:"api_timeout"`
 	DownloadTimeout   time.Duration               `json:"download_timeout"`
 	LogLevel          string                      `json:"log_level,omitempty"`
+	Language          string                      `json:"language,omitempty"`
 }
 
 type DirectoryMapping struct {
@@ -64,6 +66,10 @@ func LoadConfig() (*Config, error) {
 		config.DownloadTimeout = 60 * time.Minute
 	}
 
+	if config.Language == "" {
+		config.Language = "en"
+	}
+
 	return &config, nil
 }
 
@@ -72,7 +78,15 @@ func SaveConfig(config *Config) error {
 		config.LogLevel = "ERROR"
 	}
 
+	if config.Language == "" {
+		config.Language = "en"
+	}
+
 	gaba.SetRawLogLevel(config.LogLevel)
+
+	if err := i18n.SetWithCode(config.Language); err != nil {
+		gaba.GetLogger().Error("Failed to set language", "error", err, "language", config.Language)
+	}
 
 	pretty, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {

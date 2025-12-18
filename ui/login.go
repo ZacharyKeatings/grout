@@ -11,6 +11,7 @@ import (
 	"grout/romm"
 
 	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type loginInput struct {
@@ -39,11 +40,11 @@ func (s *LoginScreen) draw(input loginInput) (ScreenResult[loginOutput], error) 
 	items := []gabagool.ItemWithOptions{
 		{
 			Item: gabagool.MenuItem{
-				Text: "Protocol",
+				Text: i18n.GetString("login_protocol"),
 			},
 			Options: []gabagool.Option{
-				{DisplayName: "HTTP", Value: "http://"},
-				{DisplayName: "HTTPS", Value: "https://"},
+				{DisplayName: i18n.GetString("login_protocol_http"), Value: "http://"},
+				{DisplayName: i18n.GetString("login_protocol_https"), Value: "https://"},
 			},
 			SelectedOption: func() int {
 				if strings.Contains(host.RootURI, "https") {
@@ -54,7 +55,7 @@ func (s *LoginScreen) draw(input loginInput) (ScreenResult[loginOutput], error) 
 		},
 		{
 			Item: gabagool.MenuItem{
-				Text: "Hostname",
+				Text: i18n.GetString("login_hostname"),
 			},
 			Options: []gabagool.Option{
 				{
@@ -67,7 +68,7 @@ func (s *LoginScreen) draw(input loginInput) (ScreenResult[loginOutput], error) 
 		},
 		{
 			Item: gabagool.MenuItem{
-				Text: "Port (optional)",
+				Text: i18n.GetString("login_port"),
 			},
 			Options: []gabagool.Option{
 				{
@@ -95,7 +96,7 @@ func (s *LoginScreen) draw(input loginInput) (ScreenResult[loginOutput], error) 
 		},
 		{
 			Item: gabagool.MenuItem{
-				Text: "Username",
+				Text: i18n.GetString("login_username"),
 			},
 			Options: []gabagool.Option{
 				{
@@ -108,7 +109,7 @@ func (s *LoginScreen) draw(input loginInput) (ScreenResult[loginOutput], error) 
 		},
 		{
 			Item: gabagool.MenuItem{
-				Text: "Password",
+				Text: i18n.GetString("login_password"),
 			},
 			Options: []gabagool.Option{
 				{
@@ -123,13 +124,13 @@ func (s *LoginScreen) draw(input loginInput) (ScreenResult[loginOutput], error) 
 	}
 
 	res, err := gabagool.OptionsList(
-		"Login to RomM",
+		i18n.GetString("login_title"),
 		gabagool.OptionListSettings{
 			DisableBackButton: false,
 			FooterHelpItems: []gabagool.FooterHelpItem{
-				{ButtonName: "B", HelpText: "Quit"},
-				{ButtonName: "←→", HelpText: "Cycle"},
-				{ButtonName: "Start", HelpText: "Login"},
+				{ButtonName: "B", HelpText: i18n.GetString("button_quit")},
+				{ButtonName: "←→", HelpText: i18n.GetString("button_cycle")},
+				{ButtonName: "Start", HelpText: i18n.GetString("button_login")},
 			},
 		},
 		items,
@@ -162,7 +163,7 @@ func LoginFlow(existingHost romm.Host) (*utils.Config, error) {
 	for {
 		result, err := screen.draw(loginInput{ExistingHost: existingHost})
 		if err != nil {
-			gabagool.ProcessMessage("Something unexpected happened!\nCheck the logs for more info.", gabagool.ProcessMessageOptions{}, func() (interface{}, error) {
+			gabagool.ProcessMessage(i18n.GetString("login_error_unexpected"), gabagool.ProcessMessageOptions{}, func() (interface{}, error) {
 				time.Sleep(3 * time.Second)
 				return nil, nil
 			})
@@ -179,18 +180,18 @@ func LoginFlow(existingHost romm.Host) (*utils.Config, error) {
 
 		switch {
 		case loginResult.BadHost:
-			gabagool.ConfirmationMessage("Could not connect to RomM!\nPlease check the hostname and port.",
+			gabagool.ConfirmationMessage(i18n.GetString("login_error_connection"),
 				[]gabagool.FooterHelpItem{
-					{ButtonName: "A", HelpText: "Continue"},
+					{ButtonName: "A", HelpText: i18n.GetString("button_continue")},
 				},
 				gabagool.MessageOptions{})
 			existingHost = host
 			continue
 
 		case loginResult.BadCredentials:
-			gabagool.ConfirmationMessage("Invalid Username or Password.",
+			gabagool.ConfirmationMessage(i18n.GetString("login_error_credentials"),
 				[]gabagool.FooterHelpItem{
-					{ButtonName: "A", HelpText: "Continue"},
+					{ButtonName: "A", HelpText: i18n.GetString("button_continue")},
 				},
 				gabagool.MessageOptions{})
 			existingHost = host
@@ -207,7 +208,7 @@ func LoginFlow(existingHost romm.Host) (*utils.Config, error) {
 func attemptLogin(host romm.Host) loginAttemptResult {
 	rc := romm.NewClient(host.URL(), romm.WithTimeout(time.Second*15))
 
-	result, _ := gabagool.ProcessMessage("Logging in...", gabagool.ProcessMessageOptions{}, func() (interface{}, error) {
+	result, _ := gabagool.ProcessMessage(i18n.GetString("login_logging_in"), gabagool.ProcessMessageOptions{}, func() (interface{}, error) {
 		lr := rc.Login(host.Username, host.Password)
 		if lr != nil {
 			return loginAttemptResult{BadCredentials: true}, nil

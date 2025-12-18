@@ -8,6 +8,7 @@ import (
 	"time"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type SettingsInput struct {
@@ -31,33 +32,33 @@ func NewSettingsScreen() *SettingsScreen {
 
 var (
 	apiTimeoutOptions = []struct {
-		Display string
+		I18nKey string
 		Value   time.Duration
 	}{
-		{"15 Seconds", 15 * time.Second},
-		{"30 Seconds", 30 * time.Second},
-		{"45 Seconds", 45 * time.Second},
-		{"60 Seconds", 60 * time.Second},
-		{"75 Seconds", 75 * time.Second},
-		{"90 Seconds", 90 * time.Second},
-		{"120 Seconds", 120 * time.Second},
-		{"180 Seconds", 180 * time.Second},
-		{"240 Seconds", 240 * time.Second},
-		{"300 Seconds", 300 * time.Second},
+		{"time_15_seconds", 15 * time.Second},
+		{"time_30_seconds", 30 * time.Second},
+		{"time_45_seconds", 45 * time.Second},
+		{"time_60_seconds", 60 * time.Second},
+		{"time_75_seconds", 75 * time.Second},
+		{"time_90_seconds", 90 * time.Second},
+		{"time_120_seconds", 120 * time.Second},
+		{"time_180_seconds", 180 * time.Second},
+		{"time_240_seconds", 240 * time.Second},
+		{"time_300_seconds", 300 * time.Second},
 	}
 
 	downloadTimeoutOptions = []struct {
-		Display string
+		I18nKey string
 		Value   time.Duration
 	}{
-		{"15 Minutes", 15 * time.Minute},
-		{"30 Minutes", 30 * time.Minute},
-		{"45 Minutes", 45 * time.Minute},
-		{"60 Minutes", 60 * time.Minute},
-		{"75 Minutes", 75 * time.Minute},
-		{"90 Minutes", 90 * time.Minute},
-		{"105 Minutes", 105 * time.Minute},
-		{"120 Minutes", 120 * time.Minute},
+		{"time_15_minutes", 15 * time.Minute},
+		{"time_30_minutes", 30 * time.Minute},
+		{"time_45_minutes", 45 * time.Minute},
+		{"time_60_minutes", 60 * time.Minute},
+		{"time_75_minutes", 75 * time.Minute},
+		{"time_90_minutes", 90 * time.Minute},
+		{"time_105_minutes", 105 * time.Minute},
+		{"time_120_minutes", 120 * time.Minute},
 	}
 )
 
@@ -68,12 +69,12 @@ func (s *SettingsScreen) Draw(input SettingsInput) (ScreenResult[SettingsOutput]
 	items := s.buildMenuItems(config)
 
 	result, err := gaba.OptionsList(
-		"Settings",
+		i18n.GetString("settings_title"),
 		gaba.OptionListSettings{
 			FooterHelpItems: []gaba.FooterHelpItem{
-				{ButtonName: "B", HelpText: "Cancel"},
-				{ButtonName: "←→", HelpText: "Cycle"},
-				{ButtonName: "Start", HelpText: "Save"},
+				{ButtonName: "B", HelpText: i18n.GetString("button_cancel")},
+				{ButtonName: "←→", HelpText: i18n.GetString("button_cycle")},
+				{ButtonName: "Start", HelpText: i18n.GetString("button_save")},
 			},
 			InitialSelectedIndex: input.LastSelectedIndex,
 		},
@@ -107,19 +108,19 @@ func (s *SettingsScreen) Draw(input SettingsInput) (ScreenResult[SettingsOutput]
 func (s *SettingsScreen) buildMenuItems(config *utils.Config) []gaba.ItemWithOptions {
 	return []gaba.ItemWithOptions{
 		{
-			Item:    gaba.MenuItem{Text: "Edit Directory Mappings"},
+			Item:    gaba.MenuItem{Text: i18n.GetString("settings_edit_mappings")},
 			Options: []gaba.Option{{Type: gaba.OptionTypeClickable}},
 		},
 		{
-			Item:    gaba.MenuItem{Text: "Sync Saves"},
+			Item:    gaba.MenuItem{Text: i18n.GetString("settings_sync_saves")},
 			Options: []gaba.Option{{Type: gaba.OptionTypeClickable}},
 		},
 
 		{
-			Item: gaba.MenuItem{Text: "Show Game Details"},
+			Item: gaba.MenuItem{Text: i18n.GetString("settings_show_game_details")},
 			Options: []gaba.Option{
-				{DisplayName: "True", Value: true},
-				{DisplayName: "False", Value: false},
+				{DisplayName: i18n.GetString("common_true"), Value: true},
+				{DisplayName: i18n.GetString("common_false"), Value: false},
 			},
 			SelectedOption: boolToIndex(!config.ShowGameDetails),
 		},
@@ -134,36 +135,44 @@ func (s *SettingsScreen) buildMenuItems(config *utils.Config) []gaba.ItemWithOpt
 		//	SelectedOption: boolToIndex(!config.AutoSyncSaves),
 		//},
 		{
-			Item: gaba.MenuItem{Text: "Download Art"},
+			Item: gaba.MenuItem{Text: i18n.GetString("settings_download_art")},
 			Options: []gaba.Option{
-				{DisplayName: "True", Value: true},
-				{DisplayName: "False", Value: false},
+				{DisplayName: i18n.GetString("common_true"), Value: true},
+				{DisplayName: i18n.GetString("common_false"), Value: false},
 			},
 			SelectedOption: boolToIndex(!config.DownloadArt),
 		},
 		{
-			Item: gaba.MenuItem{Text: "Unzip Downloads"},
+			Item: gaba.MenuItem{Text: i18n.GetString("settings_unzip_downloads")},
 			Options: []gaba.Option{
-				{DisplayName: "True", Value: true},
-				{DisplayName: "False", Value: false},
+				{DisplayName: i18n.GetString("common_true"), Value: true},
+				{DisplayName: i18n.GetString("common_false"), Value: false},
 			},
 			SelectedOption: boolToIndex(!config.UnzipDownloads),
 		},
 		{
-			Item:           gaba.MenuItem{Text: "API Timeout"},
+			Item:           gaba.MenuItem{Text: i18n.GetString("settings_api_timeout")},
 			Options:        s.buildApiTimeoutOptions(),
 			SelectedOption: s.findApiTimeoutIndex(config.ApiTimeout),
 		},
 		{
-			Item:           gaba.MenuItem{Text: "Download Timeout"},
+			Item:           gaba.MenuItem{Text: i18n.GetString("settings_download_timeout")},
 			Options:        s.buildDownloadTimeoutOptions(),
 			SelectedOption: s.findDownloadTimeoutIndex(config.DownloadTimeout),
 		},
 		{
-			Item: gaba.MenuItem{Text: "Log Level"},
+			Item: gaba.MenuItem{Text: i18n.GetString("settings_language")},
 			Options: []gaba.Option{
-				{DisplayName: "Debug", Value: "DEBUG"},
-				{DisplayName: "Error", Value: "ERROR"},
+				{DisplayName: i18n.GetString("settings_language_english"), Value: "en"},
+				{DisplayName: i18n.GetString("settings_language_spanish"), Value: "es"},
+			},
+			SelectedOption: languageToIndex(config.Language),
+		},
+		{
+			Item: gaba.MenuItem{Text: i18n.GetString("settings_log_level")},
+			Options: []gaba.Option{
+				{DisplayName: i18n.GetString("log_level_debug"), Value: "DEBUG"},
+				{DisplayName: i18n.GetString("log_level_error"), Value: "ERROR"},
 			},
 			SelectedOption: logLevelToIndex(config.LogLevel),
 		},
@@ -173,7 +182,7 @@ func (s *SettingsScreen) buildMenuItems(config *utils.Config) []gaba.ItemWithOpt
 func (s *SettingsScreen) buildApiTimeoutOptions() []gaba.Option {
 	options := make([]gaba.Option, len(apiTimeoutOptions))
 	for i, opt := range apiTimeoutOptions {
-		options[i] = gaba.Option{DisplayName: opt.Display, Value: opt.Value}
+		options[i] = gaba.Option{DisplayName: i18n.GetString(opt.I18nKey), Value: opt.Value}
 	}
 	return options
 }
@@ -181,7 +190,7 @@ func (s *SettingsScreen) buildApiTimeoutOptions() []gaba.Option {
 func (s *SettingsScreen) buildDownloadTimeoutOptions() []gaba.Option {
 	options := make([]gaba.Option, len(downloadTimeoutOptions))
 	for i, opt := range downloadTimeoutOptions {
-		options[i] = gaba.Option{DisplayName: opt.Display, Value: opt.Value}
+		options[i] = gaba.Option{DisplayName: i18n.GetString(opt.I18nKey), Value: opt.Value}
 	}
 	return options
 }
@@ -206,28 +215,33 @@ func (s *SettingsScreen) findDownloadTimeoutIndex(timeout time.Duration) int {
 
 func (s *SettingsScreen) applySettings(config *utils.Config, items []gaba.ItemWithOptions) {
 	for _, item := range items {
-		switch item.Item.Text {
-		case "Download Art":
+		text := item.Item.Text
+		switch text {
+		case i18n.GetString("settings_download_art"):
 			config.DownloadArt = item.SelectedOption == 0
-		case "Auto Sync Saves":
+		case i18n.GetString("settings_auto_sync_saves"):
 			config.AutoSyncSaves = item.SelectedOption == 0
-		case "Unzip Downloads":
+		case i18n.GetString("settings_unzip_downloads"):
 			config.UnzipDownloads = item.SelectedOption == 0
-		case "Show Game Details":
+		case i18n.GetString("settings_show_game_details"):
 			config.ShowGameDetails = item.SelectedOption == 0
-		case "API Timeout":
+		case i18n.GetString("settings_api_timeout"):
 			idx := item.SelectedOption
 			if idx < len(apiTimeoutOptions) {
 				config.ApiTimeout = apiTimeoutOptions[idx].Value
 			}
-		case "Download Timeout":
+		case i18n.GetString("settings_download_timeout"):
 			idx := item.SelectedOption
 			if idx < len(downloadTimeoutOptions) {
 				config.DownloadTimeout = downloadTimeoutOptions[idx].Value
 			}
-		case "Log Level":
+		case i18n.GetString("settings_log_level"):
 			if val, ok := item.Options[item.SelectedOption].Value.(string); ok {
 				config.LogLevel = val
+			}
+		case i18n.GetString("settings_language"):
+			if val, ok := item.Options[item.SelectedOption].Value.(string); ok {
+				config.Language = val
 			}
 		}
 	}
@@ -245,6 +259,17 @@ func logLevelToIndex(level string) int {
 	case "DEBUG":
 		return 0
 	case "ERROR":
+		return 1
+	default:
+		return 0
+	}
+}
+
+func languageToIndex(lang string) int {
+	switch lang {
+	case "en":
+		return 0
+	case "es":
 		return 1
 	default:
 		return 0
