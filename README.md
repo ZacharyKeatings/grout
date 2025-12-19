@@ -66,14 +66,9 @@ When you first launch Grout, you'll be greeted with this login screen.
 ![Grout preview, login flow](.github/resources/user_guide/login.png "Grout preview, login flow")
 
 1. **Protocol** – Choose between HTTP and HTTPS.
-
-2. **Hostname** – Enter your RomM server address without the protocol. For example, if your RomM is at
-   `http://192.168.1.100`, just enter `192.168.1.100`. If it's `https://romm.example.com`, enter `romm.example.com`.
-
+2. **Hostname** – Enter your RomM server address without the protocol.
 3. **Port (optional)** – If your RomM instance runs on a non-standard port, enter it here.
-
 4. **Username** - Your RomM username.
-
 5. **Password** - Your RomM password.
 
 Use the left and right buttons to cycle through options for Protocol. For the text fields (Hostname, Username,
@@ -364,14 +359,14 @@ When the sync completes, you'll see a summary showing:
 
 Grout has been tested on the following devices running muOS 2508.4 Loose Goose:
 
-| Manufacturer | Device       |
-|--------------|--------------|
-| Anbernic     | RG34XX       |
-| Anbernic     | RG35XX-H     |
-| Anbernic     | RG35XXSP     |
-| Anbernic     | RG40XXV      |
-| TrimUI       | Brick        |
-| TrimUI       | Smart Pro    |
+| Manufacturer | Device    |
+|--------------|-----------|
+| Anbernic     | RG34XX    |
+| Anbernic     | RG35XX-H  |
+| Anbernic     | RG35XXSP  |
+| Anbernic     | RG40XXV   |
+| TrimUI       | Brick     |
+| TrimUI       | Smart Pro |
 
 _Please help verify compatibility on other devices by reporting your results!_
 
@@ -417,7 +412,7 @@ _Please help verify compatibility on other devices by reporting your results!_
 
 > [!IMPORTANT]
 > Grout requires a setting to be toggled in Knulli to enable art downloading.
-> 
+>
 > On the main Knulli menu, press start, 'System Settings', `Frontend Developer Options` (at the very bottom), and turn
 `Search For Local Art` on.
 
@@ -427,10 +422,10 @@ _Please help verify compatibility on other devices by reporting your results!_
 
 Grout has been tested on the following devices running NextUI:
 
-| Manufacturer | Device     |
-|--------------|------------|
-| TrimUI       | Brick      |
-| TrimUI       | Smart Pro  |
+| Manufacturer | Device    |
+|--------------|-----------|
+| TrimUI       | Brick     |
+| TrimUI       | Smart Pro |
 
 #### Installation Steps:
 

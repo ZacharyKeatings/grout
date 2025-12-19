@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 	"time"
 
 	"grout/romm"
@@ -89,11 +88,7 @@ func (s *PlatformMappingScreen) Draw(input PlatformMappingInput) (ScreenResult[P
 }
 
 func (s *PlatformMappingScreen) fetchPlatforms(input PlatformMappingInput) ([]romm.Platform, error) {
-	client := romm.NewClient(
-		input.Host.URL(),
-		romm.WithBasicAuth(input.Host.Username, input.Host.Password),
-		romm.WithTimeout(input.ApiTimeout),
-	)
+	client := utils.GetRommClient(input.Host, input.ApiTimeout)
 	return client.GetPlatforms()
 }
 
@@ -106,14 +101,7 @@ func (s *PlatformMappingScreen) getRomDirectories(romDir string) ([]os.DirEntry,
 		return nil, fmt.Errorf("failed to read ROM directory: %w", err)
 	}
 
-	var dirs []os.DirEntry
-	for _, entry := range entries {
-		if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
-			dirs = append(dirs, entry)
-		}
-	}
-
-	return dirs, nil
+	return utils.FilterVisibleDirectories(entries), nil
 }
 
 func (s *PlatformMappingScreen) buildMappingOptions(

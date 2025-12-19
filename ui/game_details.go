@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"grout/romm"
@@ -12,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	groutConstants "grout/constants"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
 	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/constants"
@@ -225,11 +226,9 @@ func (s *GameDetailsScreen) fetchImageFromURL(host romm.Host, imageURL string) [
 		return nil
 	}
 
-	auth := host.Username + ":" + host.Password
-	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-	req.Header.Set("Authorization", authHeader)
+	req.SetBasicAuth(host.Username, host.Password)
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: groutConstants.DefaultHTTPTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Warn("Failed to fetch image", "url", imageURL, "error", err)

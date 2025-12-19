@@ -263,9 +263,7 @@ func (s *GameListScreen) showFilteredOutMessage(collectionName string) {
 func fetchList(config *utils.Config, host romm.Host, queryID int, fetchType fetchType) ([]romm.Rom, error) {
 	logger := gaba.GetLogger()
 
-	rc := romm.NewClient(host.URL(),
-		romm.WithBasicAuth(host.Username, host.Password),
-		romm.WithTimeout(config.ApiTimeout))
+	rc := utils.GetRommClient(host, config.ApiTimeout)
 
 	opt := romm.GetRomsQuery{
 		Limit: 10000,

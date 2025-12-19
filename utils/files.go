@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bufio"
 	"fmt"
+	"grout/constants"
 	"io"
 	"os"
 	"path/filepath"
@@ -96,7 +97,7 @@ func Unzip(zipPath string, destDir string, progress *atomic.Float64) error {
 		return fmt.Errorf("failed to create destination directory: %w", err)
 	}
 
-	buffer := make([]byte, 128*1024)
+	buffer := make([]byte, constants.DefaultBufferSize)
 
 	createdDirs := make(map[string]bool)
 	createdDirs[destDir] = true
@@ -154,7 +155,7 @@ func extractFile(file *zip.File, destPath string, buffer []byte, totalBytes uint
 	}
 	defer destFile.Close()
 
-	bufWriter := bufio.NewWriterSize(destFile, 64*1024)
+	bufWriter := bufio.NewWriterSize(destFile, constants.SmallBufferSize)
 	defer bufWriter.Flush()
 
 	progressW := &progressWriter{
@@ -229,4 +230,26 @@ func OrganizeMultiFileRomForMuOS(extractDir, romDirectory, gameName string) erro
 	logger.Debug("Renamed directory for muOS", "from", extractDir, "to", underscoreDir)
 
 	return nil
+}
+
+// FilterVisibleFiles returns non-directory entries that don't start with "."
+func FilterVisibleFiles(entries []os.DirEntry) []os.DirEntry {
+	result := make([]os.DirEntry, 0, len(entries))
+	for _, entry := range entries {
+		if !entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
+			result = append(result, entry)
+		}
+	}
+	return result
+}
+
+// FilterVisibleDirectories returns directory entries that don't start with "."
+func FilterVisibleDirectories(entries []os.DirEntry) []os.DirEntry {
+	result := make([]os.DirEntry, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
+			result = append(result, entry)
+		}
+	}
+	return result
 }

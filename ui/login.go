@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"grout/constants"
 	"grout/utils"
 	"os"
 	"strconv"
@@ -206,7 +207,7 @@ func LoginFlow(existingHost romm.Host) (*utils.Config, error) {
 }
 
 func attemptLogin(host romm.Host) loginAttemptResult {
-	rc := romm.NewClient(host.URL(), romm.WithTimeout(time.Second*15))
+	rc := utils.GetRommClient(host, constants.LoginTimeout)
 
 	result, _ := gabagool.ProcessMessage(i18n.GetString("login_logging_in"), gabagool.ProcessMessageOptions{}, func() (interface{}, error) {
 		lr := rc.Login(host.Username, host.Password)

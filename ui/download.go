@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"encoding/base64"
 	"fmt"
 	"grout/constants"
 	"grout/utils"
@@ -89,11 +88,9 @@ func (s *DownloadScreen) draw(input downloadInput) (ScreenResult[downloadOutput]
 	downloads, artDownloads := s.buildDownloads(input.Config, input.Host, input.Platform, input.SelectedGames)
 
 	headers := make(map[string]string)
-	auth := input.Host.Username + ":" + input.Host.Password
-	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-	headers["Authorization"] = authHeader
+	headers["Authorization"] = input.Host.BasicAuthHeader()
 
-	logger.Debug("RomM Auth Header", "header", authHeader)
+	logger.Debug("RomM Auth Header", "header", headers["Authorization"])
 
 	slices.SortFunc(downloads, func(a, b gaba.Download) int {
 		return strings.Compare(strings.ToLower(a.DisplayName), strings.ToLower(b.DisplayName))

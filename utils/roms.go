@@ -224,11 +224,8 @@ func scanRomDirectory(slug, romDir string, saveFileMap map[string]*localSave) []
 		return roms
 	}
 
-	for _, entry := range entries {
-		if entry.IsDir() || strings.HasPrefix(entry.Name(), ".") {
-			continue
-		}
-
+	visibleFiles := FilterVisibleFiles(entries)
+	for _, entry := range visibleFiles {
 		romPath := filepath.Join(romDir, entry.Name())
 
 		fileInfo, err := entry.Info()

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"grout/constants"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,16 +44,7 @@ func getSaveDirectoryForSlug(slug string, emulator string) (string, error) {
 	logger.Debug("getSaveDirectoryForSlug called", "slug", slug, "emulator", emulator)
 	bsd := getSaveDirectory()
 
-	var saveFolders []string
-
-	switch GetCFW() {
-	case constants.MuOS:
-		saveFolders = constants.MuOSSaveDirectories[slug]
-	case constants.Knulli:
-		saveFolders = constants.KnulliSaveDirectories[slug]
-	case constants.NextUI:
-		saveFolders = constants.NextUISaveDirectories[slug]
-	}
+	saveFolders := GetSaveDirectoriesForSlug(slug)
 
 	if len(saveFolders) == 0 {
 		return "", fmt.Errorf("no save folder mapping for slug: %s", slug)
@@ -99,14 +89,7 @@ func findSaveFiles(slug string) []localSave {
 	logger := gaba.GetLogger()
 
 	bsd := getSaveDirectory()
-	var saveFolders []string
-
-	switch GetCFW() {
-	case constants.MuOS:
-		saveFolders = constants.MuOSSaveDirectories[slug]
-	case constants.NextUI:
-		saveFolders = constants.NextUISaveDirectories[slug]
-	}
+	saveFolders := GetSaveDirectoriesForSlug(slug)
 
 	if len(saveFolders) == 0 {
 		logger.Debug("No save folder mapping for slug", "slug", slug)
@@ -128,24 +111,23 @@ func findSaveFiles(slug string) []localSave {
 			continue
 		}
 
-		for _, entry := range entries {
-			if !entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
-				savePath := filepath.Join(sd, entry.Name())
+		visibleFiles := FilterVisibleFiles(entries)
+		for _, entry := range visibleFiles {
+			savePath := filepath.Join(sd, entry.Name())
 
-				fileInfo, err := entry.Info()
-				if err != nil {
-					logger.Warn("Failed to get file info", "file", entry.Name(), "error", err)
-					continue
-				}
-
-				saveFile := localSave{
-					Slug:         slug,
-					Path:         savePath,
-					LastModified: fileInfo.ModTime(),
-				}
-
-				allSaveFiles = append(allSaveFiles, saveFile)
+			fileInfo, err := entry.Info()
+			if err != nil {
+				logger.Warn("Failed to get file info", "file", entry.Name(), "error", err)
+				continue
 			}
+
+			saveFile := localSave{
+				Slug:         slug,
+				Path:         savePath,
+				LastModified: fileInfo.ModTime(),
+			}
+
+			allSaveFiles = append(allSaveFiles, saveFile)
 		}
 
 		logger.Debug("Found save files in directory", "path", sd, "count", len(entries))
@@ -159,14 +141,7 @@ func GetEmulatorDirectoriesWithStatus(slug string) []EmulatorDirectoryInfo {
 	logger := gaba.GetLogger()
 	bsd := getSaveDirectory()
 
-	var saveFolders []string
-
-	switch GetCFW() {
-	case constants.MuOS:
-		saveFolders = constants.MuOSSaveDirectories[slug]
-	case constants.NextUI:
-		saveFolders = constants.NextUISaveDirectories[slug]
-	}
+	saveFolders := GetSaveDirectoriesForSlug(slug)
 
 	if len(saveFolders) == 0 {
 		logger.Debug("No save folder mapping for slug", "slug", slug)
@@ -196,12 +171,8 @@ func GetEmulatorDirectoriesWithStatus(slug string) []EmulatorDirectoryInfo {
 			continue
 		}
 
-		count := 0
-		for _, entry := range entries {
-			if !entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
-				count++
-			}
-		}
+		visibleFiles := FilterVisibleFiles(entries)
+		count := len(visibleFiles)
 
 		info.SaveCount = count
 		info.HasSaves = count > 0
@@ -230,13 +201,6 @@ func needsEmulatorSelection(slug string, hasLocalSave bool) bool {
 		}
 	}
 
-	if nonEmptyCount > 1 {
-		return true
-	}
-
-	if nonEmptyCount == 0 {
-		return true
-	}
-
-	return false
+	// Need selection if we have multiple directories and exactly 1 doesn't have saves
+	return nonEmptyCount != 1
 }
