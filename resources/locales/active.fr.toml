@@ -265,7 +265,7 @@ other = "/{{.Name}}"
 
 [platform_mapping_title]
 description = "Titre association de la plateforme"
-other = "Association du dossier de la rom"
+other = "Association des Dossiers de ROM"
 
 [platform_selection_collections]
 description = "Élément de menu des collections"
