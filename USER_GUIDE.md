@@ -261,7 +261,7 @@ immediately starts the download. If you know what you want and just want to grab
 **Downloaded Games** - Controls how already-downloaded games appear in game lists:
 
 - **Do Nothing** – No special treatment for downloaded games
-- **Mark** – Downloaded games are marked with a checkmark indicator
+- **Mark** – Downloaded games are marked with a downward pointing arrow
 - **Filter** – Downloaded games are hidden from the list entirely
 
 **Save Sync** - Controls save synchronization behavior:
