@@ -33,22 +33,19 @@ A RomM Client for <a href="https://muos.dev">muOS</a>, <a href="https://knulli.o
 
 ---
 
-## Quick Start
+## Installation
 
-1. **Install Grout** - Choose your platform and follow the installation guide:
-    - [muOS Installation](INSTALL_MUOS.md)
-    - [Knulli Installation](INSTALL_KNULLI.md)
-    - [NextUI Installation](INSTALL_NEXTUI.md)
+Choose your platform and follow the installation guide:
 
-2. **Launch Grout** - Start the application from your device's Apps or Tools menu
+- [muOS Installation](INSTALL_MUOS.md)
+- [Knulli Installation](INSTALL_KNULLI.md)
+- [NextUI Installation](INSTALL_NEXTUI.md)
 
-3. **Login** - Enter your RomM server details and credentials
+---
 
-4. **Map Platforms** - Configure where downloaded games should be stored
+## User Guide
 
-5. **Start Downloading** - Browse your collection and download games wirelessly
-
-For detailed usage instructions, see the [User Guide](USER_GUIDE.md).
+For detailed usage instructions and configuration options, see the [User Guide](USER_GUIDE.md).
 
 ---
 
