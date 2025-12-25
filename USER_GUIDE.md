@@ -214,10 +214,9 @@ ready to play.
 
 ## BIOS Files
 
-> [!IMPORTANT]
-> This feature requires RomM v4.5.0 or later and must be enabled in Settings ("Show BIOS" option).
-
 Many emulators require BIOS files to function properly. Grout can download these files directly from your RomM server to the correct location on your device.
+
+![Grout preview, BIOS download](.github/resources/user_guide/bios_download.png "Grout preview, BIOS download")
 
 ### Accessing BIOS Downloads
 
@@ -233,19 +232,6 @@ When you select the BIOS option, you'll see a list of all required BIOS files fo
 - **✗ Not Installed** – BIOS file is missing
 
 Files marked as **(Optional)** are not required for the emulator to function but may enable additional features.
-
-### Downloading BIOS Files
-
-The BIOS screen starts in multi-select mode by default. Missing or incorrectly versioned files are automatically pre-selected.
-
-**Navigation:**
-
-- `Up/Down` to scroll through files
-- `A` to toggle selection
-- `Start` to download selected files
-- `B` to go back
-
-After confirming your selection, Grout downloads the selected BIOS files from RomM and places them in the correct directory for your custom firmware. For platforms with multiple emulator cores (like GBA), BIOS files are automatically copied to all relevant directories.
 
 ### Important Notes
 
@@ -263,12 +249,8 @@ Press `X` from the main platform menu to access Settings.
 
 Settings are organized into logical groups for easier navigation:
 
-### Platform Configuration
-
-**Edit Mappings** – Change which device directories are mapped to which RomM platforms. This takes you back to
+**Directory Mappings** – Change which device directories are mapped to which RomM platforms. This takes you back to
 the platform mapping screen that appeared during setup.
-
-### Display Settings
 
 **Show Game Details** - When enabled, selecting a game shows the details screen first. When disabled, selecting a game
 immediately starts the download. If you know what you want and just want to grab it fast, turn this off.
@@ -284,15 +266,11 @@ immediately starts the download. If you know what you want and just want to grab
 - **Mark** – Downloaded games are marked with a checkmark indicator
 - **Filter** – Downloaded games are hidden from the list entirely
 
-### Feature Settings
-
 **Save Sync** - Controls save synchronization behavior:
 - **Off** – Save sync is completely disabled
 - **Manual** – Save sync is available via the `Y` button from the platform menu
 
 **Show BIOS** - When enabled, adds a BIOS download option to the platform menu, allowing you to download required BIOS files for emulators directly from your RomM server.
-
-### Download Settings
 
 **Download Art** – When enabled, Grout downloads box art for games after downloading the ROMs. The art goes into your
 artwork directory so your frontend can display it.
@@ -303,8 +281,6 @@ after extraction. Useful if you prefer keeping ROMs uncompressed.
 **Download Timeout** – How long Grout waits for a single ROM to download before giving up. Useful for large files or
 slow connections. Options range from 15 to 120 minutes.
 
-### System Settings
-
 **API Timeout** – How long Grout waits for responses from your RomM server before giving up. If you have a slow
 connection or are a completionist with a heavily loaded server, increase this. Options range from 15 to 300 seconds.
 
@@ -312,8 +288,6 @@ connection or are a completionist with a heavily loaded server, increase this. O
 us know!
 
 **Log Level** – Set to Debug if you're troubleshooting issues and want detailed logs. Otherwise, Error is fine.
-
-### Application Info
 
 **Info** – View version information, build details, server connection info, and the GitHub repository QR code.
 
