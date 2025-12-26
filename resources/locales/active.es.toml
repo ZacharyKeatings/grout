@@ -8,6 +8,10 @@ description = "Back button"
 hash = "sha1-f750c1a93e7159a57615993b8cc80ac1c150a084"
 other = "Atrás"
 
+[button_bios]
+description = "BIOS button"
+other = "BIOS"
+
 [button_cancel]
 description = "Cancel button"
 hash = "sha1-e84f4e196b3fc633b784628ec564a877a3c659be"

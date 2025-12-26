@@ -6,6 +6,10 @@ other = "Grout"
 description = "Bouton retour"
 other = "Retour"
 
+[button_bios]
+description = "Bouton BIOS"
+other = "BIOS"
+
 [button_cancel]
 description = "Bouton annuler"
 other = "Annuler"

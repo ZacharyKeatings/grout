@@ -107,7 +107,7 @@ func GetBIOSFilePaths(biosFile constants.BIOSFile, platformSlug string) []string
 	}
 
 	// For other CFWs or if no tag mapping exists, honor subdirectories from firmware*_path
-	// e.g., "psx/scph5500.bin" → "/path/to/ShowBIOSDownload/psx/scph5500.bin"
+	// e.g., "psx/scph5500.bin" → "/path/to/BIOS/psx/scph5500.bin"
 	return []string{filepath.Join(biosDir, biosFile.RelativePath)}
 }
 

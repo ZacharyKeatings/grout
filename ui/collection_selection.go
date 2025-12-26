@@ -178,9 +178,9 @@ func (s *CollectionSelectionScreen) Draw(input CollectionSelectionInput) (Screen
 		{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 	}
 
-	title := "ShowCollections"
+	title := "Collections"
 	if input.SearchFilter != "" {
-		title = fmt.Sprintf("[Search: \"%s\"] | ShowCollections", input.SearchFilter)
+		title = fmt.Sprintf("[Search: \"%s\"] | Collections", input.SearchFilter)
 	}
 
 	options := gaba.DefaultListOptions(title, menuItems)

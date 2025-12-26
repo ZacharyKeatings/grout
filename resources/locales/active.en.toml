@@ -6,6 +6,10 @@ other = "Grout"
 description = "Back button"
 other = "Back"
 
+[button_bios]
+description = "BIOS button"
+other = "BIOS"
+
 [button_cancel]
 description = "Cancel button"
 other = "Cancel"

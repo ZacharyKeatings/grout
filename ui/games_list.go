@@ -164,7 +164,7 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 		{ButtonName: "X", HelpText: i18n.GetString("button_search")},
 	}
 	if hasBIOS {
-		footerItems = append(footerItems, gaba.FooterHelpItem{ButtonName: "Y", HelpText: "ShowBIOSDownload"})
+		footerItems = append(footerItems, gaba.FooterHelpItem{ButtonName: "Y", HelpText: i18n.GetString("button_bios")})
 	}
 
 	options.FooterHelpItems = footerItems
@@ -302,7 +302,7 @@ func (s *GameListScreen) hasBIOSFilesInRomM(config utils.Config, host romm.Host,
 		return false
 	}
 
-	// Show ShowBIOSDownload button if RomM has any firmware files for this platform
+	// Show BIOS button if RomM has any firmware files for this platform
 	return len(firmwareList) > 0
 }
 

@@ -38,7 +38,7 @@ func (s *BIOSDownloadScreen) Execute(config utils.Config, host romm.Host, platfo
 	})
 
 	if err != nil {
-		gaba.GetLogger().Error("ShowBIOSDownload download failed", "error", err)
+		gaba.GetLogger().Error("BIOS download failed", "error", err)
 		return BIOSDownloadOutput{Platform: platform}
 	}
 
@@ -58,7 +58,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 	if err != nil {
 		logger.Error("Failed to fetch firmware from RomM", "error", err, "platform_id", input.Platform.ID)
 		gaba.ConfirmationMessage(
-			fmt.Sprintf("Failed to fetch ShowBIOSDownload files from RomM: %v", err),
+			fmt.Sprintf("Failed to fetch BIOS files from RomM: %v", err),
 			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
 			gaba.MessageOptions{},
 		)
@@ -66,7 +66,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 	}
 
 	if len(firmwareList) == 0 {
-		logger.Info("No ShowBIOSDownload files available in RomM for platform", "platform", input.Platform.Name)
+		logger.Info("No BIOS files available in RomM for platform", "platform", input.Platform.Name)
 		gaba.ConfirmationMessage(
 			i18n.GetString("bios_no_files_required"),
 			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
@@ -77,7 +77,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 
 	logger.Debug("Fetched firmware from RomM", "count", len(firmwareList), "platform_id", input.Platform.ID)
 
-	// Try to get ShowBIOSDownload metadata to enrich the firmware list (optional)
+	// Try to get BIOS metadata to enrich the firmware list (optional)
 	biosFiles := utils.GetBIOSFilesForPlatform(input.Platform.Slug)
 
 	// Build metadata lookup by filename for enrichment (case-insensitive)
@@ -157,7 +157,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 
 			// Try multiple potential file locations
 			potentialPaths := []string{
-				filepath.Join(biosDir, fw.FileName), // Root ShowBIOSDownload dir
+				filepath.Join(biosDir, fw.FileName), // Root BIOS dir
 				filepath.Join(biosDir, fw.FilePath), // Using firmware's relative path
 			}
 
@@ -189,7 +189,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 		})
 	}
 
-	options := gaba.DefaultListOptions(fmt.Sprintf("%s - ShowBIOSDownload Files", input.Platform.Name), menuItems)
+	options := gaba.DefaultListOptions(fmt.Sprintf("%s - BIOS Files", input.Platform.Name), menuItems)
 	options.SmallTitle = true
 	options.StartInMultiSelectMode = true
 	options.FooterHelpItems = []gaba.FooterHelpItem{
@@ -199,7 +199,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 
 	sel, err := gaba.List(options)
 	if err != nil {
-		logger.Error("ShowBIOSDownload selection failed", "error", err)
+		logger.Error("BIOS selection failed", "error", err)
 		return back(output), err
 	}
 
@@ -213,7 +213,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 		selectedItems = append(selectedItems, item)
 	}
 
-	logger.Debug("Selected ShowBIOSDownload files for download", "count", len(selectedItems))
+	logger.Debug("Selected BIOS files for download", "count", len(selectedItems))
 
 	// Build downloads from selected items
 	var downloads []gaba.Download
@@ -239,7 +239,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 			metadata: item.metadata,
 		}
 
-		logger.Debug("Added ShowBIOSDownload file to download queue",
+		logger.Debug("Added BIOS file to download queue",
 			"file", item.firmware.FileName,
 			"url", downloadURL,
 			"size", item.firmware.FileSizeBytes)
@@ -252,7 +252,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 		AutoContinue: true,
 	})
 	if err != nil {
-		logger.Error("ShowBIOSDownload download failed", "error", err)
+		logger.Error("BIOS download failed", "error", err)
 		return back(output), err
 	}
 
@@ -265,7 +265,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 
 		data, err := os.ReadFile(download.Location)
 		if err != nil {
-			logger.Error("Failed to read downloaded ShowBIOSDownload file", "file", info.firmware.FileName, "error", err)
+			logger.Error("Failed to read downloaded BIOS file", "file", info.firmware.FileName, "error", err)
 			continue
 		}
 
@@ -273,7 +273,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 		if info.metadata != nil && info.metadata.MD5Hash != "" {
 			isValid, actualHash := utils.VerifyBIOSFileMD5(data, info.metadata.MD5Hash)
 			if !isValid {
-				logger.Warn("MD5 hash mismatch for ShowBIOSDownload file",
+				logger.Warn("MD5 hash mismatch for BIOS file",
 					"file", info.metadata.FileName,
 					"expected", info.metadata.MD5Hash,
 					"actual", actualHash)
@@ -285,10 +285,10 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 		if info.metadata != nil {
 			// We have metadata - use SaveBIOSFile to handle subdirectories
 			if err := utils.SaveBIOSFile(*info.metadata, input.Platform.Slug, data); err != nil {
-				logger.Error("Failed to save ShowBIOSDownload file", "file", info.metadata.FileName, "error", err)
+				logger.Error("Failed to save BIOS file", "file", info.metadata.FileName, "error", err)
 				continue
 			}
-			logger.Debug("Successfully saved ShowBIOSDownload file", "file", info.metadata.FileName, "paths", utils.GetBIOSFilePaths(*info.metadata, input.Platform.Slug))
+			logger.Debug("Successfully saved BIOS file", "file", info.metadata.FileName, "paths", utils.GetBIOSFilePaths(*info.metadata, input.Platform.Slug))
 		} else {
 			// No metadata - use firmware FilePath from RomM (preserves subdirectories)
 			biosDir := utils.GetBIOSDirectory()
@@ -300,15 +300,15 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 			filePath := filepath.Join(biosDir, relativePath)
 
 			if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
-				logger.Error("Failed to create ShowBIOSDownload directory", "error", err)
+				logger.Error("Failed to create BIOS directory", "error", err)
 				continue
 			}
 
 			if err := os.WriteFile(filePath, data, 0644); err != nil {
-				logger.Error("Failed to save ShowBIOSDownload file", "file", info.firmware.FileName, "error", err)
+				logger.Error("Failed to save BIOS file", "file", info.firmware.FileName, "error", err)
 				continue
 			}
-			logger.Debug("Successfully saved ShowBIOSDownload file", "file", info.firmware.FileName, "path", filePath)
+			logger.Debug("Successfully saved BIOS file", "file", info.firmware.FileName, "path", filePath)
 		}
 
 		os.Remove(download.Location)
@@ -317,14 +317,14 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 
 	// Show completion message to user
 	if successCount > 0 && warningCount == 0 {
-		logger.Info("ShowBIOSDownload download complete", "success", successCount)
+		logger.Info("BIOS download complete", "success", successCount)
 		gaba.ConfirmationMessage(
 			fmt.Sprintf(i18n.GetString("bios_download_complete"), successCount),
 			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
 			gaba.MessageOptions{},
 		)
 	} else if successCount > 0 && warningCount > 0 {
-		logger.Warn("ShowBIOSDownload download complete with warnings",
+		logger.Warn("BIOS download complete with warnings",
 			"success", successCount,
 			"warnings", warningCount)
 		gaba.ConfirmationMessage(
@@ -333,7 +333,7 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 			gaba.MessageOptions{},
 		)
 	} else if len(res.Failed) > 0 {
-		logger.Error("ShowBIOSDownload download failed", "failed", len(res.Failed))
+		logger.Error("BIOS download failed", "failed", len(res.Failed))
 		gaba.ConfirmationMessage(
 			fmt.Sprintf(i18n.GetString("bios_download_failed"), len(res.Failed)),
 			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
