@@ -102,7 +102,18 @@ Your custom platform order is automatically saved to the config and will persist
 
 ![Grout preview, collections list](.github/resources/user_guide/collections.png "Grout preview, collections list")
 
-After selecting Collections from the main menu, you'll see all your collections. Pick one and press `A`.
+Grout has two views for collections:
+
+**Platform** – After selecting a collection, you'll see a platform selection screen showing all platforms in that
+collection. Select a platform to view games from only that platform.
+
+![Grout preview, collection content - platform](.github/resources/user_guide/collections_platform.png "Grout preview, collection content - platform")
+
+**Unified** – After selecting a collection, you'll immediately see all games from all platforms with platform slugs
+shown as prefixes (e.g., `[nes] Tecmo Bowl`, `[snes] Super Mario World`)
+
+![Grout preview, collection content - unified](.github/resources/user_guide/collections_unified.png "Grout preview, collection content - unified")
+
 
 > [!IMPORTANT]
 > If you skipped a platform in the mapping screen, you won't see games for that platform in your collections.
@@ -247,8 +258,10 @@ immediately starts the download. If you know what you want and just want to grab
 
 **Collection View** - Controls how collections display their games:
 
-- **Platform** – After selecting a collection, you'll see a platform selection screen showing all platforms in that collection. Select a platform to view games from only that platform.
-- **Unified** – After selecting a collection, you'll immediately see all games from all platforms with platform slugs shown as prefixes (e.g., `[nes] Tecmo Bowl`, `[snes] Super Mario World`)
+- **Platform** – After selecting a collection, you'll see a platform selection screen showing all platforms in that
+  collection. Select a platform to view games from only that platform.
+- **Unified** – After selecting a collection, you'll immediately see all games from all platforms with platform slugs
+  shown as prefixes (e.g., `[nes] Tecmo Bowl`, `[snes] Super Mario World`)
 
 **Downloaded Games** - Controls how already-downloaded games appear in game lists:
 
