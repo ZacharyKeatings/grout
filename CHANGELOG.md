@@ -40,7 +40,11 @@
 
 - **Spanish Translation**: Complete Spanish language support
 - **French Translation**: Complete French language support (contributed by @pawndev)
-- Translation infrastructure for future languages
+- **German Translation**: Complete German language support
+- **Italian Translation**: Complete Italian language support
+- **Portuguese Translation**: Complete Portuguese language support
+- **Japanese Translation**: Complete Japanese language support
+- **Russian Translation**: Complete Russian language support
 
 ## Bug Fixes
 

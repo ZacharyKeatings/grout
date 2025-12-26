@@ -21,6 +21,29 @@ This guide walks you through using Grout to download games from your RomM instan
 
 ## First Launch and Login
 
+### Language Selection
+
+![Grout preview, language selection](.github/resources/user_guide/language_selection.png "Grout preview, language selection")
+
+When you first launch Grout, you'll be asked to select your preferred language. Grout supports:
+
+- English
+- Deutsch (German)
+- Español (Spanish)
+- Français (French)
+- Italiano (Italian)
+- Português (Portuguese)
+- Русский (Russian)
+- 日本語 (Japanese)
+
+Use `Left/Right` to cycle through the available languages. The welcome message will update to show a localized greeting as you browse. Press `A` to confirm your selection.
+
+You can change your language later from the Settings menu.
+
+---
+
+### Login
+
 ![Grout preview, login flow](.github/resources/user_guide/login.png "Grout preview, login flow")
 
 1. **Protocol** – Choose between HTTP and HTTPS.
