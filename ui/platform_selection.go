@@ -5,13 +5,16 @@ import (
 	"grout/constants"
 	"grout/romm"
 
-	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	buttons "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/constants"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type PlatformSelectionInput struct {
 	Platforms            []romm.Platform
-	QuitOnBack           bool // If true, back button quits the app; if false, it navigates back
+	QuitOnBack           bool
 	ShowCollections      bool
+	ShowSaveSync         bool
 	LastSelectedIndex    int
 	LastSelectedPosition int
 }
@@ -20,6 +23,7 @@ type PlatformSelectionOutput struct {
 	SelectedPlatform     romm.Platform
 	LastSelectedIndex    int
 	LastSelectedPosition int
+	ReorderedPlatforms   []romm.Platform
 }
 
 type PlatformSelectionScreen struct{}
@@ -35,17 +39,18 @@ func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (ScreenResu
 	}
 
 	if len(input.Platforms) == 0 {
-		return WithCode(output, gaba.ExitCode(404)), nil
+		return withCode(output, gaba.ExitCode(404)), nil
 	}
 
 	var menuItems []gaba.MenuItem
 
 	if input.ShowCollections {
 		menuItems = append(menuItems, gaba.MenuItem{
-			Text:     "Collections",
-			Selected: false,
-			Focused:  false,
-			Metadata: romm.Platform{Slug: "collections"},
+			Text:           i18n.GetString("platform_selection_collections"),
+			Selected:       false,
+			Focused:        false,
+			Metadata:       romm.Platform{Slug: "collections"},
+			NotReorderable: true,
 		})
 	}
 
@@ -61,29 +66,76 @@ func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (ScreenResu
 	var footerItems []gaba.FooterHelpItem
 	if input.QuitOnBack {
 		footerItems = []gaba.FooterHelpItem{
-			{ButtonName: "B", HelpText: "Quit"},
-			{ButtonName: "X", HelpText: "Settings"},
-			{ButtonName: "A", HelpText: "Select"},
+			{ButtonName: "X", HelpText: i18n.GetString("button_settings")},
 		}
+		if input.ShowSaveSync {
+			footerItems = append(footerItems, gaba.FooterHelpItem{ButtonName: "Y", HelpText: i18n.GetString("button_save_sync")})
+		}
+		footerItems = append(footerItems, gaba.FooterHelpItem{ButtonName: "A", HelpText: i18n.GetString("button_select")})
 	} else {
 		footerItems = []gaba.FooterHelpItem{
-			{ButtonName: "B", HelpText: "Back"},
-			{ButtonName: "A", HelpText: "Select"},
+			{ButtonName: "B", HelpText: i18n.GetString("button_back")},
+			{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 		}
 	}
 
 	options := gaba.DefaultListOptions("Grout", menuItems)
-	options.EnableAction = input.QuitOnBack
+	options.ActionButton = buttons.VirtualButtonX
+	if input.ShowSaveSync {
+		options.SecondaryActionButton = buttons.VirtualButtonY
+	}
+	options.ReorderButton = buttons.VirtualButtonSelect
 	options.FooterHelpItems = footerItems
 	options.SelectedIndex = input.LastSelectedIndex
 	options.VisibleStartIndex = max(0, input.LastSelectedIndex-input.LastSelectedPosition)
 
 	sel, err := gaba.List(options)
+
+	// Check for reordering before handling errors
+	// This ensures we save the order even when user presses B (cancel)
+	platformsReordered := false
+	startIndex := 0
+	if input.ShowCollections {
+		startIndex = 1
+	}
+
+	if sel != nil && len(sel.Items) > 0 {
+		gaba.GetLogger().Debug("Checking for platform reordering",
+			"total_items", len(sel.Items),
+			"startIndex", startIndex,
+			"input_platforms_count", len(input.Platforms))
+
+		if len(sel.Items)-startIndex == len(input.Platforms) {
+			for i := 0; i < len(input.Platforms); i++ {
+				originalPlatform := input.Platforms[i]
+				returnedPlatform := sel.Items[i+startIndex].Metadata.(romm.Platform)
+				if originalPlatform.Slug != returnedPlatform.Slug {
+					gaba.GetLogger().Debug("Platform order changed detected",
+						"position", i,
+						"original", originalPlatform.Slug,
+						"returned", returnedPlatform.Slug)
+					platformsReordered = true
+					break
+				}
+			}
+		}
+
+		if platformsReordered {
+			var reorderedPlatforms []romm.Platform
+			for i := startIndex; i < len(sel.Items); i++ {
+				platform := sel.Items[i].Metadata.(romm.Platform)
+				reorderedPlatforms = append(reorderedPlatforms, platform)
+				gaba.GetLogger().Debug("Reordered platform", "position", i-startIndex, "slug", platform.Slug)
+			}
+			output.ReorderedPlatforms = reorderedPlatforms
+		}
+	}
+
 	if err != nil {
 		if errors.Is(err, gaba.ErrCancelled) {
-			return Back(output), nil
+			return back(output), nil
 		}
-		return WithCode(output, gaba.ExitCodeError), err
+		return withCode(output, gaba.ExitCodeError), err
 	}
 
 	switch sel.Action {
@@ -95,17 +147,21 @@ func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (ScreenResu
 		output.LastSelectedPosition = sel.VisiblePosition
 
 		if platform.Slug == "collections" {
-			return WithCode(output, constants.ExitCodeCollections), nil
+			return withCode(output, constants.ExitCodeCollections), nil
 		}
 
-		return Success(output), nil
+		return success(output), nil
 
 	case gaba.ListActionTriggered:
-		// Settings action (X button) - only available when QuitOnBack is true
 		if input.QuitOnBack {
-			return WithCode(output, gaba.ExitCodeAction), nil
+			return withCode(output, gaba.ExitCodeAction), nil
+		}
+
+	case gaba.ListActionSecondaryTriggered:
+		if input.QuitOnBack && input.ShowSaveSync {
+			return withCode(output, constants.ExitCodeSaveSync), nil
 		}
 	}
 
-	return WithCode(output, gaba.ExitCodeBack), nil
+	return withCode(output, gaba.ExitCodeBack), nil
 }

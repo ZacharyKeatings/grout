@@ -13,25 +13,25 @@ type Platform struct {
 	ShortName           string     `json:"short_name"`
 	LogoPath            string     `json:"logo_path"`
 	ROMCount            int        `json:"rom_count"`
-	Firmware            []Firmware `json:"firmware"`
+	Firmware            []Firmware `json:"Firmware"`
 	CreatedAt           time.Time  `json:"created_at"`
 	UpdatedAt           time.Time  `json:"updated_at"`
-	Manufacturer        *string    `json:"manufacturer"`
-	Generation          *int       `json:"generation"`
-	Type                *string    `json:"type"`
+	Manufacturer        string     `json:"manufacturer"`
+	Generation          int        `json:"generation"`
+	Type                string     `json:"type"`
 	HasBIOS             bool       `json:"has_bios"`
 	SupportedExtensions []string   `json:"supported_extensions"`
 }
 
 func (c *Client) GetPlatforms() ([]Platform, error) {
 	var platforms []Platform
-	err := c.doRequest("GET", "/api/platforms", nil, &platforms)
+	err := c.doRequest("GET", endpointPlatforms, nil, nil, &platforms)
 	return platforms, err
 }
 
-func (c *Client) GetPlatform(id int) (*Platform, error) {
+func (c *Client) GetPlatform(id int) (Platform, error) {
 	var platform Platform
-	path := fmt.Sprintf("/api/platforms/%d", id)
-	err := c.doRequest("GET", path, nil, &platform)
-	return &platform, err
+	path := fmt.Sprintf(endpointPlatformByID, id)
+	err := c.doRequest("GET", path, nil, nil, &platform)
+	return platform, err
 }

@@ -1,0 +1,227 @@
+package ui
+
+import (
+	"fmt"
+	"grout/romm"
+	"grout/utils"
+	"strings"
+	"sync"
+	"sync/atomic"
+
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
+)
+
+type ArtworkSyncInput struct {
+	Config utils.Config
+	Host   romm.Host
+}
+
+type ArtworkSyncOutput struct{}
+
+type ArtworkSyncScreen struct{}
+
+func NewArtworkSyncScreen() *ArtworkSyncScreen {
+	return &ArtworkSyncScreen{}
+}
+
+func (s *ArtworkSyncScreen) Execute(config utils.Config, host romm.Host) ArtworkSyncOutput {
+	s.draw(ArtworkSyncInput{
+		Config: config,
+		Host:   host,
+	})
+	return ArtworkSyncOutput{}
+}
+
+func (s *ArtworkSyncScreen) draw(input ArtworkSyncInput) {
+	logger := gaba.GetLogger()
+
+	// Fetch platforms
+	client := utils.GetRommClient(input.Host, input.Config.ApiTimeout)
+	platforms, err := client.GetPlatforms()
+	if err != nil {
+		logger.Error("Failed to fetch platforms", "error", err)
+		gaba.ConfirmationMessage(
+			fmt.Sprintf("Failed to fetch platforms: %v", err),
+			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
+			gaba.MessageOptions{},
+		)
+		return
+	}
+
+	// Filter to only mapped platforms
+	var mappedPlatforms []romm.Platform
+	for _, p := range platforms {
+		if _, exists := input.Config.DirectoryMappings[p.Slug]; exists {
+			mappedPlatforms = append(mappedPlatforms, p)
+		}
+	}
+
+	if len(mappedPlatforms) == 0 {
+		gaba.ConfirmationMessage(
+			i18n.GetString("artwork_sync_no_platforms"),
+			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
+			gaba.MessageOptions{},
+		)
+		return
+	}
+
+	// Collect all ROMs that need artwork (missing or outdated)
+	var allNeedingArtwork []romm.Rom
+	platformCount := len(mappedPlatforms)
+
+	for i, platform := range mappedPlatforms {
+		// Show scanning progress
+		gaba.ProcessMessage(
+			fmt.Sprintf(i18n.GetString("artwork_sync_scanning"), i+1, platformCount, platform.Name),
+			gaba.ProcessMessageOptions{ShowThemeBackground: true},
+			func() (interface{}, error) {
+				roms, err := client.GetRoms(romm.GetRomsQuery{
+					PlatformID: platform.ID,
+					Limit:      10000,
+				})
+				if err != nil {
+					logger.Error("Failed to fetch ROMs for platform", "platform", platform.Name, "error", err)
+					return nil, nil
+				}
+
+				// Get missing artwork
+				missing := utils.GetMissingArtwork(roms.Items)
+				allNeedingArtwork = append(allNeedingArtwork, missing...)
+
+				// Check for outdated artwork via ETag
+				outdated := utils.GetOutdatedArtwork(roms.Items, input.Host)
+				allNeedingArtwork = append(allNeedingArtwork, outdated...)
+				return nil, nil
+			},
+		)
+	}
+
+	if len(allNeedingArtwork) == 0 {
+		gaba.ConfirmationMessage(
+			i18n.GetString("artwork_sync_up_to_date"),
+			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
+			gaba.MessageOptions{},
+		)
+		return
+	}
+
+	// Build downloads
+	var downloads []gaba.Download
+	romsByLocation := make(map[string]romm.Rom)
+
+	baseURL := input.Host.URL()
+	for _, rom := range allNeedingArtwork {
+		coverPath := utils.GetArtworkCoverPath(rom)
+		if coverPath == "" {
+			continue
+		}
+
+		downloadURL := strings.ReplaceAll(baseURL+coverPath, " ", "%20")
+		cachePath := utils.GetArtworkCachePath(rom.PlatformSlug, rom.ID)
+
+		// Ensure directory exists
+		utils.EnsureArtworkCacheDir(rom.PlatformSlug)
+
+		downloads = append(downloads, gaba.Download{
+			URL:         downloadURL,
+			Location:    cachePath,
+			DisplayName: rom.Name,
+		})
+		romsByLocation[cachePath] = rom
+	}
+
+	if len(downloads) == 0 {
+		gaba.ConfirmationMessage(
+			i18n.GetString("artwork_sync_up_to_date"),
+			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
+			gaba.MessageOptions{},
+		)
+		return
+	}
+
+	// Show confirmation before downloading
+	_, err = gaba.ConfirmationMessage(
+		fmt.Sprintf(i18n.GetString("artwork_sync_confirm"), len(downloads)),
+		[]gaba.FooterHelpItem{
+			{ButtonName: "B", HelpText: i18n.GetString("button_cancel")},
+			{ButtonName: "A", HelpText: i18n.GetString("button_download")},
+		},
+		gaba.MessageOptions{},
+	)
+
+	if err != nil {
+		// User cancelled
+		return
+	}
+
+	headers := make(map[string]string)
+	headers["Authorization"] = input.Host.BasicAuthHeader()
+
+	res, err := gaba.DownloadManager(downloads, headers, gaba.DownloadManagerOptions{
+		AutoContinue: true,
+	})
+	if err != nil {
+		logger.Error("Artwork download failed", "error", err)
+		gaba.ConfirmationMessage(
+			fmt.Sprintf("Download failed: %v", err),
+			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
+			gaba.MessageOptions{},
+		)
+		return
+	}
+
+	// Process downloaded images in parallel
+	var successCount int32
+	var wg sync.WaitGroup
+	semaphore := make(chan struct{}, 4) // Limit to 4 concurrent processors
+
+	for _, download := range res.Completed {
+		wg.Add(1)
+		go func(dl gaba.Download) {
+			defer wg.Done()
+			semaphore <- struct{}{}        // Acquire
+			defer func() { <-semaphore }() // Release
+
+			if err := utils.ProcessArtImage(dl.Location); err != nil {
+				logger.Warn("Failed to process artwork", "path", dl.Location, "error", err)
+				return
+			}
+			atomic.AddInt32(&successCount, 1)
+		}(download)
+	}
+
+	// Wait for all processing to complete with a progress message
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	gaba.ProcessMessage(
+		i18n.GetString("artwork_sync_processing"),
+		gaba.ProcessMessageOptions{ShowThemeBackground: true},
+		func() (interface{}, error) {
+			<-done
+			return nil, nil
+		},
+	)
+
+	finalCount := int(atomic.LoadInt32(&successCount))
+	logger.Info("Artwork sync complete", "success", finalCount, "failed", len(res.Failed))
+
+	// Show completion message
+	if finalCount > 0 {
+		gaba.ConfirmationMessage(
+			fmt.Sprintf(i18n.GetString("artwork_sync_complete"), finalCount),
+			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
+			gaba.MessageOptions{},
+		)
+	} else if len(res.Failed) > 0 {
+		gaba.ConfirmationMessage(
+			fmt.Sprintf(i18n.GetString("artwork_sync_failed"), len(res.Failed)),
+			[]gaba.FooterHelpItem{{ButtonName: "A", HelpText: i18n.GetString("button_continue")}},
+			gaba.MessageOptions{},
+		)
+	}
+}

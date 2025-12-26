@@ -1,34 +1,61 @@
 package romm
 
 import (
-	"strconv"
+	"fmt"
 	"time"
 )
 
 type Firmware struct {
-	ID          int       `json:"id"`
-	PlatformID  int       `json:"platform_id"`
-	FileName    string    `json:"file_name"`
-	FilePath    string    `json:"file_path"`
-	FileSize    int64     `json:"file_size"`
-	FileHash    string    `json:"file_hash"`
-	Description *string   `json:"description"`
-	Version     *string   `json:"version"`
-	Required    bool      `json:"required"`
-	DownloadURL string    `json:"download_url"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID             int       `json:"id"`
+	FileName       string    `json:"file_name"`
+	FileNameNoTags string    `json:"file_name_no_tags"`
+	FileNameNoExt  string    `json:"file_name_no_ext"`
+	FileExtension  string    `json:"file_extension"`
+	FilePath       string    `json:"file_path"`
+	FileSizeBytes  int64     `json:"file_size_bytes"`
+	FullPath       string    `json:"full_path"`
+	IsVerified     bool      `json:"is_verified"`
+	CRCHash        string    `json:"crc_hash"`
+	MD5Hash        string    `json:"md5_hash"`
+	SHA1Hash       string    `json:"sha1_hash"`
+	MissingFromFS  bool      `json:"missing_from_fs"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+
+	// Computed fields (not from API)
+	DownloadURL string `json:"-"`
 }
 
-func (c *Client) GetFirmware(platformID *int) ([]Firmware, error) {
-	params := map[string]string{}
+type FirmwareOptions struct {
+	PlatformID int `qs:"platform_id"`
+}
 
-	if platformID != nil {
-		params["platform_id"] = strconv.Itoa(*platformID)
+func (fo FirmwareOptions) Valid() bool {
+	return fo.PlatformID != 0
+}
+
+// GetFirmware retrieves all firmware/BIOS files for a given platform
+func (c *Client) GetFirmware(platformID int) ([]Firmware, error) {
+	var firmware []Firmware
+	err := c.doRequest("GET", endpointFirmware, FirmwareOptions{PlatformID: platformID}, nil, &firmware)
+	if err != nil {
+		return nil, err
 	}
 
-	var firmware []Firmware
-	path := "/api/firmware" + buildQueryString(params)
-	err := c.doRequest("GET", path, nil, &firmware)
-	return firmware, err
+	// Construct download URLs since the API doesn't provide them
+	// Format: /api/firmware/{id}/content/{filename}
+	for i := range firmware {
+		firmware[i].DownloadURL = fmt.Sprintf("/api/firmware/%d/content/%s", firmware[i].ID, firmware[i].FileName)
+	}
+
+	return firmware, nil
+}
+
+// DownloadFirmware downloads a firmware/BIOS file and returns the raw bytes
+func (c *Client) DownloadFirmware(firmware Firmware) ([]byte, error) {
+	if firmware.DownloadURL == "" {
+		return nil, fmt.Errorf("firmware download URL is empty")
+	}
+
+	return c.downloadFile(firmware.DownloadURL)
 }

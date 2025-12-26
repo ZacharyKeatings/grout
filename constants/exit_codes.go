@@ -1,11 +1,21 @@
 package constants
 
 import (
-	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
 )
 
 const (
 	ExitCodeEditMappings             gaba.ExitCode = 100
+	ExitCodeSaveSync                 gaba.ExitCode = 101
+	ExitCodeInfo                     gaba.ExitCode = 102
+	ExitCodeLogout                   gaba.ExitCode = 103
+	ExitCodeBIOS                     gaba.ExitCode = 104
+	ExitCodeLogoutConfirm            gaba.ExitCode = 105
+	ExitCodeSyncArtwork              gaba.ExitCode = 106
+	ExitCodeCollectionsSettings      gaba.ExitCode = 107
+	ExitCodeAdvancedSettings         gaba.ExitCode = 108
+	ExitCodeBackToAdvanced           gaba.ExitCode = 109
+	ExitCodeClearCache               gaba.ExitCode = 110
 	ExitCodeSearch                   gaba.ExitCode = 200
 	ExitCodeClearSearch              gaba.ExitCode = 201
 	ExitCodeCollections              gaba.ExitCode = 300

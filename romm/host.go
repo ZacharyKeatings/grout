@@ -1,6 +1,7 @@
 package romm
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strings"
 )
@@ -31,4 +32,9 @@ func (h Host) URL() string {
 		return fmt.Sprintf("%s:%d", h.RootURI, h.Port)
 	}
 	return h.RootURI
+}
+
+func (h Host) BasicAuthHeader() string {
+	auth := h.Username + ":" + h.Password
+	return "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 }

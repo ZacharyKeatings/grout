@@ -7,8 +7,9 @@ import (
 	"image/png"
 	"os"
 
-	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
-	"github.com/skip2/go-qrcode"
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/yeqown/go-qrcode/v2"
+	"github.com/yeqown/go-qrcode/writer/standard"
 	"golang.org/x/image/draw"
 )
 
@@ -41,40 +42,32 @@ func ProcessArtImage(inputPath string) error {
 	windowAspect := float64(windowWidth) / float64(windowHeight)
 
 	if imgAspect > windowAspect {
-		// Image is wider than window, fit to width
 		newWidth = windowWidth
 		newHeight = int(float64(windowWidth) / imgAspect)
 	} else {
-		// Image is taller than window, fit to height
 		newHeight = windowHeight
 		newWidth = int(float64(windowHeight) * imgAspect)
 	}
 
-	// Only resize if dimensions changed
-	var processedImg image.Image = img
+	var processedImg = img
 	if newWidth != imgWidth || newHeight != imgHeight {
 		logger.Debug("Resizing image", "from", fmt.Sprintf("%dx%d", imgWidth, imgHeight), "to", fmt.Sprintf("%dx%d", newWidth, newHeight))
 
-		// Create a new image with the target dimensions
 		dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
 
-		// Use high-quality bilinear scaling
 		draw.BiLinear.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
 		processedImg = dst
 	}
 
-	// If the original format is not PNG, or if we resized, save as PNG
 	if format != "png" || processedImg != img {
 		logger.Debug("Converting/saving image as PNG", "original_format", format)
 
-		// Create output file
 		outputFile, err := os.Create(inputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file: %w", err)
 		}
 		defer outputFile.Close()
 
-		// Encode as PNG
 		if err := png.Encode(outputFile, processedImg); err != nil {
 			return fmt.Errorf("failed to encode PNG: %w", err)
 		}
@@ -84,24 +77,27 @@ func ProcessArtImage(inputPath string) error {
 }
 
 func CreateTempQRCode(content string, size int) (string, error) {
-	qr, err := qrcode.New(content, qrcode.Medium)
-
+	qr, err := qrcode.New(content)
 	if err != nil {
 		return "", err
 	}
 
-	qr.BackgroundColor = color.Black
-	qr.ForegroundColor = color.White
-	qr.DisableBorder = true
-
-	tempFile, err := os.CreateTemp("", "qrcode-*")
-
-	err = qr.Write(size, tempFile)
-
+	tempFile, err := os.CreateTemp("", "qrcode-*.png")
 	if err != nil {
 		return "", err
 	}
 	defer tempFile.Close()
 
-	return tempFile.Name(), err
+	w := standard.NewWithWriter(tempFile,
+		standard.WithQRWidth(uint8(size/10)),
+		standard.WithBgColor(color.Black),
+		standard.WithFgColor(color.White),
+		standard.WithBorderWidth(0),
+	)
+
+	if err := qr.Save(w); err != nil {
+		return "", err
+	}
+
+	return tempFile.Name(), nil
 }

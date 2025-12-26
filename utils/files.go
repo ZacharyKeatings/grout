@@ -4,16 +4,16 @@ import (
 	"archive/zip"
 	"bufio"
 	"fmt"
+	"grout/constants"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
-	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
 	"go.uber.org/atomic"
 )
 
-// progressWriter wraps a writer and updates progress as bytes are written
 type progressWriter struct {
 	writer         io.Writer
 	totalBytes     uint64
@@ -37,6 +37,36 @@ func TempDir() string {
 	}
 
 	return filepath.Join(wd, ".tmp")
+}
+
+func copyFile(src, dest string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("failed to open source file: %w", err)
+	}
+	defer sourceFile.Close()
+
+	if err := os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
+		return fmt.Errorf("failed to create destination directory: %w", err)
+	}
+
+	destinationFile, err := os.Create(dest)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer destinationFile.Close()
+
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		return fmt.Errorf("failed to copy file contents: %w", err)
+	}
+
+	err = destinationFile.Sync()
+	if err != nil {
+		return fmt.Errorf("failed to sync destination file: %w", err)
+	}
+
+	return nil
 }
 
 func DeleteFile(path string) bool {
@@ -67,15 +97,11 @@ func Unzip(zipPath string, destDir string, progress *atomic.Float64) error {
 		return fmt.Errorf("failed to create destination directory: %w", err)
 	}
 
-	// Pre-allocate a larger buffer for file copying (128KB)
-	// Reusing the same buffer across all files reduces allocations
-	buffer := make([]byte, 128*1024)
+	buffer := make([]byte, constants.DefaultBufferSize)
 
-	// Track created directories to avoid redundant MkdirAll calls
 	createdDirs := make(map[string]bool)
 	createdDirs[destDir] = true
 
-	// Calculate total uncompressed size for progress tracking (no I/O overhead)
 	var totalBytes uint64
 	for _, file := range reader.File {
 		if !file.FileInfo().IsDir() {
@@ -129,11 +155,9 @@ func extractFile(file *zip.File, destPath string, buffer []byte, totalBytes uint
 	}
 	defer destFile.Close()
 
-	// Use a buffered writer (64KB buffer) to reduce write syscalls
-	bufWriter := bufio.NewWriterSize(destFile, 64*1024)
+	bufWriter := bufio.NewWriterSize(destFile, constants.SmallBufferSize)
 	defer bufWriter.Flush()
 
-	// Wrap the buffered writer with progress tracking
 	progressW := &progressWriter{
 		writer:         bufWriter,
 		totalBytes:     totalBytes,
@@ -141,22 +165,17 @@ func extractFile(file *zip.File, destPath string, buffer []byte, totalBytes uint
 		progress:       progress,
 	}
 
-	// Use the pre-allocated buffer for copying to reduce allocations
 	_, err = io.CopyBuffer(progressW, srcFile, buffer)
 	if err != nil {
 		return err
 	}
 
-	// Ensure all data is flushed to disk
 	return bufWriter.Flush()
 }
 
-// OrganizeMultiFileRomForMuOS reorganizes extracted multi-file ROM contents for muOS
-// muOS expects: .m3u file in platform dir, disc files in _{gameName}/ subdirectory
 func OrganizeMultiFileRomForMuOS(extractDir, romDirectory, gameName string) error {
 	logger := gaba.GetLogger()
 
-	// Find the .m3u file in the extracted directory
 	var m3uFile string
 	entries, err := os.ReadDir(extractDir)
 	if err != nil {
@@ -171,8 +190,6 @@ func OrganizeMultiFileRomForMuOS(extractDir, romDirectory, gameName string) erro
 	}
 
 	if m3uFile == "" {
-		// No .m3u file found, this might not be a multi-disc game
-		// Just rename the directory with underscore prefix
 		underscoreDir := filepath.Join(romDirectory, "_"+gameName)
 		if err := os.Rename(extractDir, underscoreDir); err != nil {
 			return fmt.Errorf("failed to rename directory to %s: %w", underscoreDir, err)
@@ -181,37 +198,31 @@ func OrganizeMultiFileRomForMuOS(extractDir, romDirectory, gameName string) erro
 		return nil
 	}
 
-	// Read the .m3u file contents
 	m3uContent, err := os.ReadFile(m3uFile)
 	if err != nil {
 		return fmt.Errorf("failed to read .m3u file: %w", err)
 	}
 
-	// Update the .m3u file contents to reference _{gameName}/ subdirectory
 	lines := strings.Split(string(m3uContent), "\n")
 	for i, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		// Prepend _{gameName}/ to the file reference
 		lines[i] = filepath.Join("_"+gameName, line)
 	}
 	updatedM3U := strings.Join(lines, "\n")
 
-	// Write the updated .m3u file to the platform directory
 	m3uDestPath := filepath.Join(romDirectory, gameName+".m3u")
 	if err := os.WriteFile(m3uDestPath, []byte(updatedM3U), 0644); err != nil {
 		return fmt.Errorf("failed to write updated .m3u file: %w", err)
 	}
 	logger.Debug("Moved and updated .m3u file", "from", m3uFile, "to", m3uDestPath)
 
-	// Remove the original .m3u file from the extracted directory
 	if err := os.Remove(m3uFile); err != nil {
 		logger.Warn("Failed to remove original .m3u file", "path", m3uFile, "error", err)
 	}
 
-	// Rename the extracted directory to have underscore prefix
 	underscoreDir := filepath.Join(romDirectory, "_"+gameName)
 	if err := os.Rename(extractDir, underscoreDir); err != nil {
 		return fmt.Errorf("failed to rename directory to %s: %w", underscoreDir, err)
@@ -219,4 +230,26 @@ func OrganizeMultiFileRomForMuOS(extractDir, romDirectory, gameName string) erro
 	logger.Debug("Renamed directory for muOS", "from", extractDir, "to", underscoreDir)
 
 	return nil
+}
+
+// FilterVisibleFiles returns non-directory entries that don't start with "."
+func FilterVisibleFiles(entries []os.DirEntry) []os.DirEntry {
+	result := make([]os.DirEntry, 0, len(entries))
+	for _, entry := range entries {
+		if !entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
+			result = append(result, entry)
+		}
+	}
+	return result
+}
+
+// FilterVisibleDirectories returns directory entries that don't start with "."
+func FilterVisibleDirectories(entries []os.DirEntry) []os.DirEntry {
+	result := make([]os.DirEntry, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
+			result = append(result, entry)
+		}
+	}
+	return result
 }

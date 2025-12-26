@@ -12,7 +12,8 @@ A clear description of what the bug is. The more information you provide the bet
 
 **Reproduction Steps**
 Steps to reproduce the behavior:
-1.  ...
+
+1. ...
 2. ...
 3. ...
 
@@ -20,7 +21,8 @@ Steps to reproduce the behavior:
 A concise description of what you expected to happen.
 
 **Information**
- - CFW:
- - CFW Version:
- - Handheld Device:
- - RomM Version:
+
+- CFW:
+- CFW Version:
+- Handheld Device:
+- RomM Version:

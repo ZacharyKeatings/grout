@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"grout/romm"
@@ -13,8 +12,11 @@ import (
 	"strings"
 	"time"
 
-	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
-	"github.com/UncleJunVIP/gabagool/v2/pkg/gabagool/constants"
+	groutConstants "grout/constants"
+
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/constants"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type GameDetailsInput struct {
@@ -51,24 +53,24 @@ func (s *GameDetailsScreen) Draw(input GameDetailsInput) (ScreenResult[GameDetai
 	options.ShowScrollbar = true
 
 	result, err := gaba.DetailScreen(input.Game.Name, options, []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "A", HelpText: "Download"},
+		{ButtonName: "B", HelpText: i18n.GetString("button_back")},
+		{ButtonName: "A", HelpText: i18n.GetString("button_download")},
 	})
 
 	if err != nil {
 		if errors.Is(err, gaba.ErrCancelled) {
-			return Back(output), nil
+			return back(output), nil
 		}
 		logger.Error("Detail screen error", "error", err)
-		return WithCode(output, gaba.ExitCodeError), err
+		return withCode(output, gaba.ExitCodeError), err
 	}
 
 	if result.Action == gaba.DetailActionConfirmed {
 		output.DownloadRequested = true
-		return Success(output), nil
+		return success(output), nil
 	}
 
-	return Back(output), nil
+	return back(output), nil
 }
 
 func (s *GameDetailsScreen) buildSections(input GameDetailsInput) []gaba.Section {
@@ -107,64 +109,64 @@ func (s *GameDetailsScreen) buildSections(input GameDetailsInput) []gaba.Section
 	if game.Metadatum.FirstReleaseDate > 0 {
 		releaseDate := time.Unix(game.Metadatum.FirstReleaseDate/1000, 0)
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Release Date",
+			Label: i18n.GetString("game_details_release_date"),
 			Value: releaseDate.Format("January 2, 2006"),
 		})
 	}
 
 	if game.Metadatum.AverageRating > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Average Rating",
+			Label: i18n.GetString("game_details_average_rating"),
 			Value: fmt.Sprintf("%.1f/100", game.Metadatum.AverageRating),
 		})
 	}
 
 	if len(game.Metadatum.Genres) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Genres",
+			Label: i18n.GetString("game_details_genres"),
 			Value: strings.Join(game.Metadatum.Genres, ", "),
 		})
 	}
 
 	if len(game.Metadatum.Companies) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Companies",
+			Label: i18n.GetString("game_details_companies"),
 			Value: strings.Join(game.Metadatum.Companies, ", "),
 		})
 	}
 
 	if len(game.Metadatum.GameModes) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Game Modes",
+			Label: i18n.GetString("game_details_game_modes"),
 			Value: strings.Join(game.Metadatum.GameModes, ", "),
 		})
 	}
 
 	if len(game.Regions) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Regions",
+			Label: i18n.GetString("game_details_regions"),
 			Value: strings.Join(game.Regions, ", "),
 		})
 	}
 
 	if len(game.Languages) > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Languages",
+			Label: i18n.GetString("game_details_languages"),
 			Value: strings.Join(game.Languages, ", "),
 		})
 	}
 
 	if game.FsSizeBytes > 0 {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "File Size",
-			Value: formatBytes(game.FsSizeBytes),
+			Label: i18n.GetString("game_details_file_size"),
+			Value: utils.FormatBytes(game.FsSizeBytes),
 		})
 	}
 
 	if game.Multi {
 		metadata = append(metadata, gaba.MetadataItem{
-			Label: "Type",
-			Value: "Multi-file ROM",
+			Label: i18n.GetString("game_details_type"),
+			Value: i18n.GetString("game_details_multi_file_rom"),
 		})
 	}
 
@@ -175,15 +177,15 @@ func (s *GameDetailsScreen) buildSections(input GameDetailsInput) []gaba.Section
 	if len(sections) == 0 {
 		logger.Warn("No sections available for game", "game", game.Name)
 		sections = append(sections, gaba.NewInfoSection("", []gaba.MetadataItem{
-			{Label: "Game", Value: game.Name},
-			{Label: "Platform", Value: game.PlatformDisplayName},
+			{Label: i18n.GetString("game_details_game"), Value: game.Name},
+			{Label: i18n.GetString("game_details_platform"), Value: game.PlatformDisplayName},
 		}))
 	}
 
 	qrcode, err := utils.CreateTempQRCode(game.GetGamePage(input.Host), 256)
 	if err == nil {
 		sections = append(sections, gaba.NewImageSection(
-			"RomM Game Listing",
+			i18n.GetString("game_details_qr_section"),
 			qrcode,
 			int32(256),
 			int32(256),
@@ -198,6 +200,20 @@ func (s *GameDetailsScreen) buildSections(input GameDetailsInput) []gaba.Section
 }
 
 func (s *GameDetailsScreen) fetchCoverImage(host romm.Host, game romm.Rom) []byte {
+	logger := gaba.GetLogger()
+
+	// First, check if artwork is in the cache
+	if utils.ArtworkExists(game.PlatformSlug, game.ID) {
+		cachePath := utils.GetArtworkCachePath(game.PlatformSlug, game.ID)
+		data, err := os.ReadFile(cachePath)
+		if err == nil {
+			logger.Debug("Using cached artwork for game details", "game", game.Name)
+			return data
+		}
+		logger.Debug("Failed to read cached artwork, will fetch from server", "error", err)
+	}
+
+	// Not in cache, fetch from server
 	var coverPath string
 	if game.PathCoverLarge != "" {
 		coverPath = game.PathCoverLarge
@@ -210,7 +226,20 @@ func (s *GameDetailsScreen) fetchCoverImage(host romm.Host, game romm.Rom) []byt
 	}
 
 	coverURL := host.URL() + coverPath
-	return s.fetchImageFromURL(host, coverURL)
+	imageData := s.fetchImageFromURL(host, coverURL)
+
+	// Cache the artwork for future use
+	if imageData != nil {
+		if err := utils.EnsureArtworkCacheDir(game.PlatformSlug); err == nil {
+			cachePath := utils.GetArtworkCachePath(game.PlatformSlug, game.ID)
+			if err := os.WriteFile(cachePath, imageData, 0644); err == nil {
+				utils.ProcessArtImage(cachePath)
+				logger.Debug("Cached artwork from game details", "game", game.Name)
+			}
+		}
+	}
+
+	return imageData
 }
 
 func (s *GameDetailsScreen) fetchImageFromURL(host romm.Host, imageURL string) []byte {
@@ -224,11 +253,9 @@ func (s *GameDetailsScreen) fetchImageFromURL(host romm.Host, imageURL string) [
 		return nil
 	}
 
-	auth := host.Username + ":" + host.Password
-	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-	req.Header.Set("Authorization", authHeader)
+	req.SetBasicAuth(host.Username, host.Password)
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: groutConstants.DefaultHTTPTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Warn("Failed to fetch image", "url", imageURL, "error", err)
@@ -253,17 +280,4 @@ func (s *GameDetailsScreen) fetchImageFromURL(host romm.Host, imageURL string) [
 
 	logger.Debug("Successfully fetched image", "url", imageURL, "size", len(imageData))
 	return imageData
-}
-
-func formatBytes(bytes int) string {
-	const unit = 1024
-	if bytes < unit {
-		return fmt.Sprintf("%d B", bytes)
-	}
-	div, exp := int64(unit), 0
-	for n := bytes / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }

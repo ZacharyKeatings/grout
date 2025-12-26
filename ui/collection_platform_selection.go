@@ -9,7 +9,8 @@ import (
 	"strings"
 	"time"
 
-	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
 type CollectionPlatformSelectionInput struct {
@@ -49,13 +50,21 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 	} else {
 		var loadErr error
 		_, err := gaba.ProcessMessage(
-			fmt.Sprintf("Loading %s...", input.Collection.Name),
+			i18n.GetStringWithData("games_list_loading", map[string]interface{}{"Name": input.Collection.Name}),
 			gaba.ProcessMessageOptions{ShowThemeBackground: true},
 			func() (interface{}, error) {
 				rc := utils.GetRommClient(input.Host)
-				opt := &romm.GetRomsOptions{
-					Limit:        10000,
-					CollectionID: &input.Collection.ID,
+				opt := romm.GetRomsQuery{
+					Limit: 10000,
+				}
+
+				// Use appropriate ID based on collection type
+				if input.Collection.IsVirtual {
+					opt.VirtualCollectionID = input.Collection.VirtualID
+				} else if input.Collection.IsSmart {
+					opt.SmartCollectionID = input.Collection.ID
+				} else {
+					opt.CollectionID = input.Collection.ID
 				}
 
 				res, err := rc.GetRoms(opt)
@@ -70,14 +79,28 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 		)
 
 		if err != nil || loadErr != nil {
-			return WithCode(output, gaba.ExitCodeError), err
+			return withCode(output, gaba.ExitCodeError), err
 		}
+	}
+
+	// Handle unified mode - skip platform selection and return all games
+	if input.Config.CollectionView == "unified" {
+		// Filter games to only include those with mapped platforms
+		filteredGames := make([]romm.Rom, 0)
+		for _, game := range allGames {
+			if _, hasMapping := input.Config.DirectoryMappings[game.PlatformSlug]; hasMapping {
+				filteredGames = append(filteredGames, game)
+			}
+		}
+
+		output.AllGames = filteredGames
+		output.SelectedPlatform = romm.Platform{ID: 0} // ID=0 signals unified mode
+		return success(output), nil
 	}
 
 	platformMap := make(map[int]romm.Platform)
 	for _, game := range allGames {
 		if _, exists := platformMap[game.PlatformID]; !exists {
-			// Check if this platform is mapped in config
 			if _, hasMapping := input.Config.DirectoryMappings[game.PlatformSlug]; hasMapping {
 				platformMap[game.PlatformID] = romm.Platform{
 					ID:   game.PlatformID,
@@ -90,38 +113,35 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 
 	if len(platformMap) == 0 {
 		gaba.ProcessMessage(
-			fmt.Sprintf("No platforms with mapped games in %s", input.Collection.Name),
+			i18n.GetStringWithData("collection_platform_no_mapped", map[string]interface{}{"Name": input.Collection.Name}),
 			gaba.ProcessMessageOptions{ShowThemeBackground: true},
 			func() (interface{}, error) {
 				time.Sleep(time.Second * 2)
 				return nil, nil
 			},
 		)
-		return WithCode(output, gaba.ExitCodeBack), nil
+		return withCode(output, gaba.ExitCodeBack), nil
 	}
 
-	// Convert map to sorted slice
 	platforms := make([]romm.Platform, 0, len(platformMap))
 	for _, platform := range platformMap {
 		platforms = append(platforms, platform)
 	}
 
-	// Sort platforms by name
 	slices.SortFunc(platforms, func(a, b romm.Platform) int {
 		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
 	})
 
-	// Build menu items
+	gameCounts := make(map[int]int)
+	for _, game := range allGames {
+		if _, hasMapping := input.Config.DirectoryMappings[game.PlatformSlug]; hasMapping {
+			gameCounts[game.PlatformID]++
+		}
+	}
+
 	menuItems := make([]gaba.MenuItem, len(platforms))
 	for i, platform := range platforms {
-		// Count games for this platform
-		gameCount := 0
-		for _, game := range allGames {
-			if game.PlatformID == platform.ID {
-				gameCount++
-			}
-		}
-
+		gameCount := gameCounts[platform.ID]
 		displayName := fmt.Sprintf("%s (%d)", platform.Name, gameCount)
 		menuItems[i] = gaba.MenuItem{
 			Text:     displayName,
@@ -132,11 +152,11 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 	}
 
 	footerItems := []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "A", HelpText: "Select"},
+		{ButtonName: "B", HelpText: i18n.GetString("button_back")},
+		{ButtonName: "A", HelpText: i18n.GetString("button_select")},
 	}
 
-	title := fmt.Sprintf("%s - Platforms", input.Collection.Name)
+	title := i18n.GetStringWithData("collection_platform_title", map[string]interface{}{"Name": input.Collection.Name})
 	options := gaba.DefaultListOptions(title, menuItems)
 	options.SmallTitle = true
 	options.FooterHelpItems = footerItems
@@ -146,9 +166,9 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 	sel, err := gaba.List(options)
 	if err != nil {
 		if errors.Is(err, gaba.ErrCancelled) {
-			return Back(output), nil
+			return back(output), nil
 		}
-		return WithCode(output, gaba.ExitCodeError), err
+		return withCode(output, gaba.ExitCodeError), err
 	}
 
 	switch sel.Action {
@@ -159,8 +179,9 @@ func (s *CollectionPlatformSelectionScreen) Draw(input CollectionPlatformSelecti
 		output.AllGames = allGames
 		output.LastSelectedIndex = sel.Selected[0]
 		output.LastSelectedPosition = sel.VisiblePosition
-		return Success(output), nil
-	}
+		return success(output), nil
 
-	return WithCode(output, gaba.ExitCodeBack), nil
+	default:
+		return withCode(output, gaba.ExitCodeBack), nil
+	}
 }

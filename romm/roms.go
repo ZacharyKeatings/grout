@@ -1,13 +1,12 @@
 package romm
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/sonh/qs"
 )
 
 type PaginatedRoms struct {
@@ -32,7 +31,6 @@ type Rom struct {
 	FsSizeBytes         int    `json:"fs_size_bytes,omitempty"`
 	Name                string `json:"name,omitempty"`
 	DisplayName         string
-	ListName            string
 	Slug                string       `json:"slug,omitempty"`
 	Summary             string       `json:"summary,omitempty"`
 	AlternativeNames    []string     `json:"alternative_names,omitempty"`
@@ -44,6 +42,7 @@ type Rom struct {
 	PathManual          string       `json:"path_manual,omitempty"`
 	URLManual           string       `json:"url_manual,omitempty"`
 	UserScreenshots     []Screenshot `json:"user_screenshots,omitempty"`
+	UserSaves           []Save       `json:"user_saves,omitempty"`
 	MergedScreenshots   []string     `json:"merged_screenshots,omitempty"`
 	IsIdentifying       bool         `json:"is_identifying,omitempty"`
 	IsUnidentified      bool         `json:"is_unidentified,omitempty"`
@@ -65,11 +64,6 @@ type Rom struct {
 	UpdatedAt           time.Time    `json:"updated_at,omitempty"`
 	MissingFromFs       bool         `json:"missing_from_fs,omitempty"`
 	Siblings            []any        `json:"siblings,omitempty"`
-}
-
-func (r Rom) GetGamePage(host Host) string {
-	u, _ := url.JoinPath(host.URL(), "rom", strconv.Itoa(r.ID))
-	return u
 }
 
 type Screenshot struct {
@@ -109,118 +103,83 @@ type RomFile struct {
 	Category      any       `json:"category,omitempty"`
 }
 
-type GetRomsOptions struct {
-	Page         int
-	Limit        int
-	PlatformID   *int
-	CollectionID *int
-	Search       string
-	OrderBy      string
-	OrderDir     string
+type GetRomsQuery struct {
+	Page                int    `qs:"page,omitempty"`
+	Limit               int    `qs:"limit,omitempty"`
+	PlatformID          int    `qs:"platform_id,omitempty"`
+	CollectionID        int    `qs:"collection_id,omitempty"`
+	SmartCollectionID   int    `qs:"smart_collection_id,omitempty"`
+	VirtualCollectionID string `qs:"virtual_collection_id,omitempty"`
+	Search              string `qs:"search,omitempty"`
+	OrderBy             string `qs:"order_by,omitempty"`
+	OrderDir            string `qs:"order_dir,omitempty"`
 }
 
-func (c *Client) GetRoms(opts *GetRomsOptions) (*PaginatedRoms, error) {
-	params := map[string]string{}
+func (q GetRomsQuery) Valid() bool {
+	return q.Page > 0 || q.Limit > 0 || q.PlatformID > 0 || q.CollectionID > 0 || q.SmartCollectionID > 0 || q.VirtualCollectionID != "" || q.Search != "" || q.OrderBy != "" || q.OrderDir != ""
+}
 
-	if opts != nil {
-		if opts.Page > 0 {
-			params["page"] = strconv.Itoa(opts.Page)
-		}
-		if opts.Limit > 0 {
-			params["limit"] = strconv.Itoa(opts.Limit)
-		}
-		if opts.PlatformID != nil {
-			params["platform_id"] = strconv.Itoa(*opts.PlatformID)
-		}
-		if opts.CollectionID != nil {
-			params["collection_id"] = strconv.Itoa(*opts.CollectionID)
-		}
-		if opts.Search != "" {
-			params["search"] = opts.Search
-		}
-		if opts.OrderBy != "" {
-			params["order_by"] = opts.OrderBy
-		}
-		if opts.OrderDir != "" {
-			params["order_dir"] = opts.OrderDir
-		}
-	}
-
+func (c *Client) GetRoms(query GetRomsQuery) (PaginatedRoms, error) {
 	var result PaginatedRoms
-	path := "/api/roms" + buildQueryString(params)
-	err := c.doRequest("GET", path, nil, &result)
-
-	return &result, err
+	err := c.doRequest("GET", endpointRoms, query, nil, &result)
+	return result, err
 }
 
-func (c *Client) AddRom(platformID int, file io.Reader, filename string) error {
-	var body bytes.Buffer
-	writer := multipart.NewWriter(&body)
-
-	// Add platform ID
-	if err := writer.WriteField("platform_id", strconv.Itoa(platformID)); err != nil {
-		return fmt.Errorf("failed to write platform_id field: %w", err)
-	}
-
-	// Add file
-	part, err := writer.CreateFormFile("file", filename)
-	if err != nil {
-		return fmt.Errorf("failed to create file form field: %w", err)
-	}
-	if _, err := io.Copy(part, file); err != nil {
-		return fmt.Errorf("failed to write file data: %w", err)
-	}
-
-	writer.Close()
-
-	return c.doMultipartRequest("POST", "/api/roms", &body, writer.FormDataContentType(), nil)
+type GetRomByHashQuery struct {
+	CrcHash  string `qs:"crc_hash,omitempty"`
+	Md5Hash  string `qs:"md5_hash,omitempty"`
+	Sha1Hash string `qs:"sha1_hash,omitempty"`
 }
 
-func (c *Client) GetRom(id int) (*Rom, error) {
+func (q GetRomByHashQuery) Valid() bool {
+	return q.CrcHash != "" || q.Md5Hash != "" || q.Sha1Hash != ""
+}
+
+func (c *Client) GetRomByHash(query GetRomByHashQuery) (Rom, error) {
 	var rom Rom
-	path := fmt.Sprintf("/api/roms/%d", id)
-	err := c.doRequest("GET", path, nil, &rom)
-	return &rom, err
+	err := c.doRequest("GET", endpointRomsByHash, query, nil, &rom)
+	return rom, err
 }
 
-func (c *Client) GetRomContent(id int, fileName string) ([]byte, error) {
-	path := fmt.Sprintf("/api/roms/%d/content/%s", id, fileName)
-	return c.doRequestRaw("GET", path, nil)
+func (r Rom) GetGamePage(host Host) string {
+	u, _ := url.JoinPath(host.URL(), "rom", strconv.Itoa(r.ID))
+	return u
 }
 
-func (c *Client) GetRomFile(id int) (*RomFile, error) {
-	var romFile RomFile
-	path := fmt.Sprintf("/api/romsfiles/%d", id)
-	err := c.doRequest("GET", path, nil, &romFile)
-	return &romFile, err
+func (c *Client) GetRom(id int) (Rom, error) {
+	var rom Rom
+	path := fmt.Sprintf(endpointRomByID, id)
+	err := c.doRequest("GET", path, nil, nil, &rom)
+	return rom, err
 }
 
-func (c *Client) GetRomFileContent(id int, fileName string) ([]byte, error) {
-	path := fmt.Sprintf("/api/romsfiles/%d/content/%s", id, fileName)
-	return c.doRequestRaw("GET", path, nil)
+type DownloadRomsQuery struct {
+	RomIDs string `qs:"rom_ids"`
+}
+
+func (q DownloadRomsQuery) Valid() bool {
+	return q.RomIDs != ""
 }
 
 func (c *Client) DownloadRoms(romIDs []int) ([]byte, error) {
-	params := map[string]string{}
-
-	// Build comma-separated list of ROM IDs
-	if len(romIDs) > 0 {
-		ids := ""
-		for i, id := range romIDs {
-			if i > 0 {
-				ids += ","
-			}
-			ids += strconv.Itoa(id)
-		}
-		params["rom_ids"] = ids
+	if len(romIDs) == 0 {
+		return c.doRequestRaw("GET", endpointRomsDownload, nil)
 	}
 
-	path := "/api/roms/download" + buildQueryString(params)
-	return c.doRequestRaw("GET", path, nil)
-}
+	ids := ""
+	for i, id := range romIDs {
+		if i > 0 {
+			ids += ","
+		}
+		ids += strconv.Itoa(id)
+	}
 
-// DownloadMultiFileRom downloads a multi-file ROM as a zip archive
-// The zip contains all ROM files and a m3u playlist file
-func (c *Client) DownloadMultiFileRom(romID int) ([]byte, error) {
-	return c.DownloadRoms([]int{romID})
+	query := DownloadRomsQuery{RomIDs: ids}
+	values, err := qs.NewEncoder().Values(query)
+	if err != nil {
+		return nil, err
+	}
+
+	path := endpointRomsDownload + "?" + values.Encode()
+	return c.doRequestRaw("GET", path, nil)
 }

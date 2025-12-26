@@ -1,0 +1,764 @@
+[app_title]
+description = "Application title"
+other = "Grout"
+
+[button_back]
+description = "Back button"
+other = "Voltar"
+
+[button_bios]
+description = "BIOS button"
+other = "BIOS"
+
+[button_cancel]
+description = "Cancel button"
+other = "Cancelar"
+
+[button_close]
+description = "Close button"
+other = "Fechar"
+
+[button_confirm]
+description = "Confirm button"
+other = "Confirmar"
+
+[button_continue]
+description = "Continue button"
+other = "Continuar"
+
+[button_cycle]
+description = "Cycle button"
+other = "Alternar"
+
+[button_download]
+description = "Download button"
+other = "Baixar"
+
+[button_help]
+description = "Help button"
+other = "Ajuda"
+
+[button_login]
+description = "Login button"
+other = "Entrar"
+
+[button_logout]
+description = "Logout button"
+other = "Sair"
+
+[button_menu]
+description = "Menu button"
+other = "Menu"
+
+[logout_confirm_message]
+description = "Logout confirmation message"
+other = "Tem certeza de que deseja sair?"
+
+[clear_cache_confirm_message]
+description = "Clear cache confirmation message"
+other = "Limpar todas as imagens em cache?"
+
+[button_multi]
+description = "Multi select button"
+other = "Múltiplo"
+
+[button_quit]
+description = "Quit button"
+other = "Sair"
+
+[button_save]
+description = "Save button"
+other = "Salvar"
+
+[button_save_sync]
+description = "Button to trigger save sync"
+other = "Sincronizar"
+
+[button_search]
+description = "Search button"
+other = "Buscar"
+
+[button_select]
+description = "Select button"
+other = "Selecionar"
+
+[button_settings]
+description = "Settings button"
+other = "Configurações"
+
+[collection_platform_no_mapped]
+description = "No mapped platforms message"
+other = "Nenhuma plataforma com jogos mapeados em\n{{.Name}}"
+
+[collection_platform_title]
+description = "Collection platform selection title"
+other = "{{.Name}} - Plataformas"
+
+[common_false]
+description = "False value"
+other = "Falso"
+
+[common_hide]
+description = "Hide value"
+other = "Ocultar"
+
+[common_show]
+description = "Show value"
+other = "Mostrar"
+
+[common_skip]
+description = "Skip option"
+other = "Pular"
+
+[common_true]
+description = "True value"
+other = "Verdadeiro"
+
+[download_artwork]
+description = "Downloading artwork message"
+other = "Baixando artwork..."
+
+[download_extracting]
+description = "Extracting ROM message"
+other = "Extraindo {{.Name}}..."
+
+[emulator_default]
+description = "Default emulator suffix"
+other = " (Padrão)"
+
+[emulator_saves_count]
+description = "Emulator saves count suffix"
+other = " ({{.Count}} saves)"
+
+[emulator_selection_title]
+description = "Emulator selection title"
+other = "Selecionar Emulador de {{.Platform}}"
+
+[game_details_average_rating]
+description = "Average rating label"
+other = "Avaliação Média"
+
+[game_details_companies]
+description = "Companies label"
+other = "Empresas"
+
+[game_details_file_size]
+description = "File size label"
+other = "Tamanho do Arquivo"
+
+[game_details_game]
+description = "Game label"
+other = "Jogo"
+
+[game_details_game_modes]
+description = "Game modes label"
+other = "Modos de Jogo"
+
+[game_details_genres]
+description = "Genres label"
+other = "Gêneros"
+
+[game_details_languages]
+description = "Languages label"
+other = "Idiomas"
+
+[game_details_multi_file_rom]
+description = "Multi-file ROM value"
+other = "ROM com múltiplos arquivos"
+
+[game_details_platform]
+description = "Platform label"
+other = "Plataforma"
+
+[game_details_qr_section]
+description = "QR code section title"
+other = "Lista de Jogos RomM"
+
+[game_details_regions]
+description = "Regions label"
+other = "Regiões"
+
+[game_details_release_date]
+description = "Release date label"
+other = "Data de Lançamento"
+
+[game_details_type]
+description = "Type label"
+other = "Tipo"
+
+[games_list_filtered_out]
+description = "All games filtered out message"
+other = "Nenhum jogo em {{.Name}} corresponde aos seus mapeamentos de plataforma"
+
+[games_list_loading]
+description = "Loading games message"
+other = "Carregando {{.Name}}..."
+
+[games_list_no_games]
+description = "No games found message"
+other = "Nenhum jogo encontrado para {{.Name}}"
+
+[games_list_no_results]
+description = "No search results message"
+other = "Nenhum resultado encontrado para \"{{.Query}}\""
+
+[games_list_search_prefix]
+description = "Search prefix in title"
+other = "[Busca: \"{{.Query}}\"]"
+
+[games_list_help_title]
+description = "Games list help screen title"
+other = "Ajuda da Lista de Jogos"
+
+[games_list_help_body]
+description = "Games list help screen body text"
+other = """A - Selecionar um jogo
+B - Voltar à tela anterior
+X - Buscar jogos por nome
+Select - Alternar modo de seleção múltipla
+  No modo de seleção múltipla:
+  - Use o D-Pad para navegar
+  - Pressione A para selecionar/desselecionar
+  - Pressione Start para confirmar seleções
+Menu - Mostrar esta tela de ajuda
+D-Pad - Navegar na lista de jogos"""
+
+[help_exit_text]
+description = "Message to close the help screen"
+other = "Pressione qualquer botão para fechar a ajuda"
+
+[log_level_debug]
+description = "Debug log level"
+other = "Debug"
+
+[log_level_error]
+description = "Error log level"
+other = "Erro"
+
+[login_error_connection]
+description = "Connection error message"
+other = "Não foi possível conectar ao RomM!\nVerifique o hostname e a porta."
+
+[login_error_credentials]
+description = "Invalid credentials error"
+other = "Nome de usuário ou senha inválidos."
+
+[login_error_forbidden]
+description = "Access forbidden (403) error"
+other = "Acesso negado!\nVerifique seu nome de usuário/senha e tente alternar entre http e https."
+
+[login_error_unexpected]
+description = "Unexpected error message"
+other = "Algo inesperado aconteceu!\nVerifique os logs para mais informações."
+
+[login_error_invalid_hostname]
+description = "Invalid hostname/DNS error"
+other = "Não foi possível resolver o hostname!\nVerifique se o hostname está correto."
+
+[login_error_connection_refused]
+description = "Connection refused error"
+other = "Não foi possível conectar ao host!\nVerifique se o hostname e a porta estão corretos."
+
+[login_error_timeout]
+description = "Connection timeout error"
+other = "Tempo de conexão esgotado!\nVerifique sua conexão de rede e se o host está acessível."
+
+[login_error_wrong_protocol]
+description = "Wrong protocol (http vs https) error"
+other = "Erro de protocolo!\nTente alternar entre http e https."
+
+[login_error_use_https]
+description = "Server requires HTTPS"
+other = "Erro de protocolo!\nUse HTTPS em vez de HTTP."
+
+[login_error_use_http]
+description = "Server requires HTTP"
+other = "Erro de protocolo!\nUse HTTP em vez de HTTPS."
+
+[login_error_server]
+description = "Server error (5xx) message"
+other = "Erro do servidor RomM!\nVerifique os logs do servidor RomM."
+
+[login_validating]
+description = "Validating connection message"
+other = "Validando conexão..."
+
+[error_loading_platforms]
+description = "Error loading platforms from RomM"
+other = "Falha ao carregar plataformas do RomM!\nVerifique sua conexão e tente novamente."
+
+[startup_error_invalid_hostname]
+description = "Startup: Invalid hostname/DNS error"
+other = "Não foi possível resolver o hostname!\nO endereço do servidor configurado não pode ser encontrado."
+
+[startup_error_connection_refused]
+description = "Startup: Connection refused error"
+other = "Não foi possível conectar ao servidor!\nO servidor pode estar offline ou a porta pode estar incorreta."
+
+[startup_error_timeout]
+description = "Startup: Connection timeout error"
+other = "Tempo de conexão esgotado!\nO servidor não está respondendo. Verifique sua conexão de rede."
+
+[startup_error_wrong_protocol]
+description = "Startup: Wrong protocol (http vs https) error"
+other = "Erro de protocolo!\nO servidor pode exigir http em vez de https (ou vice-versa)."
+
+[startup_error_use_https]
+description = "Startup: Server requires HTTPS"
+other = "Erro de protocolo!\nAltere sua configuração para usar HTTPS em vez de HTTP."
+
+[startup_error_use_http]
+description = "Startup: Server requires HTTP"
+other = "Erro de protocolo!\nAltere sua configuração para usar HTTP em vez de HTTPS."
+
+[startup_error_credentials]
+description = "Startup: Invalid credentials error"
+other = "Autenticação falhou!\nSeu nome de usuário ou senha pode ter mudado no servidor."
+
+[startup_error_forbidden]
+description = "Startup: Access forbidden (403) error"
+other = "Acesso negado!\nSuas credenciais podem ter mudado, ou o servidor pode exigir um protocolo diferente (http vs https)."
+
+[startup_error_server]
+description = "Startup: Server error (5xx) message"
+other = "Erro do servidor RomM!\nO servidor está com problemas. Verifique os logs do servidor."
+
+[startup_error_action_retry]
+description = "Startup error action: Retry connection"
+other = "Tentar Novamente"
+
+[startup_error_action_relogin]
+description = "Startup error action: Re-enter credentials"
+other = "Reinserir Credenciais"
+
+[startup_error_action_exit]
+description = "Startup error action: Exit application"
+other = "Sair"
+
+[login_hostname]
+description = "Hostname field label"
+other = "Hostname"
+
+[login_logging_in]
+description = "Logging in progress message"
+other = "Entrando..."
+
+[login_password]
+description = "Password field label"
+other = "Senha"
+
+[login_port]
+description = "Port field label"
+other = "Porta (opcional)"
+
+[login_protocol]
+description = "Protocol field label"
+other = "Protocolo"
+
+[login_protocol_http]
+description = "HTTP protocol option"
+other = "HTTP"
+
+[login_protocol_https]
+description = "HTTPS protocol option"
+other = "HTTPS"
+
+[login_title]
+description = "Login screen title"
+other = "Entrar no RomM"
+
+[login_username]
+description = "Username field label"
+other = "Nome de usuário"
+
+[platform_mapping_create]
+description = "Create directory option"
+other = "Criar '{{.Name}}'"
+
+[platform_mapping_directory_not_found]
+description = "ROM directory not found error"
+other = "Diretório de ROMs não encontrado!"
+
+[platform_mapping_path_prefix]
+description = "Directory path prefix"
+other = "/{{.Name}}"
+
+[platform_mapping_title]
+description = "Platform mapping screen title"
+other = "Mapeamento de Diretório de ROMs"
+
+[platform_selection_collections]
+description = "Collections menu item"
+other = "Coleções"
+
+[save_sync_downloaded]
+description = "Downloaded label"
+other = "Baixado"
+
+[save_sync_failed]
+description = "Failed label"
+other = "Falhou"
+
+[save_sync_rom_not_found]
+description = "ROM not found message"
+other = "{{.Name}} (ROM não encontrada no RomM)"
+
+[save_sync_scanning]
+description = "Scanning save files message"
+other = "Escaneando arquivos de save..."
+
+[save_sync_skipped]
+description = "Skipped label"
+other = "Pulado"
+
+[save_sync_summary]
+description = "Save sync summary title"
+other = "Resumo da Sincronização de Saves"
+
+[save_sync_summary_section]
+description = "Summary section title"
+other = "Resumo"
+
+[save_sync_total_processed]
+description = "Total processed label"
+other = "Total Processado"
+
+[save_sync_unknown_error]
+description = "Unknown error message"
+other = "Erro desconhecido"
+
+[save_sync_unmatched_saves]
+description = "Unmatched saves section title"
+other = "Saves Não Correspondidos"
+
+[save_sync_up_to_date]
+description = "Everything up to date message"
+other = "Tudo está atualizado!\nVá jogar!"
+
+[save_sync_uploaded]
+description = "Uploaded label"
+other = "Enviado"
+
+[settings_api_timeout]
+description = "API timeout option"
+other = "Timeout da API"
+
+[settings_auto_sync_saves]
+description = "Auto sync saves option"
+other = "Sincronização Automática de Saves"
+
+[settings_download_art]
+description = "Download art option"
+other = "Baixar Artwork"
+
+[settings_download_timeout]
+description = "Download timeout option"
+other = "Timeout de Download"
+
+[settings_downloaded_games]
+description = "Downloaded games option"
+other = "Jogos Baixados"
+
+[settings_edit_mappings]
+description = "Edit directory mappings option"
+other = "Mapeamentos de Diretório"
+
+[settings_info]
+description = "Info option"
+other = "Info do Grout"
+
+[info_title]
+description = "Info screen title"
+other = "Info do Grout"
+
+[info_version]
+description = "Grout version label"
+other = "Versão"
+
+[info_server]
+description = "Server URL label"
+other = "Servidor"
+
+[info_user]
+description = "Active user label"
+other = "Usuário"
+
+[info_commit]
+description = "Git commit hash label"
+other = "Commit"
+
+[info_build_date]
+description = "Build date/time label"
+other = "Data do Build"
+
+[info_build_type]
+description = "Build type label (Dev/Release)"
+other = "Tipo do Build"
+
+[info_repository]
+description = "Repository QR code label"
+other = "Repositório GitHub"
+
+[settings_language]
+description = "Language option"
+other = "Idioma"
+
+[settings_language_english]
+description = "English language option"
+other = "English"
+
+[settings_language_spanish]
+description = "Spanish language option"
+other = "Español"
+
+[settings_language_french]
+description = "French language option"
+other = "Français"
+
+[settings_language_german]
+description = "German language option"
+other = "Deutsch"
+
+[settings_language_italian]
+description = "Italian language option"
+other = "Italiano"
+
+[settings_language_portuguese]
+description = "Portuguese language option"
+other = "Português"
+
+[settings_language_japanese]
+description = "Japanese language option"
+other = "日本語"
+
+[settings_language_russian]
+description = "Russian language option"
+other = "Русский"
+
+[settings_log_level]
+description = "Log level option"
+other = "Nível de Log"
+
+[settings_collections]
+description = "Collections settings submenu"
+other = "Configurações de Coleções"
+
+[settings_advanced]
+description = "Advanced settings submenu"
+other = "Avançado"
+
+[settings_clear_cache]
+description = "Clear artwork cache option"
+other = "Limpar Cache"
+
+[settings_show_collections]
+description = "Collections option"
+other = "Coleções"
+
+[settings_show_smart_collections]
+description = "Smart collections option"
+other = "Coleções Inteligentes"
+
+[settings_show_game_details]
+description = "Game details option"
+other = "Detalhes do Jogo"
+
+[settings_show_virtual_collections]
+description = "Virtual collections option"
+other = "Coleções Virtuais"
+
+[settings_collection_view]
+description = "Collection view mode option"
+other = "Visualização de Coleção"
+
+[collection_view_platform]
+description = "Platform collection view mode"
+other = "Plataforma"
+
+[collection_view_unified]
+description = "Unified collection view mode"
+other = "Unificada"
+
+[settings_save_sync]
+description = "Save sync mode option"
+other = "Sincronização de Saves"
+
+[save_sync_mode_off]
+description = "Save sync mode off"
+other = "Desligado"
+
+[save_sync_mode_manual]
+description = "Save sync mode manual"
+other = "Manual"
+
+[save_sync_mode_daemon]
+description = "Save sync mode daemon"
+other = "Automático"
+
+[settings_show_bios]
+description = "BIOS menu option"
+other = "Menu BIOS"
+
+[bios_status_ready]
+description = "BIOS file is installed and verified"
+other = "Pronto"
+
+[bios_status_wrong_version]
+description = "BIOS file exists but hash doesn't match"
+other = "Versão Errada"
+
+[bios_status_unverified]
+description = "BIOS file is installed but cannot be verified"
+other = "Instalado (Não Verificado)"
+
+[bios_status_not_installed]
+description = "BIOS file is missing"
+other = "Não Instalado"
+
+[bios_no_files_required]
+description = "Message when platform doesn't require BIOS files"
+other = "Esta plataforma não requer arquivos BIOS."
+
+[bios_download_complete]
+description = "Message when BIOS download completes successfully"
+other = "%d arquivo(s) BIOS baixado(s) com sucesso."
+
+[bios_download_complete_with_warnings]
+description = "Message when BIOS download completes with MD5 warnings"
+other = "%d arquivo(s) BIOS baixado(s) com %d aviso(s) de hash. Os arquivos podem não ser da versão correta."
+
+[bios_download_failed]
+description = "Message when BIOS download fails"
+other = "Falha ao baixar %d arquivo(s) BIOS."
+
+[settings_box_art]
+description = "Box art in games list option"
+other = "Capa"
+
+[settings_sync_artwork]
+description = "Cache artwork option"
+other = "Armazenar Artwork"
+
+[artwork_sync_no_platforms]
+description = "No platforms mapped message"
+other = "Nenhuma plataforma com mapeamentos de diretório encontrada."
+
+[artwork_sync_scanning]
+description = "Scanning platforms for artwork message"
+other = "Escaneando plataforma %d/%d: %s..."
+
+[artwork_sync_up_to_date]
+description = "All artwork up to date message"
+other = "Todo artwork já está em cache!"
+
+[artwork_sync_confirm]
+description = "Confirm artwork download message"
+other = "Baixar artwork para %d jogos?"
+
+[artwork_sync_processing]
+description = "Processing artwork message"
+other = "Processando artwork..."
+
+[artwork_sync_complete]
+description = "Artwork sync complete message"
+other = "%d imagens de artwork baixadas com sucesso."
+
+[artwork_sync_failed]
+description = "Artwork sync failed message"
+other = "Falha ao baixar %d imagens de artwork."
+
+[settings_sync_saves]
+description = "Sync saves option"
+other = "Sincronizar Saves"
+
+[settings_title]
+description = "Settings screen title"
+other = "Configurações"
+
+[settings_unzip_downloads]
+description = "Unzip downloads option"
+other = "Extrair Downloads"
+
+[time_105_minutes]
+description = "105 minutes"
+other = "105 Minutos"
+
+[time_120_minutes]
+description = "120 minutes"
+other = "120 Minutos"
+
+[time_120_seconds]
+description = "120 seconds"
+other = "120 Segundos"
+
+[time_15_minutes]
+description = "15 minutes"
+other = "15 Minutos"
+
+[time_15_seconds]
+description = "15 seconds"
+other = "15 Segundos"
+
+[time_180_seconds]
+description = "180 seconds"
+other = "180 Segundos"
+
+[time_240_seconds]
+description = "240 seconds"
+other = "240 Segundos"
+
+[time_300_seconds]
+description = "300 seconds"
+other = "300 Segundos"
+
+[time_30_minutes]
+description = "30 minutes"
+other = "30 Minutos"
+
+[time_30_seconds]
+description = "30 seconds"
+other = "30 Segundos"
+
+[time_45_minutes]
+description = "45 minutes"
+other = "45 Minutos"
+
+[time_45_seconds]
+description = "45 seconds"
+other = "45 Segundos"
+
+[time_60_minutes]
+description = "60 minutes"
+other = "60 Minutos"
+
+[time_60_seconds]
+description = "60 seconds"
+other = "60 Segundos"
+
+[time_75_minutes]
+description = "75 minutes"
+other = "75 Minutos"
+
+[time_75_seconds]
+description = "75 seconds"
+other = "75 Segundos"
+
+[time_90_minutes]
+description = "90 minutes"
+other = "90 Minutos"
+
+[time_90_seconds]
+description = "90 seconds"
+other = "90 Segundos"
+
+[downloaded_games_do_nothing]
+description = "Do nothing option for downloaded games"
+other = "Não Fazer Nada"
+
+[downloaded_games_mark]
+description = "Mark option for downloaded games"
+other = "Marcar"
+
+[downloaded_games_filter]
+description = "Filter option for downloaded games"
+other = "Filtrar"

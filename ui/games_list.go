@@ -10,14 +10,16 @@ import (
 	"strings"
 	"time"
 
-	gaba "github.com/UncleJunVIP/gabagool/v2/pkg/gabagool"
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+	buttons "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/constants"
+	"github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/i18n"
 )
 
-type FetchType int
+type fetchType int
 
 const (
-	Platform FetchType = iota
-	Collection
+	ftPlatform fetchType = iota
+	ftCollection
 )
 
 type GameListInput struct {
@@ -47,15 +49,23 @@ func NewGameListScreen() *GameListScreen {
 	return &GameListScreen{}
 }
 
+func isCollectionSet(c romm.Collection) bool {
+	return c.ID != 0 || c.VirtualID != ""
+}
+
 func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput], error) {
 	games := input.Games
 
 	if len(games) == 0 {
 		loaded, err := s.loadGames(input)
 		if err != nil {
-			return WithCode(GameListOutput{}, gaba.ExitCodeError), err
+			return withCode(GameListOutput{}, gaba.ExitCodeError), err
 		}
 		games = loaded
+
+		if input.Config.ShowBoxArt {
+			go utils.SyncArtworkInBackground(input.Host, loaded)
+		}
 	}
 
 	output := GameListOutput{
@@ -67,11 +77,21 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 		LastSelectedPosition: input.LastSelectedPosition,
 	}
 
-	displayGames := utils.PrepareRomNames(games)
+	displayGames := utils.PrepareRomNames(games, *input.Config)
+
+	if input.Config.DownloadedGames == "filter" {
+		filteredGames := make([]romm.Rom, 0, len(displayGames))
+		for _, game := range displayGames {
+			if !utils.IsGameDownloadedLocally(game, *input.Config) {
+				filteredGames = append(filteredGames, game)
+			}
+		}
+		displayGames = filteredGames
+	}
 
 	displayName := input.Platform.Name
 	allGamesFilteredOut := false
-	if input.Collection.ID != 0 {
+	if isCollectionSet(input.Collection) {
 		displayName = input.Collection.Name
 		originalCount := len(displayGames)
 		filteredGames := make([]romm.Rom, 0, len(displayGames))
@@ -84,20 +104,38 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 
 		allGamesFilteredOut = originalCount > 0 && len(displayGames) == 0
 
-		// Only add platform prefix if we're viewing multiple platforms (no specific platform selected)
 		if input.Platform.ID == 0 {
 			for i := range displayGames {
-				displayGames[i].ListName = fmt.Sprintf("[%s] %s", displayGames[i].PlatformSlug, displayGames[i].DisplayName)
+				prefix := ""
+				if input.Config.DownloadedGames == "mark" && utils.IsGameDownloadedLocally(displayGames[i], *input.Config) {
+					prefix = utils.Downloaded + " "
+				}
+				displayGames[i].DisplayName = fmt.Sprintf("%s[%s] %s", prefix, displayGames[i].PlatformSlug, displayGames[i].DisplayName)
 			}
 		} else {
-			// Viewing a specific platform within collection, show platform name
 			displayName = fmt.Sprintf("%s - %s", input.Collection.Name, input.Platform.Name)
+			if input.Config.DownloadedGames == "mark" {
+				for i := range displayGames {
+					if utils.IsGameDownloadedLocally(displayGames[i], *input.Config) {
+						displayGames[i].DisplayName = fmt.Sprintf("%s %s", utils.Downloaded, displayGames[i].DisplayName)
+					}
+				}
+			}
+		}
+	} else {
+		if input.Config.DownloadedGames == "mark" {
+			for i := range displayGames {
+				if utils.IsGameDownloadedLocally(displayGames[i], *input.Config) {
+					displayGames[i].DisplayName = fmt.Sprintf("%s %s", utils.Downloaded, displayGames[i].DisplayName)
+				}
+			}
 		}
 	}
 
 	title := displayName
 	if input.SearchFilter != "" {
-		title = fmt.Sprintf("[Search: \"%s\"] | %s", input.SearchFilter, displayName)
+		message := i18n.GetStringWithData("games_list_search_prefix", map[string]interface{}{"Query": input.SearchFilter})
+		title = fmt.Sprintf("%s | %s", message, displayName)
 		displayGames = filterList(displayGames, input.SearchFilter)
 	}
 
@@ -108,37 +146,57 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 			s.showEmptyMessage(displayName, input.SearchFilter)
 		}
 		if input.SearchFilter != "" {
-			return WithCode(output, constants.ExitCodeNoResults), nil
+			return withCode(output, constants.ExitCodeNoResults), nil
 		}
-		if input.Collection.ID != 0 && input.Platform.ID != 0 {
-			return WithCode(output, constants.ExitCodeBackToCollectionPlatform), nil
+		if isCollectionSet(input.Collection) && input.Platform.ID != 0 {
+			return withCode(output, constants.ExitCodeBackToCollectionPlatform), nil
 		}
-		if input.Collection.ID != 0 {
-			return WithCode(output, constants.ExitCodeBackToCollection), nil
+		if isCollectionSet(input.Collection) {
+			return withCode(output, constants.ExitCodeBackToCollection), nil
 		}
-		return Back(output), nil
+		return back(output), nil
 	}
 
 	menuItems := make([]gaba.MenuItem, len(displayGames))
 	for i, game := range displayGames {
+		imageFilename := ""
+		if input.Config.ShowBoxArt {
+			imageFilename = utils.GetCachedArtworkForRom(game)
+		}
 		menuItems[i] = gaba.MenuItem{
-			Text:     game.ListName,
-			Selected: false,
-			Focused:  false,
-			Metadata: game,
+			Text:          game.DisplayName,
+			Selected:      false,
+			Focused:       false,
+			Metadata:      game,
+			ImageFilename: imageFilename,
 		}
 	}
 
 	options := gaba.DefaultListOptions(title, menuItems)
 	options.SmallTitle = true
-	options.EnableAction = true
-	options.EnableMultiSelect = true
-	options.FooterHelpItems = []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "X", HelpText: "Search"},
-		{ButtonName: "Select", HelpText: "Multi"},
-		{ButtonName: "A", HelpText: "Select"},
+	options.EnableImages = input.Config.ShowBoxArt
+	options.ActionButton = buttons.VirtualButtonX
+	options.MultiSelectButton = buttons.VirtualButtonSelect
+	options.HelpButton = buttons.VirtualButtonMenu
+
+	hasBIOS := input.Config.ShowBIOSDownload && input.Platform.ID != 0 && s.hasBIOSFilesInRomM(*input.Config, input.Host, input.Platform)
+	if hasBIOS {
+		options.SecondaryActionButton = buttons.VirtualButtonY
 	}
+
+	options.HelpTitle = i18n.GetString("games_list_help_title")
+	options.HelpText = strings.Split(i18n.GetString("games_list_help_body"), "\n")
+	options.HelpExitText = i18n.GetString("help_exit_text")
+
+	footerItems := []gaba.FooterHelpItem{
+		{ButtonName: i18n.GetString("button_menu"), HelpText: i18n.GetString("button_help")},
+		{ButtonName: "X", HelpText: i18n.GetString("button_search")},
+	}
+	if hasBIOS {
+		footerItems = append(footerItems, gaba.FooterHelpItem{ButtonName: "Y", HelpText: i18n.GetString("button_bios")})
+	}
+
+	options.FooterHelpItems = footerItems
 
 	options.SelectedIndex = input.LastSelectedIndex
 	options.VisibleStartIndex = max(0, input.LastSelectedIndex-input.LastSelectedPosition)
@@ -150,18 +208,17 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 				output.SearchFilter = ""
 				output.LastSelectedIndex = 0
 				output.LastSelectedPosition = 0
-				return WithCode(output, constants.ExitCodeClearSearch), nil
+				return withCode(output, constants.ExitCodeClearSearch), nil
 			}
-			// Return different exit code based on whether viewing collection or platform
-			if input.Collection.ID != 0 && input.Platform.ID != 0 {
-				return WithCode(output, constants.ExitCodeBackToCollectionPlatform), nil
+			if isCollectionSet(input.Collection) && input.Platform.ID != 0 {
+				return withCode(output, constants.ExitCodeBackToCollectionPlatform), nil
 			}
-			if input.Collection.ID != 0 {
-				return WithCode(output, constants.ExitCodeBackToCollection), nil
+			if isCollectionSet(input.Collection) {
+				return withCode(output, constants.ExitCodeBackToCollection), nil
 			}
-			return Back(output), nil
+			return back(output), nil
 		}
-		return WithCode(output, gaba.ExitCodeError), err
+		return withCode(output, gaba.ExitCodeError), err
 	}
 
 	switch res.Action {
@@ -173,19 +230,22 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 		output.LastSelectedIndex = res.Selected[0]
 		output.LastSelectedPosition = res.VisiblePosition
 		output.SelectedGames = selectedGames
-		return Success(output), nil
+		return success(output), nil
 
 	case gaba.ListActionTriggered:
-		return WithCode(output, constants.ExitCodeSearch), nil
+		return withCode(output, constants.ExitCodeSearch), nil
+
+	case gaba.ListActionSecondaryTriggered:
+		return withCode(output, constants.ExitCodeBIOS), nil
 	}
 
-	if input.Collection.ID != 0 && input.Platform.ID != 0 {
-		return WithCode(output, constants.ExitCodeBackToCollectionPlatform), nil
+	if isCollectionSet(input.Collection) && input.Platform.ID != 0 {
+		return withCode(output, constants.ExitCodeBackToCollectionPlatform), nil
 	}
-	if input.Collection.ID != 0 {
-		return WithCode(output, constants.ExitCodeBackToCollection), nil
+	if isCollectionSet(input.Collection) {
+		return withCode(output, constants.ExitCodeBackToCollection), nil
 	}
-	return Back(output), nil
+	return back(output), nil
 }
 
 func (s *GameListScreen) loadGames(input GameListInput) ([]romm.Rom, error) {
@@ -195,12 +255,12 @@ func (s *GameListScreen) loadGames(input GameListInput) ([]romm.Rom, error) {
 	collection := input.Collection
 
 	id := platform.ID
-	ft := Platform
+	ft := ftPlatform
 	displayName := platform.Name
 
-	if collection.ID != 0 {
+	if isCollectionSet(collection) {
 		id = collection.ID
-		ft = Collection
+		ft = ftCollection
 		displayName = collection.Name
 	}
 
@@ -210,7 +270,7 @@ func (s *GameListScreen) loadGames(input GameListInput) ([]romm.Rom, error) {
 	var loadErr error
 
 	_, err := gaba.ProcessMessage(
-		fmt.Sprintf("Loading %s...", displayName),
+		i18n.GetStringWithData("games_list_loading", map[string]interface{}{"Name": displayName}),
 		gaba.ProcessMessageOptions{ShowThemeBackground: true},
 		func() (interface{}, error) {
 			roms, err := fetchList(config, host, id, ft)
@@ -234,9 +294,9 @@ func (s *GameListScreen) loadGames(input GameListInput) ([]romm.Rom, error) {
 func (s *GameListScreen) showEmptyMessage(platformName, searchFilter string) {
 	var message string
 	if searchFilter != "" {
-		message = fmt.Sprintf("No results found for \"%s\"", searchFilter)
+		message = i18n.GetStringWithData("games_list_no_results", map[string]interface{}{"Query": searchFilter})
 	} else {
-		message = fmt.Sprintf("No games found for %s", platformName)
+		message = i18n.GetStringWithData("games_list_no_games", map[string]interface{}{"Name": platformName})
 	}
 
 	gaba.ProcessMessage(
@@ -250,7 +310,7 @@ func (s *GameListScreen) showEmptyMessage(platformName, searchFilter string) {
 }
 
 func (s *GameListScreen) showFilteredOutMessage(collectionName string) {
-	message := fmt.Sprintf("No games in %s match your platform mappings", collectionName)
+	message := i18n.GetStringWithData("games_list_filtered_out", map[string]interface{}{"Name": collectionName})
 
 	gaba.ProcessMessage(
 		message,
@@ -262,22 +322,33 @@ func (s *GameListScreen) showFilteredOutMessage(collectionName string) {
 	)
 }
 
-func fetchList(config *utils.Config, host romm.Host, queryID int, fetchType FetchType) ([]romm.Rom, error) {
+func (s *GameListScreen) hasBIOSFilesInRomM(config utils.Config, host romm.Host, platform romm.Platform) bool {
+	// Check if RomM has any firmware for this platform
+	client := utils.GetRommClient(host, config.ApiTimeout)
+	firmwareList, err := client.GetFirmware(platform.ID)
+	if err != nil {
+		// If we can't fetch from RomM, don't show the button
+		return false
+	}
+
+	// Show BIOS button if RomM has any firmware files for this platform
+	return len(firmwareList) > 0
+}
+
+func fetchList(config *utils.Config, host romm.Host, queryID int, fetchType fetchType) ([]romm.Rom, error) {
 	logger := gaba.GetLogger()
 
-	rc := romm.NewClient(host.URL(),
-		romm.WithBasicAuth(host.Username, host.Password),
-		romm.WithTimeout(config.ApiTimeout))
+	rc := utils.GetRommClient(host, config.ApiTimeout)
 
-	opt := &romm.GetRomsOptions{
+	opt := romm.GetRomsQuery{
 		Limit: 10000,
 	}
 
 	switch fetchType {
-	case Platform:
-		opt.PlatformID = &queryID
-	case Collection:
-		opt.CollectionID = &queryID
+	case ftPlatform:
+		opt.PlatformID = queryID
+	case ftCollection:
+		opt.CollectionID = queryID
 	}
 
 	res, err := rc.GetRoms(opt)

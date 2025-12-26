@@ -6,9 +6,8 @@
   <br />
   <img src=".github/resources/logotipo.png" height="45px" width="auto" alt="romm grout logotype">
     <h3 style="font-size: 25px;">
-
-A RomM Client for [NextUI](https://nextui.loveretro.games) and [muOS](https://muos.dev)
-</h3>
+A RomM Client for <a href="https://muos.dev">muOS</a>, <a href="https://knulli.org">Knulli</a>, and <a href="https://nextui.loveretro.games">NextUI</a>.
+    </h3>
 
 <br>
 
@@ -18,84 +17,49 @@ A RomM Client for [NextUI](https://nextui.loveretro.games) and [muOS](https://mu
 [![downloads-badge-img]][downloads-badge]
 [![discord-badge-img]][discord-badge]
 
-<img src=".github/resources/webp/preview.webp" alt="collection flow" width="800px" height="auto">
+![Grout preview, collection flow](.github/resources/webp/preview.webp "Grout preview, collection flow")
 
 </div>
 
-## Features
+---
 
-- Download Games Wirelessly From Your RomM Instance
-- Download Box Art
-- Multi-file games with automatic M3U file creation
-- Select multiple games at once
-- Optional Game Details Screen
-- Optional Unzipping
+## Features at a Glance
 
-## Installation
-
-### NextUI Setup
-
-Grout has been tested on the following devices running NextUI.
-
-- TrimUI Devices
-    - Brick
-    - Smart Pro
-
-1. Own a TrimUI Brick or Smart Pro and have a SD Card with NextUI.
-2. Connect your device to a Wi-Fi network.
-3. The preferred Grout installation method is to use the NextUI Pak Store. You can find the Pak Store in the
-   `Tools` menu. Once in the Pak Store, Grout can be found under the `ROM Management` category.
-    - Alternatively, download
-      the [latest Grout release](https://github.com/rommapp/grout/releases/latest/download/Grout.pak.zip) for
-      NextUI
-    - For manual downloads, unzip the release zip and place the `Grout.pak` directory into `SD_ROOT/Tools/tg5040`.
-4. Launch `Grout` from the `Tools` menu and enjoy!
+- Download games wirelessly from your RomM instance
+- Download box art
+- Download and verify BIOS files
+- Save Sync
+- Platform directory mapping configurable on device
 
 ---
 
-### muOS Setup
+## Installation
 
-Grout has been tested on the following devices running muOS 2508.4 Loose Goose.
+Choose your platform and follow the installation guide:
 
-- Anbernic Devices
-    - RG34XX
-    - RG35XXSP
-    - RG40XXV
+- [muOS Installation](INSTALL_MUOS.md)
+- [Knulli Installation](INSTALL_KNULLI.md)
+- [NextUI Installation](INSTALL_NEXTUI.md)
 
-- TrimUI Devices
-    - Brick
-    - Smart Pro
+---
 
-Please help by verifying if it works on other devices!
+## User Guide
 
-1. Own a supported device running muOS.
-2. Download the [latest Grout release](https://github.com/rommapp/grout/releases/latest/download/Grout.muxapp) for muOS.
-3. Transfer the `Grout.muxapp` file an `ARCHIVE` folder on your device.
-    - `/mnt/mmc/ARCHIVE` or `/mnt/sdcard/ARCHIVE`
-4. Go to Applications and launch Archive Manager.
-5. Select `[SDX-APP] Grout` from the list and let it extract to your applications directory.
-6. Exit Archive Manager.
-7. Find an [input mapping config](/.github/resources/input_mappings) for your device.
-    - If one does not exist, please try one for a different device.
-    - If that does not work,
-      please [create an issue](https://github.com/rommapp/grout/issues/new?template=button-mapping-request.md).
-    - A first launch setup process is in the works but is not ready for primetime.
-8. Save the input mapping JSON file as `input_mapping.json` and transfer it to `/MUOS/application/Grout`.
-    - `/mnt/mmc/MUOS/application` or `/mnt/sdcard/MUOS/application`
-9. Select `Apps` on the Main Menu, launch Grout, and enjoy!
+For detailed usage instructions and configuration options, see the [User Guide](USER_GUIDE.md).
 
-**Note:** Grout does not support downloading art on muOS. This will be added in a future release.
+---
 
-## Need Help? Find a Bug? Have an Idea?
+## Need Help? Found a Bug? Have an Idea?
 
-Please [create an issue](https://github.com/rommapp/grout/issues/new/choose). Be sure to fill out the template
-completely!
+Please [create an issue](https://github.com/rommapp/grout/issues/new/choose) and fill out the template completely.
 
-## Spread joy!
+---
 
-A good chunk of time has been spent building Grout.
+## Spread Joy!
 
-If you feel inclined to pay it forward, go do something nice for someone! ❤️
+A significant amount of time has been spent building Grout.
+
+If you enjoy using Grout and feel inclined to pay it forward, go do something nice for someone! ❤️
 
 ✌🏻
 

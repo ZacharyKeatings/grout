@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"grout/constants"
 	"grout/romm"
-	"path"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 )
+
+const Downloaded = "↓"
 
 func ParseTag(input string) string {
 	cleaned := filepath.Clean(input)
@@ -32,7 +34,7 @@ func ParseTag(input string) string {
 	return foundTag
 }
 
-func NameCleaner(name string, stripTag bool) (string, string) {
+func nameCleaner(name string, stripTag bool) (string, string) {
 	cleaned := filepath.Clean(name)
 
 	tags := constants.TagRegex.FindAllStringSubmatch(cleaned, -1)
@@ -60,7 +62,7 @@ func NameCleaner(name string, stripTag bool) (string, string) {
 		cleaned = strings.ReplaceAll(cleaned, orderedFolderRegex[0], "")
 	}
 
-	cleaned = strings.ReplaceAll(cleaned, path.Ext(cleaned), "")
+	cleaned = strings.ReplaceAll(cleaned, ":", " -")
 
 	cleaned = strings.TrimSpace(cleaned)
 
@@ -70,11 +72,11 @@ func NameCleaner(name string, stripTag bool) (string, string) {
 	return cleaned, foundTag
 }
 
-func PrepareRomNames(games []romm.Rom) []romm.Rom {
+func PrepareRomNames(games []romm.Rom, config Config) []romm.Rom {
 	for i := range games {
 		regions := strings.Join(games[i].Regions, ", ")
 
-		cleanedName, _ := NameCleaner(games[i].Name, true)
+		cleanedName, _ := nameCleaner(games[i].Name, true)
 		games[i].DisplayName = cleanedName
 
 		if len(regions) > 0 {
@@ -82,7 +84,6 @@ func PrepareRomNames(games []romm.Rom) []romm.Rom {
 			games[i].DisplayName = dn
 		}
 
-		games[i].ListName = games[i].DisplayName
 	}
 
 	slices.SortFunc(games, func(a, b romm.Rom) int {
@@ -90,4 +91,50 @@ func PrepareRomNames(games []romm.Rom) []romm.Rom {
 	})
 
 	return games
+}
+
+func IsGameDownloadedLocally(game romm.Rom, config Config) bool {
+	// Need platform info to get ROM directory
+	if game.PlatformSlug == "" {
+		return false
+	}
+
+	platform := romm.Platform{
+		ID:   game.PlatformID,
+		Slug: game.PlatformSlug,
+		Name: game.PlatformDisplayName,
+	}
+
+	romDirectory := GetPlatformRomDirectory(config, platform)
+
+	if game.Multi {
+		// For multi-file ROMs, check if the directory exists
+		// Use the display name (before we added the checkmark)
+		cleanedName, _ := nameCleaner(game.Name, true)
+		multiDir := filepath.Join(romDirectory, cleanedName)
+		if _, err := os.Stat(multiDir); err == nil {
+			return true
+		}
+	} else if len(game.Files) > 0 {
+		// For single-file ROMs, check if the file exists based on filename
+		romPath := filepath.Join(romDirectory, game.Files[0].FileName)
+		if _, err := os.Stat(romPath); err == nil {
+			return true
+		}
+	}
+
+	return false
+}
+
+func FormatBytes(bytes int) string {
+	const unit = 1024
+	if bytes < unit {
+		return fmt.Sprintf("%d B", bytes)
+	}
+	div, exp := int64(unit), 0
+	for n := bytes / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }

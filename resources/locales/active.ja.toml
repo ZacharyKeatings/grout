@@ -1,0 +1,764 @@
+[app_title]
+description = "Application title"
+other = "Grout"
+
+[button_back]
+description = "Back button"
+other = "戻る"
+
+[button_bios]
+description = "BIOS button"
+other = "BIOS"
+
+[button_cancel]
+description = "Cancel button"
+other = "キャンセル"
+
+[button_close]
+description = "Close button"
+other = "閉じる"
+
+[button_confirm]
+description = "Confirm button"
+other = "確認"
+
+[button_continue]
+description = "Continue button"
+other = "続ける"
+
+[button_cycle]
+description = "Cycle button"
+other = "切替"
+
+[button_download]
+description = "Download button"
+other = "ダウンロード"
+
+[button_help]
+description = "Help button"
+other = "ヘルプ"
+
+[button_login]
+description = "Login button"
+other = "ログイン"
+
+[button_logout]
+description = "Logout button"
+other = "ログアウト"
+
+[button_menu]
+description = "Menu button"
+other = "メニュー"
+
+[logout_confirm_message]
+description = "Logout confirmation message"
+other = "ログアウトしますか？"
+
+[clear_cache_confirm_message]
+description = "Clear cache confirmation message"
+other = "キャッシュされた画像をすべて削除しますか？"
+
+[button_multi]
+description = "Multi select button"
+other = "複数選択"
+
+[button_quit]
+description = "Quit button"
+other = "終了"
+
+[button_save]
+description = "Save button"
+other = "保存"
+
+[button_save_sync]
+description = "Button to trigger save sync"
+other = "同期"
+
+[button_search]
+description = "Search button"
+other = "検索"
+
+[button_select]
+description = "Select button"
+other = "選択"
+
+[button_settings]
+description = "Settings button"
+other = "設定"
+
+[collection_platform_no_mapped]
+description = "No mapped platforms message"
+other = "{{.Name}}にマッピングされたゲームのある\nプラットフォームがありません"
+
+[collection_platform_title]
+description = "Collection platform selection title"
+other = "{{.Name}} - プラットフォーム"
+
+[common_false]
+description = "False value"
+other = "いいえ"
+
+[common_hide]
+description = "Hide value"
+other = "非表示"
+
+[common_show]
+description = "Show value"
+other = "表示"
+
+[common_skip]
+description = "Skip option"
+other = "スキップ"
+
+[common_true]
+description = "True value"
+other = "はい"
+
+[download_artwork]
+description = "Downloading artwork message"
+other = "アートワークをダウンロード中..."
+
+[download_extracting]
+description = "Extracting ROM message"
+other = "{{.Name}}を展開中..."
+
+[emulator_default]
+description = "Default emulator suffix"
+other = "（デフォルト）"
+
+[emulator_saves_count]
+description = "Emulator saves count suffix"
+other = "（{{.Count}}個のセーブ）"
+
+[emulator_selection_title]
+description = "Emulator selection title"
+other = "{{.Platform}}エミュレータを選択"
+
+[game_details_average_rating]
+description = "Average rating label"
+other = "平均評価"
+
+[game_details_companies]
+description = "Companies label"
+other = "開発会社"
+
+[game_details_file_size]
+description = "File size label"
+other = "ファイルサイズ"
+
+[game_details_game]
+description = "Game label"
+other = "ゲーム"
+
+[game_details_game_modes]
+description = "Game modes label"
+other = "ゲームモード"
+
+[game_details_genres]
+description = "Genres label"
+other = "ジャンル"
+
+[game_details_languages]
+description = "Languages label"
+other = "言語"
+
+[game_details_multi_file_rom]
+description = "Multi-file ROM value"
+other = "マルチファイルROM"
+
+[game_details_platform]
+description = "Platform label"
+other = "プラットフォーム"
+
+[game_details_qr_section]
+description = "QR code section title"
+other = "RomMゲームリスト"
+
+[game_details_regions]
+description = "Regions label"
+other = "リージョン"
+
+[game_details_release_date]
+description = "Release date label"
+other = "発売日"
+
+[game_details_type]
+description = "Type label"
+other = "タイプ"
+
+[games_list_filtered_out]
+description = "All games filtered out message"
+other = "{{.Name}}内のゲームはプラットフォームマッピングに一致しません"
+
+[games_list_loading]
+description = "Loading games message"
+other = "{{.Name}}を読み込み中..."
+
+[games_list_no_games]
+description = "No games found message"
+other = "{{.Name}}のゲームが見つかりません"
+
+[games_list_no_results]
+description = "No search results message"
+other = "「{{.Query}}」の検索結果がありません"
+
+[games_list_search_prefix]
+description = "Search prefix in title"
+other = "[検索: \"{{.Query}}\"]"
+
+[games_list_help_title]
+description = "Games list help screen title"
+other = "ゲームリストのヘルプ"
+
+[games_list_help_body]
+description = "Games list help screen body text"
+other = """A - ゲームを選択
+B - 前の画面に戻る
+X - 名前でゲームを検索
+Select - 複数選択モードを切替
+  複数選択モード中:
+  - 十字キーでナビゲート
+  - Aで選択を切替
+  - Startで選択を確定
+Menu - このヘルプ画面を表示
+十字キー - ゲームリストをナビゲート"""
+
+[help_exit_text]
+description = "Message to close the help screen"
+other = "任意のボタンを押してヘルプを閉じる"
+
+[log_level_debug]
+description = "Debug log level"
+other = "デバッグ"
+
+[log_level_error]
+description = "Error log level"
+other = "エラー"
+
+[login_error_connection]
+description = "Connection error message"
+other = "RomMに接続できませんでした！\nホスト名とポートを確認してください。"
+
+[login_error_credentials]
+description = "Invalid credentials error"
+other = "ユーザー名またはパスワードが無効です。"
+
+[login_error_forbidden]
+description = "Access forbidden (403) error"
+other = "アクセスが拒否されました！\nユーザー名/パスワードを確認し、httpとhttpsを切り替えてみてください。"
+
+[login_error_unexpected]
+description = "Unexpected error message"
+other = "予期しないエラーが発生しました！\n詳細はログを確認してください。"
+
+[login_error_invalid_hostname]
+description = "Invalid hostname/DNS error"
+other = "ホスト名を解決できませんでした！\nホスト名が正しいか確認してください。"
+
+[login_error_connection_refused]
+description = "Connection refused error"
+other = "ホストに接続できませんでした！\nホスト名とポートが正しいか確認してください。"
+
+[login_error_timeout]
+description = "Connection timeout error"
+other = "接続がタイムアウトしました！\nネットワーク接続とホストにアクセス可能か確認してください。"
+
+[login_error_wrong_protocol]
+description = "Wrong protocol (http vs https) error"
+other = "プロトコルエラー！\nhttpとhttpsを切り替えてみてください。"
+
+[login_error_use_https]
+description = "Server requires HTTPS"
+other = "プロトコルエラー！\nHTTPの代わりにHTTPSを使用してください。"
+
+[login_error_use_http]
+description = "Server requires HTTP"
+other = "プロトコルエラー！\nHTTPSの代わりにHTTPを使用してください。"
+
+[login_error_server]
+description = "Server error (5xx) message"
+other = "RomMサーバーエラー！\nRomMサーバーのログを確認してください。"
+
+[login_validating]
+description = "Validating connection message"
+other = "接続を検証中..."
+
+[error_loading_platforms]
+description = "Error loading platforms from RomM"
+other = "RomMからプラットフォームを読み込めませんでした！\n接続を確認して再試行してください。"
+
+[startup_error_invalid_hostname]
+description = "Startup: Invalid hostname/DNS error"
+other = "ホスト名を解決できませんでした！\n設定されたサーバーアドレスが見つかりません。"
+
+[startup_error_connection_refused]
+description = "Startup: Connection refused error"
+other = "サーバーに接続できませんでした！\nサーバーがオフラインか、ポートが間違っている可能性があります。"
+
+[startup_error_timeout]
+description = "Startup: Connection timeout error"
+other = "接続がタイムアウトしました！\nサーバーが応答しません。ネットワーク接続を確認してください。"
+
+[startup_error_wrong_protocol]
+description = "Startup: Wrong protocol (http vs https) error"
+other = "プロトコルエラー！\nサーバーはhttpsの代わりにhttpを必要としているかもしれません（またはその逆）。"
+
+[startup_error_use_https]
+description = "Startup: Server requires HTTPS"
+other = "プロトコルエラー！\n設定をHTTPからHTTPSに変更してください。"
+
+[startup_error_use_http]
+description = "Startup: Server requires HTTP"
+other = "プロトコルエラー！\n設定をHTTPSからHTTPに変更してください。"
+
+[startup_error_credentials]
+description = "Startup: Invalid credentials error"
+other = "認証に失敗しました！\nサーバー上でユーザー名またはパスワードが変更された可能性があります。"
+
+[startup_error_forbidden]
+description = "Startup: Access forbidden (403) error"
+other = "アクセスが拒否されました！\n資格情報が変更されたか、サーバーが異なるプロトコル（http vs https）を必要としている可能性があります。"
+
+[startup_error_server]
+description = "Startup: Server error (5xx) message"
+other = "RomMサーバーエラー！\nサーバーに問題が発生しています。サーバーログを確認してください。"
+
+[startup_error_action_retry]
+description = "Startup error action: Retry connection"
+other = "再接続"
+
+[startup_error_action_relogin]
+description = "Startup error action: Re-enter credentials"
+other = "資格情報を再入力"
+
+[startup_error_action_exit]
+description = "Startup error action: Exit application"
+other = "終了"
+
+[login_hostname]
+description = "Hostname field label"
+other = "ホスト名"
+
+[login_logging_in]
+description = "Logging in progress message"
+other = "ログイン中..."
+
+[login_password]
+description = "Password field label"
+other = "パスワード"
+
+[login_port]
+description = "Port field label"
+other = "ポート（任意）"
+
+[login_protocol]
+description = "Protocol field label"
+other = "プロトコル"
+
+[login_protocol_http]
+description = "HTTP protocol option"
+other = "HTTP"
+
+[login_protocol_https]
+description = "HTTPS protocol option"
+other = "HTTPS"
+
+[login_title]
+description = "Login screen title"
+other = "RomMにログイン"
+
+[login_username]
+description = "Username field label"
+other = "ユーザー名"
+
+[platform_mapping_create]
+description = "Create directory option"
+other = "'{{.Name}}'を作成"
+
+[platform_mapping_directory_not_found]
+description = "ROM directory not found error"
+other = "ROMディレクトリが見つかりませんでした！"
+
+[platform_mapping_path_prefix]
+description = "Directory path prefix"
+other = "/{{.Name}}"
+
+[platform_mapping_title]
+description = "Platform mapping screen title"
+other = "ROMディレクトリマッピング"
+
+[platform_selection_collections]
+description = "Collections menu item"
+other = "コレクション"
+
+[save_sync_downloaded]
+description = "Downloaded label"
+other = "ダウンロード済み"
+
+[save_sync_failed]
+description = "Failed label"
+other = "失敗"
+
+[save_sync_rom_not_found]
+description = "ROM not found message"
+other = "{{.Name}}（RomMでROMが見つかりません）"
+
+[save_sync_scanning]
+description = "Scanning save files message"
+other = "セーブファイルをスキャン中..."
+
+[save_sync_skipped]
+description = "Skipped label"
+other = "スキップ"
+
+[save_sync_summary]
+description = "Save sync summary title"
+other = "セーブ同期サマリー"
+
+[save_sync_summary_section]
+description = "Summary section title"
+other = "サマリー"
+
+[save_sync_total_processed]
+description = "Total processed label"
+other = "処理合計"
+
+[save_sync_unknown_error]
+description = "Unknown error message"
+other = "不明なエラー"
+
+[save_sync_unmatched_saves]
+description = "Unmatched saves section title"
+other = "未マッチのセーブ"
+
+[save_sync_up_to_date]
+description = "Everything up to date message"
+other = "すべて最新です！\nゲームを楽しんでください！"
+
+[save_sync_uploaded]
+description = "Uploaded label"
+other = "アップロード済み"
+
+[settings_api_timeout]
+description = "API timeout option"
+other = "APIタイムアウト"
+
+[settings_auto_sync_saves]
+description = "Auto sync saves option"
+other = "セーブ自動同期"
+
+[settings_download_art]
+description = "Download art option"
+other = "アートワークをダウンロード"
+
+[settings_download_timeout]
+description = "Download timeout option"
+other = "ダウンロードタイムアウト"
+
+[settings_downloaded_games]
+description = "Downloaded games option"
+other = "ダウンロード済みゲーム"
+
+[settings_edit_mappings]
+description = "Edit directory mappings option"
+other = "ディレクトリマッピング"
+
+[settings_info]
+description = "Info option"
+other = "Grout情報"
+
+[info_title]
+description = "Info screen title"
+other = "Grout情報"
+
+[info_version]
+description = "Grout version label"
+other = "バージョン"
+
+[info_server]
+description = "Server URL label"
+other = "サーバー"
+
+[info_user]
+description = "Active user label"
+other = "ユーザー"
+
+[info_commit]
+description = "Git commit hash label"
+other = "コミット"
+
+[info_build_date]
+description = "Build date/time label"
+other = "ビルド日"
+
+[info_build_type]
+description = "Build type label (Dev/Release)"
+other = "ビルドタイプ"
+
+[info_repository]
+description = "Repository QR code label"
+other = "GitHubリポジトリ"
+
+[settings_language]
+description = "Language option"
+other = "言語"
+
+[settings_language_english]
+description = "English language option"
+other = "English"
+
+[settings_language_spanish]
+description = "Spanish language option"
+other = "Español"
+
+[settings_language_french]
+description = "French language option"
+other = "Français"
+
+[settings_language_german]
+description = "German language option"
+other = "Deutsch"
+
+[settings_language_italian]
+description = "Italian language option"
+other = "Italiano"
+
+[settings_language_portuguese]
+description = "Portuguese language option"
+other = "Português"
+
+[settings_language_japanese]
+description = "Japanese language option"
+other = "日本語"
+
+[settings_language_russian]
+description = "Russian language option"
+other = "Русский"
+
+[settings_log_level]
+description = "Log level option"
+other = "ログレベル"
+
+[settings_collections]
+description = "Collections settings submenu"
+other = "コレクション設定"
+
+[settings_advanced]
+description = "Advanced settings submenu"
+other = "詳細設定"
+
+[settings_clear_cache]
+description = "Clear artwork cache option"
+other = "キャッシュをクリア"
+
+[settings_show_collections]
+description = "Collections option"
+other = "コレクション"
+
+[settings_show_smart_collections]
+description = "Smart collections option"
+other = "スマートコレクション"
+
+[settings_show_game_details]
+description = "Game details option"
+other = "ゲーム詳細"
+
+[settings_show_virtual_collections]
+description = "Virtual collections option"
+other = "仮想コレクション"
+
+[settings_collection_view]
+description = "Collection view mode option"
+other = "コレクション表示"
+
+[collection_view_platform]
+description = "Platform collection view mode"
+other = "プラットフォーム"
+
+[collection_view_unified]
+description = "Unified collection view mode"
+other = "統合"
+
+[settings_save_sync]
+description = "Save sync mode option"
+other = "セーブ同期"
+
+[save_sync_mode_off]
+description = "Save sync mode off"
+other = "オフ"
+
+[save_sync_mode_manual]
+description = "Save sync mode manual"
+other = "手動"
+
+[save_sync_mode_daemon]
+description = "Save sync mode daemon"
+other = "自動"
+
+[settings_show_bios]
+description = "BIOS menu option"
+other = "BIOSメニュー"
+
+[bios_status_ready]
+description = "BIOS file is installed and verified"
+other = "準備完了"
+
+[bios_status_wrong_version]
+description = "BIOS file exists but hash doesn't match"
+other = "バージョン不一致"
+
+[bios_status_unverified]
+description = "BIOS file is installed but cannot be verified"
+other = "インストール済み（未検証）"
+
+[bios_status_not_installed]
+description = "BIOS file is missing"
+other = "未インストール"
+
+[bios_no_files_required]
+description = "Message when platform doesn't require BIOS files"
+other = "このプラットフォームはBIOSファイルを必要としません。"
+
+[bios_download_complete]
+description = "Message when BIOS download completes successfully"
+other = "%d個のBIOSファイルを正常にダウンロードしました。"
+
+[bios_download_complete_with_warnings]
+description = "Message when BIOS download completes with MD5 warnings"
+other = "%d個のBIOSファイルをダウンロードしましたが、%d個のハッシュ警告があります。ファイルが正しいバージョンでない可能性があります。"
+
+[bios_download_failed]
+description = "Message when BIOS download fails"
+other = "%d個のBIOSファイルのダウンロードに失敗しました。"
+
+[settings_box_art]
+description = "Box art in games list option"
+other = "ボックスアート"
+
+[settings_sync_artwork]
+description = "Cache artwork option"
+other = "アートワークをキャッシュ"
+
+[artwork_sync_no_platforms]
+description = "No platforms mapped message"
+other = "ディレクトリマッピングのあるプラットフォームが見つかりません。"
+
+[artwork_sync_scanning]
+description = "Scanning platforms for artwork message"
+other = "プラットフォームをスキャン中 %d/%d: %s..."
+
+[artwork_sync_up_to_date]
+description = "All artwork up to date message"
+other = "すべてのアートワークは既にキャッシュされています！"
+
+[artwork_sync_confirm]
+description = "Confirm artwork download message"
+other = "%d個のゲームのアートワークをダウンロードしますか？"
+
+[artwork_sync_processing]
+description = "Processing artwork message"
+other = "アートワークを処理中..."
+
+[artwork_sync_complete]
+description = "Artwork sync complete message"
+other = "%d個のアートワーク画像を正常にダウンロードしました。"
+
+[artwork_sync_failed]
+description = "Artwork sync failed message"
+other = "%d個のアートワーク画像のダウンロードに失敗しました。"
+
+[settings_sync_saves]
+description = "Sync saves option"
+other = "セーブを同期"
+
+[settings_title]
+description = "Settings screen title"
+other = "設定"
+
+[settings_unzip_downloads]
+description = "Unzip downloads option"
+other = "ダウンロードを解凍"
+
+[time_105_minutes]
+description = "105 minutes"
+other = "105分"
+
+[time_120_minutes]
+description = "120 minutes"
+other = "120分"
+
+[time_120_seconds]
+description = "120 seconds"
+other = "120秒"
+
+[time_15_minutes]
+description = "15 minutes"
+other = "15分"
+
+[time_15_seconds]
+description = "15 seconds"
+other = "15秒"
+
+[time_180_seconds]
+description = "180 seconds"
+other = "180秒"
+
+[time_240_seconds]
+description = "240 seconds"
+other = "240秒"
+
+[time_300_seconds]
+description = "300 seconds"
+other = "300秒"
+
+[time_30_minutes]
+description = "30 minutes"
+other = "30分"
+
+[time_30_seconds]
+description = "30 seconds"
+other = "30秒"
+
+[time_45_minutes]
+description = "45 minutes"
+other = "45分"
+
+[time_45_seconds]
+description = "45 seconds"
+other = "45秒"
+
+[time_60_minutes]
+description = "60 minutes"
+other = "60分"
+
+[time_60_seconds]
+description = "60 seconds"
+other = "60秒"
+
+[time_75_minutes]
+description = "75 minutes"
+other = "75分"
+
+[time_75_seconds]
+description = "75 seconds"
+other = "75秒"
+
+[time_90_minutes]
+description = "90 minutes"
+other = "90分"
+
+[time_90_seconds]
+description = "90 seconds"
+other = "90秒"
+
+[downloaded_games_do_nothing]
+description = "Do nothing option for downloaded games"
+other = "何もしない"
+
+[downloaded_games_mark]
+description = "Mark option for downloaded games"
+other = "マーク"
+
+[downloaded_games_filter]
+description = "Filter option for downloaded games"
+other = "フィルター"
