@@ -19,6 +19,7 @@ type Config struct {
 	SaveSyncMode           string                      `json:"save_sync_mode"`
 	ShowBIOSDownload       bool                        `json:"show_bios"`
 	DownloadArt            bool                        `json:"download_art,omitempty"`
+	ShowBoxArt             bool                        `json:"show_box_art,omitempty"`
 	UnzipDownloads         bool                        `json:"unzip_downloads,omitempty"`
 	ShowCollections        bool                        `json:"show_collections"`
 	ShowSmartCollections   bool                        `json:"show_smart_collections"`
@@ -51,6 +52,7 @@ func (c Config) ToLoggable() any {
 		"download_timeout":        c.DownloadTimeout,
 		"unzip_downloads":         c.UnzipDownloads,
 		"download_art":            c.DownloadArt,
+		"show_box_art":            c.ShowBoxArt,
 		"game_details":            c.GameDetails,
 		"collections":             c.ShowCollections,
 		"smart_collections":       c.ShowSmartCollections,

@@ -54,6 +54,10 @@ other = "Menu"
 description = "Message de confirmation de déconnexion"
 other = "Êtes-vous sûr de vouloir vous déconnecter ?"
 
+[clear_cache_confirm_message]
+description = "Clear cache confirmation message"
+other = "Vider tout le cache des illustrations ?"
+
 [button_multi]
 description = "Bouton sélection multiple"
 other = "Multi"
@@ -447,6 +451,10 @@ other = "Synchronisation auto des sauvegardes"
 description = "Option de téléchargement des illustrations"
 other = "Télécharger les illustrations"
 
+[settings_box_art]
+description = "Option d'illustration de jaquette dans la liste"
+other = "Illustrations"
+
 [settings_download_timeout]
 description = "Option de délai d'attente de téléchargement"
 other = "Délai d'attente de téléchargement"
@@ -515,6 +523,18 @@ other = "Français"
 description = "Option du niveau de log"
 other = "Niveau de log"
 
+[settings_collections]
+description = "Collections settings submenu"
+other = "Paramètres de Collections"
+
+[settings_advanced]
+description = "Advanced settings submenu"
+other = "Avancé"
+
+[settings_clear_cache]
+description = "Clear artwork cache option"
+other = "Vider le Cache"
+
 [settings_show_collections]
 description = "Option des collections"
 other = "Collections"
@@ -560,8 +580,8 @@ description = "Mode de synchronisation automatique"
 other = "Automatique"
 
 [settings_show_bios]
-description = "Option de téléchargement BIOS"
-other = "Téléchargement BIOS"
+description = "Option de menu BIOS"
+other = "Menu BIOS"
 
 [bios_status_ready]
 description = "Fichier BIOS installé et vérifié"

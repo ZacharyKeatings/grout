@@ -3,7 +3,7 @@ module grout
 go 1.24.1
 
 require (
-	github.com/BrandonKowalski/gabagool/v2 v2.3.0
+	github.com/BrandonKowalski/gabagool/v2 v2.3.2
 	github.com/UncleJunVIP/certifiable v1.2.0
 	github.com/sonh/qs v0.6.4
 	github.com/yeqown/go-qrcode/v2 v2.2.5
@@ -27,3 +27,5 @@ require (
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 )
+
+replace github.com/BrandonKowalski/gabagool/v2 => /Users/btk/Developer/gabagool

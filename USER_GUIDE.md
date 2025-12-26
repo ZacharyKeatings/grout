@@ -281,6 +281,10 @@ files for emulators directly from your RomM server.
 **Download Art** – When enabled, Grout downloads box art for games after downloading the ROMs. The art goes into your
 artwork directory so your frontend can display it.
 
+**Box Art** - When set to show, Grout displays cover art thumbnails next to game names in the game list. Artwork is automatically cached in the background as you browse. This provides a visual preview similar to your frontend's game library view.
+
+**Sync Artwork** - Click this option to manually sync artwork for all games across all mapped platforms. Grout will scan your platforms, identify games that don't have cached artwork, and download cover art from RomM. Useful for pre-caching artwork or updating your library after adding new games.
+
 **Unzip Downloads** - When enabled, Grout automatically extracts zipped ROMs after downloading. The zip file is deleted
 after extraction. Useful if you prefer keeping ROMs uncompressed.
 

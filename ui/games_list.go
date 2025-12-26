@@ -62,6 +62,10 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 			return withCode(GameListOutput{}, gaba.ExitCodeError), err
 		}
 		games = loaded
+
+		if input.Config.ShowBoxArt {
+			go utils.SyncArtworkInBackground(input.Host, loaded)
+		}
 	}
 
 	output := GameListOutput{
@@ -102,7 +106,6 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 
 		if input.Platform.ID == 0 {
 			for i := range displayGames {
-				// Add download indicator before platform slug if needed
 				prefix := ""
 				if input.Config.DownloadedGames == "mark" && utils.IsGameDownloadedLocally(displayGames[i], *input.Config) {
 					prefix = utils.Downloaded + " "
@@ -111,7 +114,6 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 			}
 		} else {
 			displayName = fmt.Sprintf("%s - %s", input.Collection.Name, input.Platform.Name)
-			// For collection platform mode, add download indicator
 			if input.Config.DownloadedGames == "mark" {
 				for i := range displayGames {
 					if utils.IsGameDownloadedLocally(displayGames[i], *input.Config) {
@@ -121,7 +123,6 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 			}
 		}
 	} else {
-		// For non-collection views, add download indicator if needed
 		if input.Config.DownloadedGames == "mark" {
 			for i := range displayGames {
 				if utils.IsGameDownloadedLocally(displayGames[i], *input.Config) {
@@ -158,16 +159,22 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 
 	menuItems := make([]gaba.MenuItem, len(displayGames))
 	for i, game := range displayGames {
+		imageFilename := ""
+		if input.Config.ShowBoxArt {
+			imageFilename = utils.GetCachedArtworkForRom(game)
+		}
 		menuItems[i] = gaba.MenuItem{
-			Text:     game.DisplayName,
-			Selected: false,
-			Focused:  false,
-			Metadata: game,
+			Text:          game.DisplayName,
+			Selected:      false,
+			Focused:       false,
+			Metadata:      game,
+			ImageFilename: imageFilename,
 		}
 	}
 
 	options := gaba.DefaultListOptions(title, menuItems)
 	options.SmallTitle = true
+	options.EnableImages = input.Config.ShowBoxArt
 	options.ActionButton = buttons.VirtualButtonX
 	options.MultiSelectButton = buttons.VirtualButtonSelect
 	options.HelpButton = buttons.VirtualButtonMenu

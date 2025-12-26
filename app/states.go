@@ -18,11 +18,15 @@ const (
 	search                                     = "search"
 	collectionSearch                           = "collection_search"
 	settings                                   = "settings"
+	collectionsSettings                        = "collections_settings"
+	advancedSettings                           = "advanced_settings"
 	settingsPlatformMapping                    = "platform_mapping"
 	info                                       = "info"
 	logoutConfirmation                         = "logout_confirmation"
+	clearCacheConfirmation                     = "clear_cache_confirmation"
 	saveSync                                   = "save_sync"
 	biosDownload                               = "bios_download"
+	artworkSync                                = "artwork_sync"
 )
 
 type (
@@ -55,8 +59,20 @@ type (
 	}
 
 	settingsPosition struct {
+		Index             int
+		VisibleStartIndex int
+	}
+
+	collectionsSettingsPosition struct {
 		Index int
 	}
+
+	advancedSettingsPosition struct {
+		Index             int
+		VisibleStartIndex int
+	}
+
+	infoPreviousState gaba.StateName
 
 	cachedCollectionGames    []romm.Rom
 	cachedRegularCollections []romm.Collection
@@ -429,17 +445,21 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 
 		screen := ui.NewSettingsScreen()
 		result, err := screen.Draw(ui.SettingsInput{
-			Config:            config,
-			CFW:               cfw,
-			Host:              host,
-			LastSelectedIndex: pos.Index,
+			Config:                config,
+			CFW:                   cfw,
+			Host:                  host,
+			LastSelectedIndex:     pos.Index,
+			LastVisibleStartIndex: pos.VisibleStartIndex,
 		})
 
 		if err != nil {
 			return ui.SettingsOutput{}, gaba.ExitCodeError
 		}
 
-		gaba.Set(ctx, settingsPosition{Index: result.Value.LastSelectedIndex})
+		gaba.Set(ctx, settingsPosition{
+			Index:             result.Value.LastSelectedIndex,
+			VisibleStartIndex: result.Value.LastVisibleStartIndex,
+		})
 
 		return result.Value, result.ExitCode
 	}).
@@ -455,10 +475,91 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 			gaba.Set(ctx, showCollectionsBool(showCollections))
 			return nil
 		}).
-		On(constants.ExitCodeEditMappings, settingsPlatformMapping).
-		On(constants.ExitCodeInfo, info).
+		On(constants.ExitCodeCollectionsSettings, collectionsSettings).
+		On(constants.ExitCodeAdvancedSettings, advancedSettings).
+		OnWithHook(constants.ExitCodeInfo, info, func(ctx *gaba.Context) error {
+			gaba.Set(ctx, infoPreviousState(settings))
+			return nil
+		}).
+		On(constants.ExitCodeSyncArtwork, artworkSync).
 		OnWithHook(gaba.ExitCodeBack, platformSelection, func(ctx *gaba.Context) error {
 			gaba.Set(ctx, settingsPosition{Index: 0})
+			return nil
+		})
+
+	gaba.AddState(fsm, collectionsSettings, func(ctx *gaba.Context) (ui.CollectionsSettingsOutput, gaba.ExitCode) {
+		config, _ := gaba.Get[*utils.Config](ctx)
+		pos, _ := gaba.Get[collectionsSettingsPosition](ctx)
+
+		screen := ui.NewCollectionsSettingsScreen()
+		result, err := screen.Draw(ui.CollectionsSettingsInput{
+			Config: config,
+		})
+
+		if err != nil {
+			return ui.CollectionsSettingsOutput{}, gaba.ExitCodeError
+		}
+
+		gaba.Set(ctx, collectionsSettingsPosition{Index: pos.Index})
+
+		return result.Value, result.ExitCode
+	}).
+		OnWithHook(gaba.ExitCodeSuccess, settings, func(ctx *gaba.Context) error {
+			config, _ := gaba.Get[*utils.Config](ctx)
+			host, _ := gaba.Get[romm.Host](ctx)
+
+			gaba.Set(ctx, config)
+			gaba.Set(ctx, collectionsSettingsPosition{Index: 0})
+
+			// Update showCollections based on new settings
+			showCollections := utils.ShowCollections(config, host)
+			gaba.Set(ctx, showCollectionsBool(showCollections))
+			return nil
+		}).
+		OnWithHook(gaba.ExitCodeBack, settings, func(ctx *gaba.Context) error {
+			gaba.Set(ctx, collectionsSettingsPosition{Index: 0})
+			return nil
+		})
+
+	gaba.AddState(fsm, advancedSettings, func(ctx *gaba.Context) (ui.AdvancedSettingsOutput, gaba.ExitCode) {
+		config, _ := gaba.Get[*utils.Config](ctx)
+		host, _ := gaba.Get[romm.Host](ctx)
+		pos, _ := gaba.Get[advancedSettingsPosition](ctx)
+
+		screen := ui.NewAdvancedSettingsScreen()
+		result, err := screen.Draw(ui.AdvancedSettingsInput{
+			Config:                config,
+			Host:                  host,
+			LastSelectedIndex:     pos.Index,
+			LastVisibleStartIndex: pos.VisibleStartIndex,
+		})
+
+		if err != nil {
+			return ui.AdvancedSettingsOutput{}, gaba.ExitCodeError
+		}
+
+		gaba.Set(ctx, advancedSettingsPosition{
+			Index:             result.Value.LastSelectedIndex,
+			VisibleStartIndex: result.Value.LastVisibleStartIndex,
+		})
+
+		return result.Value, result.ExitCode
+	}).
+		OnWithHook(gaba.ExitCodeSuccess, settings, func(ctx *gaba.Context) error {
+			config, _ := gaba.Get[*utils.Config](ctx)
+
+			gaba.Set(ctx, config)
+			gaba.Set(ctx, advancedSettingsPosition{Index: 0, VisibleStartIndex: 0})
+			return nil
+		}).
+		OnWithHook(constants.ExitCodeInfo, info, func(ctx *gaba.Context) error {
+			gaba.Set(ctx, infoPreviousState(advancedSettings))
+			return nil
+		}).
+		On(constants.ExitCodeEditMappings, settingsPlatformMapping).
+		On(constants.ExitCodeClearCache, clearCacheConfirmation).
+		OnWithHook(gaba.ExitCodeBack, settings, func(ctx *gaba.Context) error {
+			gaba.Set(ctx, advancedSettingsPosition{Index: 0, VisibleStartIndex: 0})
 			return nil
 		})
 
@@ -483,7 +584,7 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 
 		return result.Value, result.ExitCode
 	}).
-		OnWithHook(gaba.ExitCodeSuccess, settings, func(ctx *gaba.Context) error {
+		OnWithHook(gaba.ExitCodeSuccess, advancedSettings, func(ctx *gaba.Context) error {
 			output, _ := gaba.Get[ui.PlatformMappingOutput](ctx)
 			config, _ := gaba.Get[*utils.Config](ctx)
 			host, _ := gaba.Get[romm.Host](ctx)
@@ -501,14 +602,16 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 			gaba.Set(ctx, platforms)
 			return nil
 		}).
-		On(gaba.ExitCodeBack, settings)
+		On(gaba.ExitCodeBack, advancedSettings)
 
 	gaba.AddState(fsm, info, func(ctx *gaba.Context) (ui.InfoOutput, gaba.ExitCode) {
 		host, _ := gaba.Get[romm.Host](ctx)
+		prevState, _ := gaba.Get[infoPreviousState](ctx)
 
 		screen := ui.NewInfoScreen()
 		result, err := screen.Draw(ui.InfoInput{
-			Host: host,
+			Host:         host,
+			FromAdvanced: prevState == advancedSettings,
 		})
 
 		if err != nil {
@@ -518,6 +621,7 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		return result.Value, result.ExitCode
 	}).
 		On(gaba.ExitCodeBack, settings).
+		On(constants.ExitCodeBackToAdvanced, advancedSettings).
 		On(constants.ExitCodeLogoutConfirm, logoutConfirmation)
 
 	gaba.AddState(fsm, logoutConfirmation, func(ctx *gaba.Context) (ui.LogoutConfirmationOutput, gaba.ExitCode) {
@@ -600,6 +704,19 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 			return nil
 		})
 
+	gaba.AddState(fsm, clearCacheConfirmation, func(ctx *gaba.Context) (ui.ClearCacheConfirmationOutput, gaba.ExitCode) {
+		screen := ui.NewClearCacheConfirmationScreen()
+		result, err := screen.Draw()
+
+		if err != nil {
+			return ui.ClearCacheConfirmationOutput{}, gaba.ExitCodeError
+		}
+
+		return result.Value, result.ExitCode
+	}).
+		On(gaba.ExitCodeBack, advancedSettings).
+		On(gaba.ExitCodeSuccess, advancedSettings)
+
 	gaba.AddState(fsm, saveSync, func(ctx *gaba.Context) (ui.SaveSyncOutput, gaba.ExitCode) {
 		config, _ := gaba.Get[*utils.Config](ctx)
 		host, _ := gaba.Get[romm.Host](ctx)
@@ -637,6 +754,17 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		return output, gaba.ExitCodeBack
 	}).
 		On(gaba.ExitCodeBack, gameList)
+
+	gaba.AddState(fsm, artworkSync, func(ctx *gaba.Context) (ui.ArtworkSyncOutput, gaba.ExitCode) {
+		config, _ := gaba.Get[*utils.Config](ctx)
+		host, _ := gaba.Get[romm.Host](ctx)
+
+		screen := ui.NewArtworkSyncScreen()
+		output := screen.Execute(*config, host)
+
+		return output, gaba.ExitCodeBack
+	}).
+		On(gaba.ExitCodeBack, settings)
 
 	return fsm.Start(platformSelection)
 }

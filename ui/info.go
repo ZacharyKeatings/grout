@@ -13,7 +13,8 @@ import (
 )
 
 type InfoInput struct {
-	Host romm.Host
+	Host         romm.Host
+	FromAdvanced bool
 }
 
 type InfoOutput struct {
@@ -45,6 +46,9 @@ func (s *InfoScreen) Draw(input InfoInput) (ScreenResult[InfoOutput], error) {
 
 	if err != nil {
 		if errors.Is(err, gaba.ErrCancelled) {
+			if input.FromAdvanced {
+				return withCode(output, constants.ExitCodeBackToAdvanced), nil
+			}
 			return back(output), nil
 		}
 		gaba.GetLogger().Error("Info screen error", "error", err)
@@ -56,6 +60,9 @@ func (s *InfoScreen) Draw(input InfoInput) (ScreenResult[InfoOutput], error) {
 		return withCode(output, constants.ExitCodeLogoutConfirm), nil
 	}
 
+	if input.FromAdvanced {
+		return withCode(output, constants.ExitCodeBackToAdvanced), nil
+	}
 	return back(output), nil
 }
 

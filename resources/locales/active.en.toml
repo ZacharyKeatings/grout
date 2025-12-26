@@ -54,6 +54,10 @@ other = "Menu"
 description = "Logout confirmation message"
 other = "Are you sure you want to logout?"
 
+[clear_cache_confirm_message]
+description = "Clear cache confirmation message"
+other = "Clear all cached artwork?"
+
 [button_multi]
 description = "Multi select button"
 other = "Multi"
@@ -515,6 +519,18 @@ other = "Français"
 description = "Log level option"
 other = "Log Level"
 
+[settings_collections]
+description = "Collections settings submenu"
+other = "Collections Settings"
+
+[settings_advanced]
+description = "Advanced settings submenu"
+other = "Advanced"
+
+[settings_clear_cache]
+description = "Clear artwork cache option"
+other = "Clear Cache"
+
 [settings_show_collections]
 description = "Collections option"
 other = "Collections"
@@ -560,8 +576,8 @@ description = "Save sync mode daemon"
 other = "Daemon"
 
 [settings_show_bios]
-description = "BIOS download option"
-other = "BIOS Download"
+description = "BIOS menu option"
+other = "BIOS Menu"
 
 [bios_status_ready]
 description = "BIOS file is installed and verified"
@@ -594,6 +610,42 @@ other = "Downloaded %d BIOS file(s) with %d hash warning(s). Files may not be th
 [bios_download_failed]
 description = "Message when BIOS download fails"
 other = "Failed to download %d BIOS file(s)."
+
+[settings_box_art]
+description = "Box art in games list option"
+other = "Box Art"
+
+[settings_sync_artwork]
+description = "Sync artwork option"
+other = "Sync Artwork"
+
+[artwork_sync_no_platforms]
+description = "No platforms mapped message"
+other = "No platforms with directory mappings found."
+
+[artwork_sync_scanning]
+description = "Scanning platforms for artwork message"
+other = "Scanning platform %d/%d: %s..."
+
+[artwork_sync_up_to_date]
+description = "All artwork up to date message"
+other = "All artwork is already cached!"
+
+[artwork_sync_confirm]
+description = "Confirm artwork download message"
+other = "Download artwork for %d games?"
+
+[artwork_sync_processing]
+description = "Processing artwork message"
+other = "Processing artwork..."
+
+[artwork_sync_complete]
+description = "Artwork sync complete message"
+other = "Successfully downloaded %d artwork images."
+
+[artwork_sync_failed]
+description = "Artwork sync failed message"
+other = "Failed to download %d artwork images."
 
 [settings_sync_saves]
 description = "Sync saves option"

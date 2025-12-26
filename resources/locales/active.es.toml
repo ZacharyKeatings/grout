@@ -62,6 +62,10 @@ other = "Menú"
 description = "Logout confirmation message"
 other = "¿Está seguro de que desea cerrar sesión?"
 
+[clear_cache_confirm_message]
+description = "Clear cache confirmation message"
+other = "¿Borrar todas las imágenes en caché?"
+
 [button_multi]
 description = "Multi select button"
 hash = "sha1-53e09a835195b421620e35e453983b46dbe435f6"
@@ -523,6 +527,10 @@ description = "Download art option"
 hash = "sha1-e16f1580e1cda0280388a2f80826d977f98975f1"
 other = "Descargar Arte"
 
+[settings_box_art]
+description = "Box art in games list option"
+other = "Arte de Caja"
+
 [settings_download_timeout]
 description = "Download timeout option"
 hash = "sha1-5859619d51d182c0c1164f95eedb59132de7c090"
@@ -597,6 +605,18 @@ description = "Log level option"
 hash = "sha1-d4b9f81b67c0923ee427be359a66fdfa670bb6da"
 other = "Nivel de Log"
 
+[settings_collections]
+description = "Collections settings submenu"
+other = "Configuración de Colecciones"
+
+[settings_advanced]
+description = "Advanced settings submenu"
+other = "Avanzado"
+
+[settings_clear_cache]
+description = "Clear artwork cache option"
+other = "Borrar Caché"
+
 [settings_show_collections]
 description = "Collections option"
 hash = "sha1-a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b1"
@@ -645,8 +665,8 @@ description = "Save sync mode daemon"
 other = "Automático"
 
 [settings_show_bios]
-description = "BIOS download option"
-other = "Descarga de BIOS"
+description = "BIOS menu option"
+other = "Menú de BIOS"
 
 [bios_status_ready]
 description = "BIOS file is installed and verified"
