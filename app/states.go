@@ -7,9 +7,15 @@ import (
 	"grout/ui"
 	"grout/utils"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
+)
+
+var (
+	autoSync     *utils.AutoSync
+	autoSyncOnce sync.Once
 )
 
 type appStartTime struct {
@@ -34,6 +40,7 @@ const (
 	logoutConfirmation                         = "logout_confirmation"
 	clearCacheConfirmation                     = "clear_cache_confirmation"
 	saveSync                                   = "save_sync"
+	syncIssues                                 = "sync_issues"
 	biosDownload                               = "bios_download"
 	artworkSync                                = "artwork_sync"
 )
@@ -116,11 +123,40 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 
 		screen := ui.NewPlatformSelectionScreen()
 		config, _ := gaba.Get[*utils.Config](ctx)
+
+		// Start auto-sync on first platform menu view
+		if config.SaveSyncMode == "automatic" {
+			autoSyncOnce.Do(func() {
+				host, _ := gaba.Get[romm.Host](ctx)
+				autoSync = utils.NewAutoSync(host)
+				utils.AddIcon(autoSync.Icon())
+				autoSync.Start()
+			})
+		}
+
+		// Determine the sync button visibility control
+		// - "off": nil (never show)
+		// - "manual": always true, shows "Sync" button
+		// - "automatic": controlled by auto-sync (shows "Issues" when there are issues)
+		var showSaveSync *atomic.Bool
+		showSyncIssues := false
+		switch config.SaveSyncMode {
+		case "manual":
+			showSaveSync = &atomic.Bool{}
+			showSaveSync.Store(true)
+		case "automatic":
+			if autoSync != nil {
+				showSaveSync = autoSync.ShowButton()
+				showSyncIssues = true
+			}
+		}
+
 		result, err := screen.Draw(ui.PlatformSelectionInput{
 			Platforms:            platforms,
 			QuitOnBack:           bool(quitOnBack),
 			ShowCollections:      bool(showCollections),
-			ShowSaveSync:         config.SaveSyncMode != "off",
+			ShowSaveSync:         showSaveSync,
+			ShowSyncIssues:       showSyncIssues,
 			LastSelectedIndex:    platPos.Index,
 			LastSelectedPosition: platPos.Pos,
 		})
@@ -173,6 +209,7 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		}).
 		On(gaba.ExitCodeAction, settings).
 		On(constants.ExitCodeSaveSync, saveSync).
+		On(constants.ExitCodeSyncIssues, syncIssues).
 		Exit(gaba.ExitCodeQuit)
 
 	gaba.AddState(fsm, collectionList, func(ctx *gaba.Context) (ui.CollectionSelectionOutput, gaba.ExitCode) {
@@ -742,6 +779,42 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		return result.Value, result.ExitCode
 	}).
 		On(gaba.ExitCodeBack, platformSelection)
+
+	gaba.AddState(fsm, syncIssues, func(ctx *gaba.Context) (ui.SyncIssuesOutput, gaba.ExitCode) {
+		host, _ := gaba.Get[romm.Host](ctx)
+
+		if autoSync == nil {
+			return ui.SyncIssuesOutput{}, gaba.ExitCodeBack
+		}
+
+		screen := ui.NewSyncIssuesScreen()
+		result, err := screen.Draw(ui.SyncIssuesInput{
+			Issues: autoSync.GetIssues(),
+			Host:   host,
+			OnIssueResolved: func(issue utils.SyncIssue) {
+				autoSync.RemoveIssue(issue)
+			},
+		})
+
+		if err != nil {
+			return ui.SyncIssuesOutput{}, gaba.ExitCodeError
+		}
+
+		// If an issue was resolved
+		if result.Value.Resolved {
+			if result.Value.HasMoreIssues {
+				// More issues remain, loop back to show updated list
+				return result.Value, gaba.ExitCodeSuccess
+			}
+			// All issues resolved, mark complete (syncs already done)
+			autoSync.MarkComplete()
+			return result.Value, gaba.ExitCodeBack
+		}
+
+		return result.Value, result.ExitCode
+	}).
+		On(gaba.ExitCodeBack, platformSelection).
+		On(gaba.ExitCodeSuccess, syncIssues)
 
 	gaba.AddState(fsm, biosDownload, func(ctx *gaba.Context) (ui.BIOSDownloadOutput, gaba.ExitCode) {
 		config, _ := gaba.Get[*utils.Config](ctx)

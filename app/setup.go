@@ -181,7 +181,6 @@ func setup() SetupResult {
 
 	splashBytes, _ := resources.GetSplashImageBytes()
 
-	// Platform loading with retry loop
 	for {
 		gaba.ProcessMessage("", gaba.ProcessMessageOptions{
 			ImageBytes:  splashBytes,

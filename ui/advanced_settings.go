@@ -51,6 +51,7 @@ func (s *AdvancedSettingsScreen) Draw(input AdvancedSettingsInput) (ScreenResult
 			InitialSelectedIndex: input.LastSelectedIndex,
 			VisibleStartIndex:    input.LastVisibleStartIndex,
 			StatusBar:            utils.StatusBar(),
+			SmallTitle:           true,
 		},
 		items,
 	)

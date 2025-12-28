@@ -38,6 +38,7 @@ func (s *CollectionsSettingsScreen) Draw(input CollectionsSettingsInput) (Screen
 			},
 			InitialSelectedIndex: 0,
 			StatusBar:            utils.StatusBar(),
+			SmallTitle:           true,
 		},
 		items,
 	)

@@ -40,7 +40,7 @@ func (s *InfoScreen) Draw(input InfoInput) (ScreenResult[InfoOutput], error) {
 	options.ActionButton = buttons.VirtualButtonX
 	options.EnableAction = true
 
-	result, err := gaba.DetailScreen(i18n.Localize(&goi18n.Message{ID: "info_title", Other: "Grout Info"}, nil), options, []gaba.FooterHelpItem{
+	result, err := gaba.DetailScreen("", options, []gaba.FooterHelpItem{
 		{ButtonName: "B", HelpText: i18n.Localize(&goi18n.Message{ID: "button_back", Other: "Back"}, nil)},
 		{ButtonName: "X", HelpText: i18n.Localize(&goi18n.Message{ID: "button_logout", Other: "Logout"}, nil)},
 	})

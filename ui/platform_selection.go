@@ -5,6 +5,7 @@ import (
 	"grout/constants"
 	"grout/romm"
 	"grout/utils"
+	"sync/atomic"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
 	buttons "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool/constants"
@@ -16,7 +17,8 @@ type PlatformSelectionInput struct {
 	Platforms            []romm.Platform
 	QuitOnBack           bool
 	ShowCollections      bool
-	ShowSaveSync         bool
+	ShowSaveSync         *atomic.Bool // nil = hidden, otherwise controls visibility dynamically
+	ShowSyncIssues       bool         // if true, show "Issues" button instead of "Sync"
 	LastSelectedIndex    int
 	LastSelectedPosition int
 }
@@ -70,8 +72,18 @@ func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (ScreenResu
 		footerItems = []gaba.FooterHelpItem{
 			{ButtonName: "X", HelpText: i18n.Localize(&goi18n.Message{ID: "button_settings", Other: "Settings"}, nil)},
 		}
-		if input.ShowSaveSync {
-			footerItems = append(footerItems, gaba.FooterHelpItem{ButtonName: "Y", HelpText: i18n.Localize(&goi18n.Message{ID: "button_save_sync", Other: "Sync"}, nil)})
+		if input.ShowSaveSync != nil {
+			var helpText string
+			if input.ShowSyncIssues {
+				helpText = i18n.Localize(&goi18n.Message{ID: "button_sync_issues", Other: "Issues"}, nil)
+			} else {
+				helpText = i18n.Localize(&goi18n.Message{ID: "button_save_sync", Other: "Sync"}, nil)
+			}
+			footerItems = append(footerItems, gaba.FooterHelpItem{
+				ButtonName: "Y",
+				HelpText:   helpText,
+				Show:       input.ShowSaveSync,
+			})
 		}
 		footerItems = append(footerItems, gaba.FooterHelpItem{ButtonName: "A", HelpText: i18n.Localize(&goi18n.Message{ID: "button_select", Other: "Select"}, nil)})
 	} else {
@@ -83,7 +95,7 @@ func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (ScreenResu
 
 	options := gaba.DefaultListOptions("Grout", menuItems)
 	options.ActionButton = buttons.VirtualButtonX
-	if input.ShowSaveSync {
+	if input.ShowSaveSync != nil {
 		options.SecondaryActionButton = buttons.VirtualButtonY
 	}
 	options.ReorderButton = buttons.VirtualButtonSelect
@@ -162,7 +174,10 @@ func (s *PlatformSelectionScreen) Draw(input PlatformSelectionInput) (ScreenResu
 		}
 
 	case gaba.ListActionSecondaryTriggered:
-		if input.QuitOnBack && input.ShowSaveSync {
+		if input.QuitOnBack && input.ShowSaveSync != nil {
+			if input.ShowSyncIssues {
+				return withCode(output, constants.ExitCodeSyncIssues), nil
+			}
 			return withCode(output, constants.ExitCodeSaveSync), nil
 		}
 	}

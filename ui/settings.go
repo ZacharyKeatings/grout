@@ -131,6 +131,7 @@ func (s *SettingsScreen) Draw(input SettingsInput) (ScreenResult[SettingsOutput]
 			InitialSelectedIndex: input.LastSelectedIndex,
 			VisibleStartIndex:    input.LastVisibleStartIndex,
 			StatusBar:            utils.StatusBar(),
+			SmallTitle:           true,
 		},
 		items,
 	)
@@ -269,6 +270,7 @@ func (s *SettingsScreen) buildMenuItem(settingType SettingType, config *utils.Co
 			Options: []gaba.Option{
 				{DisplayName: i18n.Localize(&goi18n.Message{ID: "save_sync_mode_off", Other: "Off"}, nil), Value: "off"},
 				{DisplayName: i18n.Localize(&goi18n.Message{ID: "save_sync_mode_manual", Other: "Manual"}, nil), Value: "manual"},
+				{DisplayName: i18n.Localize(&goi18n.Message{ID: "save_sync_mode_automatic", Other: "Automatic"}, nil), Value: "automatic"},
 				// {DisplayName: i18n.Localize(&goi18n.Message{ID: "save_sync_mode_daemon", Other: "Daemon"}, nil), Value: "daemon"},
 			},
 			SelectedOption: saveSyncModeToIndex(config.SaveSyncMode),
@@ -518,8 +520,10 @@ func saveSyncModeToIndex(mode string) int {
 		return 0
 	case "manual":
 		return 1
+	case "automatic":
+		return 2
 	// case "daemon":
-	// 	return 2
+	// 	return 3
 	default:
 		return 0
 	}
