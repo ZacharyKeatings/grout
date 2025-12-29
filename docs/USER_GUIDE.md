@@ -14,6 +14,9 @@ This guide walks you through using Grout to download games from your RomM instan
 - [Downloading Games](#downloading-games)
 - [BIOS Files](#bios-files)
 - [Settings](#settings)
+    - [General Settings](#general-settings)
+    - [Collections Settings](#collections-settings)
+    - [Advanced Settings](#advanced-settings)
 - [Save Sync](#save-sync)
 - [Advanced Configuration](#advanced-configuration)
 
@@ -36,7 +39,7 @@ When you first launch Grout, you'll be asked to select your preferred language. 
 - Русский (Russian)
 - 日本語 (Japanese)
 
-Use `Left/Right` to cycle through the available languages. The welcome message will update to show a localized greeting as you browse. Press `A` to confirm your selection.
+Use `Left/Right` to cycle through the available languages. Press `A` to confirm your selection.
 
 You can change your language later from the Settings menu.
 
@@ -125,7 +128,7 @@ Your custom platform order is automatically saved to the config and will persist
 
 ![Grout preview, collections list](../.github/resources/user_guide/collections.png "Grout preview, collections list")
 
-Grout has two views for collections:
+Grout has two views for collections. You can choose this view in the Settings → Collections menu.
 
 **Platform** – After selecting a collection, you'll see a platform selection screen showing all platforms in that
 collection. Select a platform to view games from only that platform.
@@ -136,7 +139,6 @@ collection. Select a platform to view games from only that platform.
 shown as prefixes (e.g., `[nes] Tetris`, `[snes] Tetris Battle Gaiden`)
 
 ![Grout preview, collection content - unified](../.github/resources/user_guide/collections_unified.png "Grout preview, collection content - unified")
-
 
 > [!WARNING]
 > If you skipped a platform in the mapping screen, you won't see games for that platform in your collections.
@@ -215,9 +217,8 @@ From here:
 
 ### Game Options
 
-For platforms with multiple emulators, you can configure which save directory a specific game should use. This is helpful when you want a particular game to use a different emulator's save folder than the platform default.
-
-- **Save Directory** – Choose which emulator's save folder this game should use. When changed, Grout automatically moves existing save files to the new location.
+- **Save Directory** – Choose which emulator's save folder this game should use. When changed, Grout automatically moves
+  existing save files to the new location.
 
 ---
 
@@ -240,11 +241,10 @@ appropriate directory on your device. Press `Y` to cancel the download.
 3. **Artwork is downloaded** – If "Download Art" is enabled in Settings, Grout downloads box art for each game to your
    artwork directory after the ROMs finish.
 
-4. **Zipped files are extracted automatically** – If "Zipped Downloads" is set to "Uncompress" in Settings, Grout extracts any
-   zipped ROMs and deletes the zip file.
+4. **Zipped files are extracted automatically** – If "Zipped Downloads" is set to "Uncompress" in Settings, Grout
+   will extract the files to the configured ROM directory and then delete the zip file.
 
-If a download fails, Grout will show you which games had problems. Successfully downloaded games stay on your device,
-failed downloads get cleaned up.
+If a download fails, Grout will show you which games had problems and clean up any leftover cruft.
 
 When everything's done, you're dropped back to the game list. The games you just downloaded are now on your device and
 ready to play.
@@ -253,10 +253,6 @@ ready to play.
 
 ## BIOS Files
 
-> [!TIP]
-> This menu will only appear if BIOS Downloads are enabled in settings and if there are BIOS files present in RomM for
-> the selected platform.
-
 Many emulators require BIOS files to function properly. Grout can download these files directly from your RomM server to
 the correct location on your device.
 
@@ -264,20 +260,14 @@ the correct location on your device.
 
 ### Accessing BIOS Downloads
 
-From the main platform menu, press `A` on a platform that requires BIOS files. If BIOS files are available for that
+From the main main menu, press `A` on a platform that requires BIOS files. If BIOS files are available for that
 platform in your RomM library, you'll see a "BIOS" option in the platform submenu.
-
-### Important Notes
-
-- BIOS files must already be uploaded to your RomM server's firmware library
-- Grout uses MD5 hashes to verify file integrity when available
-- Downloaded BIOS files are placed in the appropriate location for your custom firmware (NextUI, muOS, or Knulli)
 
 ---
 
 ## Settings
 
-Press `X` from the main platform menu to access Settings.
+Press `X` from the main main menu to access Settings.
 
 ![Grout preview, settings](../.github/resources/user_guide/settings.png "Grout preview, settings")
 
@@ -292,10 +282,13 @@ See [Collections Settings](#collections-settings) below.
 **Save Sync** - Controls save synchronization behavior:
 
 - **Off** – Save sync is completely disabled
-- **Manual** – Save sync is available via the `Y` button from the platform menu
-- **Automatic** – Grout automatically syncs saves in the background when you launch the app. A cloud icon in the status bar shows sync progress. If issues are detected, a `Y` button appears to access manual sync.
+- **Manual** – Save sync is available via the `Y` button from the main menu
+- **Automatic** – Grout automatically syncs saves in the background when you launch the app. A cloud icon in the status
+  bar shows sync progress. If issues are detected, a `Y` button appears to access manual sync.
 
-**Save Sync Mappings** - Opens a sub-menu where you can configure which emulator save directory to use for each platform. This is useful for platforms with multiple emulators (e.g., GBA on muOS). Only visible when Save Sync is enabled.
+**Save Sync Mappings** - Opens a sub-menu where you can configure which emulator save directory to use for each
+platform. This is useful for platforms with multiple emulators (e.g., GBA on muOS). Only visible when Save Sync is
+enabled.
 
 **Advanced** - Opens a sub-menu for advanced configuration options. See [Advanced Settings](#advanced-settings) below.
 
@@ -312,7 +305,7 @@ library view.
 **Downloaded Games** - Controls how already-downloaded games appear in game lists:
 
 - **Do Nothing** – No special treatment for downloaded games
-- **Mark** – Downloaded games are marked with a downward pointing arrow
+- **Mark** – Downloaded games are marked with a download icon
 - **Filter** – Downloaded games are hidden from the list entirely
 
 **Download Art** – When enabled, Grout downloads box art for games after downloading the ROMs. The art goes into your
@@ -323,7 +316,8 @@ artwork directory so your frontend can display it.
 - **Uncompress** – Grout automatically extracts zipped ROMs after downloading. The zip file is deleted after extraction.
 - **Do Nothing** – Keep the downloaded zip file as-is without extracting.
 
-**Language** – Grout is localized! Choose from English, Deutsch, Español, Français, Italiano, Português, Русский, or 日本語. If you notice an issue with a translation or want to help by translating, please let us know!
+**Language** – Grout is localized! Choose from English, Deutsch, Español, Français, Italiano, Português, Русский, or
+日本語. If you notice an issue with a translation or want to help by translating, please let us know!
 
 ### Collections Settings
 
@@ -377,7 +371,7 @@ Use `Left/Right` to cycle through options. Press `Start` to save your changes, o
 
 Save Sync keeps your game saves synchronized between your RomM server and your handheld device.
 
-To access save sync, press `Y` from the platform menu.
+To access save sync, press `Y` from the main menu.
 
 ### How It Works
 

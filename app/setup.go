@@ -122,7 +122,9 @@ func setup() SetupResult {
 
 		// Update config with selected language
 		if config == nil {
-			config = &utils.Config{}
+			config = &utils.Config{
+				ShowCollections: true,
+			}
 		}
 		config.Language = selectedLanguage
 	}
