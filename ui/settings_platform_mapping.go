@@ -228,7 +228,7 @@ func (s *PlatformMappingScreen) getCFWDirectoriesForPlatform(slug string, cfw co
 }
 
 func (s *PlatformMappingScreen) getSaveDirectoriesForPlatform(slug string, cfw constants.CFW) []string {
-	saveMap := utils.GetSaveDirectoriesMap(cfw)
+	saveMap := utils.EmulatorFolderMap(cfw)
 	if saveMap == nil {
 		return []string{}
 	}

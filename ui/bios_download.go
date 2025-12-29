@@ -291,7 +291,6 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 				logger.Error("Failed to save BIOS file", "file", info.metadata.FileName, "error", err)
 				continue
 			}
-			logger.Debug("Successfully saved BIOS file", "file", info.metadata.FileName, "paths", utils.GetBIOSFilePaths(*info.metadata, input.Platform.Slug))
 		} else {
 			// No metadata - use firmware FilePath from RomM (preserves subdirectories)
 			biosDir := utils.GetBIOSDirectory()
@@ -311,7 +310,6 @@ func (s *BIOSDownloadScreen) draw(input BIOSDownloadInput) (ScreenResult[BIOSDow
 				logger.Error("Failed to save BIOS file", "file", info.firmware.FileName, "error", err)
 				continue
 			}
-			logger.Debug("Successfully saved BIOS file", "file", info.firmware.FileName, "path", filePath)
 		}
 
 		os.Remove(download.Location)

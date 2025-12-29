@@ -292,8 +292,8 @@ func (s *GameListScreen) loadGames(input GameListInput) (loadGamesResult, error)
 			logger.Debug("Loaded games from cache (no loading screen)", "key", cacheKey, "count", len(cached))
 			result.games = cached
 
-			// Still need to check BIOS availability
-			if config.ShowBIOSDownload && platform.ID != 0 && !isCollectionSet(collection) {
+			// Check BIOS availability
+			if platform.ID != 0 && !isCollectionSet(collection) {
 				rc := utils.GetRommClient(host, config.ApiTimeout)
 				firmware, err := rc.GetFirmware(platform.ID)
 				if err == nil && len(firmware) > 0 {
@@ -331,7 +331,7 @@ func (s *GameListScreen) loadGames(input GameListInput) (loadGamesResult, error)
 			}()
 
 			// Check BIOS availability (only for platforms, not collections)
-			if config.ShowBIOSDownload && platform.ID != 0 && !isCollectionSet(collection) {
+			if platform.ID != 0 && !isCollectionSet(collection) {
 				wg.Add(1)
 				go func() {
 					defer wg.Done()

@@ -24,6 +24,7 @@ type AdvancedSettingsOutput struct {
 	InfoClicked           bool
 	EditMappingsClicked   bool
 	ClearCacheClicked     bool
+	SyncArtworkClicked    bool
 	LastSelectedIndex     int
 	LastVisibleStartIndex int
 }
@@ -86,6 +87,11 @@ func (s *AdvancedSettingsScreen) Draw(input AdvancedSettingsInput) (ScreenResult
 			output.ClearCacheClicked = true
 			return withCode(output, constants.ExitCodeClearCache), nil
 		}
+
+		if selectedText == i18n.Localize(&goi18n.Message{ID: "settings_sync_artwork", Other: "Cache Artwork"}, nil) {
+			output.SyncArtworkClicked = true
+			return withCode(output, constants.ExitCodeSyncArtwork), nil
+		}
 	}
 
 	s.applySettings(config, result.Items)
@@ -144,8 +150,15 @@ func (s *AdvancedSettingsScreen) buildMenuItems(config *utils.Config) []gaba.Ite
 			SelectedOption: logLevelToIndex(config.LogLevel),
 		},
 		{
+			Item:    gaba.MenuItem{Text: i18n.Localize(&goi18n.Message{ID: "settings_sync_artwork", Other: "Cache Artwork"}, nil)},
+			Options: []gaba.Option{{Type: gaba.OptionTypeClickable}},
+		},
+		{
 			Item:    gaba.MenuItem{Text: i18n.Localize(&goi18n.Message{ID: "settings_clear_cache", Other: "Clear Cache"}, nil)},
 			Options: []gaba.Option{{Type: gaba.OptionTypeClickable}},
+			Visible: func() bool {
+				return utils.HasArtworkCache() || utils.HasGamesCache()
+			},
 		},
 		{
 			Item:    gaba.MenuItem{Text: i18n.Localize(&goi18n.Message{ID: "settings_info", Other: "Grout Info"}, nil)},

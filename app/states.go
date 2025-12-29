@@ -28,6 +28,7 @@ const (
 	platformSelection           gaba.StateName = "platform_selection"
 	gameList                                   = "game_list"
 	gameDetails                                = "game_details"
+	gameOptions                                = "game_options"
 	collectionList                             = "collection_list"
 	collectionPlatformSelection                = "collection_platform_selection"
 	search                                     = "search"
@@ -36,11 +37,11 @@ const (
 	collectionsSettings                        = "collections_settings"
 	advancedSettings                           = "advanced_settings"
 	settingsPlatformMapping                    = "platform_mapping"
+	saveSyncSettings                           = "save_sync_settings"
 	info                                       = "info"
 	logoutConfirmation                         = "logout_confirmation"
 	clearCacheConfirmation                     = "clear_cache_confirmation"
 	saveSync                                   = "save_sync"
-	syncIssues                                 = "sync_issues"
 	biosDownload                               = "bios_download"
 	artworkSync                                = "artwork_sync"
 )
@@ -128,7 +129,7 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		if config.SaveSyncMode == "automatic" {
 			autoSyncOnce.Do(func() {
 				host, _ := gaba.Get[romm.Host](ctx)
-				autoSync = utils.NewAutoSync(host)
+				autoSync = utils.NewAutoSync(host, config)
 				utils.AddIcon(autoSync.Icon())
 				autoSync.Start()
 			})
@@ -137,9 +138,8 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		// Determine the sync button visibility control
 		// - "off": nil (never show)
 		// - "manual": always true, shows "Sync" button
-		// - "automatic": controlled by auto-sync (shows "Issues" when there are issues)
+		// - "automatic": controlled by auto-sync
 		var showSaveSync *atomic.Bool
-		showSyncIssues := false
 		switch config.SaveSyncMode {
 		case "manual":
 			showSaveSync = &atomic.Bool{}
@@ -147,7 +147,6 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		case "automatic":
 			if autoSync != nil {
 				showSaveSync = autoSync.ShowButton()
-				showSyncIssues = true
 			}
 		}
 
@@ -156,7 +155,6 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 			QuitOnBack:           bool(quitOnBack),
 			ShowCollections:      bool(showCollections),
 			ShowSaveSync:         showSaveSync,
-			ShowSyncIssues:       showSyncIssues,
 			LastSelectedIndex:    platPos.Index,
 			LastSelectedPosition: platPos.Pos,
 		})
@@ -209,7 +207,6 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		}).
 		On(gaba.ExitCodeAction, settings).
 		On(constants.ExitCodeSaveSync, saveSync).
-		On(constants.ExitCodeSyncIssues, syncIssues).
 		Exit(gaba.ExitCodeQuit)
 
 	gaba.AddState(fsm, collectionList, func(ctx *gaba.Context) (ui.CollectionSelectionOutput, gaba.ExitCode) {
@@ -387,7 +384,8 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		host, _ := gaba.Get[romm.Host](ctx)
 		gameListOutput, _ := gaba.Get[ui.GameListOutput](ctx)
 
-		if !config.GameDetails || len(gameListOutput.SelectedGames) != 1 {
+		// If multiple games selected, skip details and go straight to download
+		if len(gameListOutput.SelectedGames) != 1 {
 			filter, _ := gaba.Get[searchFilterString](ctx)
 			downloadScreen := ui.NewDownloadScreen()
 			downloadOutput := downloadScreen.Execute(*config, host, gameListOutput.Platform, gameListOutput.SelectedGames, gameListOutput.AllGames, string(filter))
@@ -426,7 +424,36 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 
 			return nil
 		}).
-		On(gaba.ExitCodeBack, gameList)
+		On(gaba.ExitCodeBack, gameList).
+		On(constants.ExitCodeGameOptions, gameOptions)
+
+	// Game options state
+	gaba.AddState(fsm, gameOptions, func(ctx *gaba.Context) (ui.GameOptionsOutput, gaba.ExitCode) {
+		config, _ := gaba.Get[*utils.Config](ctx)
+		gameListOutput, _ := gaba.Get[ui.GameListOutput](ctx)
+
+		if len(gameListOutput.SelectedGames) != 1 {
+			return ui.GameOptionsOutput{Config: config}, gaba.ExitCodeBack
+		}
+
+		screen := ui.NewGameOptionsScreen()
+		result, err := screen.Draw(ui.GameOptionsInput{
+			Config: config,
+			Game:   gameListOutput.SelectedGames[0],
+		})
+
+		if err != nil {
+			return ui.GameOptionsOutput{Config: config}, gaba.ExitCodeError
+		}
+
+		return result.Value, result.ExitCode
+	}).
+		OnWithHook(gaba.ExitCodeSuccess, gameDetails, func(ctx *gaba.Context) error {
+			output, _ := gaba.Get[ui.GameOptionsOutput](ctx)
+			gaba.Set(ctx, output.Config)
+			return nil
+		}).
+		On(gaba.ExitCodeBack, gameDetails)
 
 	gaba.AddState(fsm, search, func(ctx *gaba.Context) (ui.SearchOutput, gaba.ExitCode) {
 		filter, _ := gaba.Get[searchFilterString](ctx)
@@ -522,6 +549,7 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		}).
 		On(constants.ExitCodeCollectionsSettings, collectionsSettings).
 		On(constants.ExitCodeAdvancedSettings, advancedSettings).
+		On(constants.ExitCodeSaveSyncSettings, saveSyncSettings).
 		OnWithHook(constants.ExitCodeInfo, info, func(ctx *gaba.Context) error {
 			gaba.Set(ctx, infoPreviousState(settings))
 			return nil
@@ -566,6 +594,30 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 			return nil
 		})
 
+	// Save sync settings state
+	gaba.AddState(fsm, saveSyncSettings, func(ctx *gaba.Context) (ui.SaveSyncSettingsOutput, gaba.ExitCode) {
+		config, _ := gaba.Get[*utils.Config](ctx)
+		cfw, _ := gaba.Get[constants.CFW](ctx)
+
+		screen := ui.NewSaveSyncSettingsScreen()
+		result, err := screen.Draw(ui.SaveSyncSettingsInput{
+			Config: config,
+			CFW:    cfw,
+		})
+
+		if err != nil {
+			return ui.SaveSyncSettingsOutput{Config: config}, gaba.ExitCodeError
+		}
+
+		return result.Value, result.ExitCode
+	}).
+		OnWithHook(gaba.ExitCodeSuccess, settings, func(ctx *gaba.Context) error {
+			output, _ := gaba.Get[ui.SaveSyncSettingsOutput](ctx)
+			gaba.Set(ctx, output.Config)
+			return nil
+		}).
+		On(gaba.ExitCodeBack, settings)
+
 	gaba.AddState(fsm, advancedSettings, func(ctx *gaba.Context) (ui.AdvancedSettingsOutput, gaba.ExitCode) {
 		config, _ := gaba.Get[*utils.Config](ctx)
 		host, _ := gaba.Get[romm.Host](ctx)
@@ -603,6 +655,7 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		}).
 		On(constants.ExitCodeEditMappings, settingsPlatformMapping).
 		On(constants.ExitCodeClearCache, clearCacheConfirmation).
+		On(constants.ExitCodeSyncArtwork, artworkSync).
 		OnWithHook(gaba.ExitCodeBack, settings, func(ctx *gaba.Context) error {
 			gaba.Set(ctx, advancedSettingsPosition{Index: 0, VisibleStartIndex: 0})
 			return nil
@@ -749,12 +802,12 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 			return nil
 		})
 
-	gaba.AddState(fsm, clearCacheConfirmation, func(ctx *gaba.Context) (ui.ClearCacheConfirmationOutput, gaba.ExitCode) {
-		screen := ui.NewClearCacheConfirmationScreen()
+	gaba.AddState(fsm, clearCacheConfirmation, func(ctx *gaba.Context) (ui.ClearCacheOutput, gaba.ExitCode) {
+		screen := ui.NewClearCacheScreen()
 		result, err := screen.Draw()
 
 		if err != nil {
-			return ui.ClearCacheConfirmationOutput{}, gaba.ExitCodeError
+			return ui.ClearCacheOutput{}, gaba.ExitCodeError
 		}
 
 		return result.Value, result.ExitCode
@@ -779,42 +832,6 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 		return result.Value, result.ExitCode
 	}).
 		On(gaba.ExitCodeBack, platformSelection)
-
-	gaba.AddState(fsm, syncIssues, func(ctx *gaba.Context) (ui.SyncIssuesOutput, gaba.ExitCode) {
-		host, _ := gaba.Get[romm.Host](ctx)
-
-		if autoSync == nil {
-			return ui.SyncIssuesOutput{}, gaba.ExitCodeBack
-		}
-
-		screen := ui.NewSyncIssuesScreen()
-		result, err := screen.Draw(ui.SyncIssuesInput{
-			Issues: autoSync.GetIssues(),
-			Host:   host,
-			OnIssueResolved: func(issue utils.SyncIssue) {
-				autoSync.RemoveIssue(issue)
-			},
-		})
-
-		if err != nil {
-			return ui.SyncIssuesOutput{}, gaba.ExitCodeError
-		}
-
-		// If an issue was resolved
-		if result.Value.Resolved {
-			if result.Value.HasMoreIssues {
-				// More issues remain, loop back to show updated list
-				return result.Value, gaba.ExitCodeSuccess
-			}
-			// All issues resolved, mark complete (syncs already done)
-			autoSync.MarkComplete()
-			return result.Value, gaba.ExitCodeBack
-		}
-
-		return result.Value, result.ExitCode
-	}).
-		On(gaba.ExitCodeBack, platformSelection).
-		On(gaba.ExitCodeSuccess, syncIssues)
 
 	gaba.AddState(fsm, biosDownload, func(ctx *gaba.Context) (ui.BIOSDownloadOutput, gaba.ExitCode) {
 		config, _ := gaba.Get[*utils.Config](ctx)
@@ -845,7 +862,7 @@ func buildFSM(config *utils.Config, cfw constants.CFW, platforms []romm.Platform
 
 		return output, gaba.ExitCodeBack
 	}).
-		On(gaba.ExitCodeBack, settings)
+		On(gaba.ExitCodeBack, advancedSettings)
 
 	return fsm.Start(platformSelection)
 }

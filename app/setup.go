@@ -81,7 +81,6 @@ func setup() SetupResult {
 		}
 	}
 
-	initStart := time.Now()
 	gaba.Init(gaba.Options{
 		WindowTitle:          "Grout",
 		PrimaryThemeColorHex: 0x007C77,
@@ -92,9 +91,7 @@ func setup() SetupResult {
 
 	gaba.SetLogLevel(slog.LevelDebug)
 	logger := gaba.GetLogger()
-	logger.Debug("gaba.Init completed", "seconds", fmt.Sprintf("%.2f", time.Since(initStart).Seconds()), "totalSetup", fmt.Sprintf("%.2f", time.Since(setupStart).Seconds()))
 
-	i18nStart := time.Now()
 	localeFiles, err := resources.GetLocaleMessageFiles()
 	if err != nil {
 		utils.LogStandardFatal("Failed to load locale files", err)
@@ -102,9 +99,7 @@ func setup() SetupResult {
 	if err := i18n.InitI18NFromBytes(localeFiles); err != nil {
 		utils.LogStandardFatal("Failed to initialize i18n", err)
 	}
-	logger.Debug("i18n initialized", "seconds", fmt.Sprintf("%.2f", time.Since(i18nStart).Seconds()))
 
-	startConfig := time.Now()
 	logger.Debug("Loading configuration from config.json")
 	config, err := utils.LoadConfig()
 	isFirstLaunch := err != nil || (len(config.Hosts) == 0 && config.Language == "")
@@ -174,7 +169,7 @@ func setup() SetupResult {
 		}
 	}
 
-	logger.Debug("Configuration Loaded!", "config", config.ToLoggable(), "seconds", fmt.Sprintf("%.2f", time.Since(startConfig).Seconds()))
+	logger.Debug("Configuration Loaded!", "config", config.ToLoggable())
 
 	var platforms []romm.Platform
 	var loadErr error
@@ -187,7 +182,6 @@ func setup() SetupResult {
 			ImageWidth:  768,
 			ImageHeight: 540,
 		}, func() (interface{}, error) {
-			startPlatforms := time.Now()
 			var err error
 			platforms, err = utils.GetMappedPlatforms(config.Hosts[0], config.DirectoryMappings)
 			if err != nil {
@@ -196,7 +190,6 @@ func setup() SetupResult {
 			}
 			loadErr = nil
 			platforms = utils.SortPlatformsByOrder(platforms, config.PlatformOrder)
-			logger.Debug("Loaded platforms", "count", len(platforms), "seconds", fmt.Sprintf("%.2f", time.Since(startPlatforms).Seconds()))
 			return nil, nil
 		})
 

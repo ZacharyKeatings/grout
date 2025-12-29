@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"grout/utils"
 	"os"
 	"time"
@@ -27,9 +26,7 @@ func main() {
 	quitOnBack := len(config.Hosts) == 1
 	showCollections := utils.ShowCollections(config, config.Hosts[0])
 
-	fsmStart := time.Now()
 	fsm := buildFSM(config, cfw, platforms, quitOnBack, showCollections, appStart)
-	logger.Debug("FSM built", "seconds", fmt.Sprintf("%.2f", time.Since(fsmStart).Seconds()))
 
 	logger.Info("Starting FSM.Run()")
 	if err := fsm.Run(); err != nil {

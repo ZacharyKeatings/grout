@@ -179,11 +179,9 @@ func CheckCacheFreshness(host romm.Host, config *Config, cacheKey string, query 
 	latestUpdatedAt := res.Items[0].UpdatedAt
 
 	if latestUpdatedAt.Equal(entry.LastUpdatedAt) || latestUpdatedAt.Before(entry.LastUpdatedAt) {
-		logger.Debug("Cache is fresh", "key", cacheKey, "cached", entry.LastUpdatedAt, "latest", latestUpdatedAt)
 		return true, nil
 	}
 
-	logger.Debug("Cache is stale", "key", cacheKey, "cached", entry.LastUpdatedAt, "latest", latestUpdatedAt)
 	return false, nil
 }
 
@@ -261,4 +259,16 @@ func ClearGamesCache() error {
 	}
 
 	return os.RemoveAll(cacheDir)
+}
+
+// HasGamesCache returns true if the games cache directory exists and has content
+func HasGamesCache() bool {
+	cacheDir := GetGamesCacheDir()
+
+	entries, err := os.ReadDir(cacheDir)
+	if err != nil {
+		return false
+	}
+
+	return len(entries) > 0
 }
