@@ -64,7 +64,8 @@ func (s *GameListScreen) Draw(input GameListInput) (ScreenResult[GameListOutput]
 	if len(games) == 0 {
 		loaded, err := s.loadGames(input)
 		if err != nil {
-			return withCode(GameListOutput{}, gaba.ExitCodeError), err
+			s.showErrorMessage(err)
+			return back(GameListOutput{}), nil
 		}
 		games = loaded.games
 		hasBIOS = loaded.hasBIOS
@@ -461,13 +462,33 @@ func (s *GameListScreen) showFilteredOutMessage(collectionName string) {
 	)
 }
 
-const fetchPageSize = 1000
+func (s *GameListScreen) showErrorMessage(err error) {
+	var message string
+
+	classifiedErr := romm.ClassifyError(err)
+	if errors.Is(classifiedErr, romm.ErrTimeout) {
+		message = i18n.Localize(&goi18n.Message{ID: "games_list_load_timeout", Other: "Connection timed out!\nPlease check your network connection."}, nil)
+	} else {
+		message = i18n.Localize(&goi18n.Message{ID: "games_list_load_error", Other: "Failed to load games.\nPlease try again later."}, nil)
+	}
+
+	gaba.ProcessMessage(
+		message,
+		gaba.ProcessMessageOptions{ShowThemeBackground: true},
+		func() (interface{}, error) {
+			time.Sleep(time.Second * 2)
+			return nil, nil
+		},
+	)
+}
 
 func fetchList(config *utils.Config, host romm.Host, queryID int, fetchType fetchType) ([]romm.Rom, error) {
 	logger := gaba.GetLogger()
 
 	// Build query for cache key and freshness check
-	query := romm.GetRomsQuery{}
+	query := romm.GetRomsQuery{
+		Limit: 10000,
+	}
 	var cacheKey string
 
 	switch fetchType {
@@ -494,46 +515,19 @@ func fetchList(config *utils.Config, host romm.Host, queryID int, fetchType fetc
 	// Fetch from API
 	rc := utils.GetRommClient(host, config.ApiTimeout)
 
-	var allGames []romm.Rom
-	page := 1
-
-	for {
-		opt := romm.GetRomsQuery{
-			Page:  page,
-			Limit: fetchPageSize,
-		}
-
-		switch fetchType {
-		case ftPlatform:
-			opt.PlatformID = queryID
-		case ftCollection:
-			opt.CollectionID = queryID
-		}
-
-		res, err := rc.GetRoms(opt)
-		if err != nil {
-			return nil, err
-		}
-
-		allGames = append(allGames, res.Items...)
-		logger.Debug("Fetched games page", "page", page, "count", len(res.Items), "total", res.Total, "fetched", len(allGames))
-
-		// Check if we've fetched all items
-		if len(allGames) >= res.Total || len(res.Items) == 0 {
-			break
-		}
-
-		page++
+	res, err := rc.GetRoms(query)
+	if err != nil {
+		return nil, err
 	}
 
-	logger.Debug("Fetched all games", "total", len(allGames))
+	logger.Debug("Fetched games", "count", len(res.Items), "total", res.Total)
 
 	// Save to cache
-	if err := utils.SaveGamesToCache(cacheKey, allGames); err != nil {
+	if err := utils.SaveGamesToCache(cacheKey, res.Items); err != nil {
 		logger.Debug("Failed to save games to cache", "error", err)
 	}
 
-	return allGames, nil
+	return res.Items, nil
 }
 
 func filterList(itemList []romm.Rom, filter string) []romm.Rom {

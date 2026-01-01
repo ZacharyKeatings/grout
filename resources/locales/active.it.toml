@@ -297,6 +297,14 @@ other = "A - Seleziona un gioco\nB - Torna alla schermata precedente\nX - Cerca 
 hash = "sha1-77fdd51f105473d648b8c22b6897d0f12d0dd360"
 other = "Aiuto Lista Giochi"
 
+[games_list_load_error]
+hash = "sha1-a1b2c3d4e5f6"
+other = "Impossibile caricare i giochi.\nRiprova più tardi."
+
+[games_list_load_timeout]
+hash = "sha1-a1b2c3d4e5f7"
+other = "Connessione scaduta!\nVerifica la tua connessione di rete."
+
 [games_list_loading]
 hash = "sha1-e7222980840d29aac1ef616e64615c6f2128cd83"
 other = "Caricamento {{.Name}}..."

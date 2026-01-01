@@ -297,6 +297,14 @@ other = "A - Выбрать игру\nB - Вернуться на предыду
 hash = "sha1-77fdd51f105473d648b8c22b6897d0f12d0dd360"
 other = "Справка по списку игр"
 
+[games_list_load_error]
+hash = "sha1-a1b2c3d4e5f6"
+other = "Не удалось загрузить игры.\nПожалуйста, попробуйте позже."
+
+[games_list_load_timeout]
+hash = "sha1-a1b2c3d4e5f7"
+other = "Время соединения истекло!\nПожалуйста, проверьте сетевое подключение."
+
 [games_list_loading]
 hash = "sha1-e7222980840d29aac1ef616e64615c6f2128cd83"
 other = "Загрузка {{.Name}}..."
