@@ -366,6 +366,10 @@ slow connections. Options range from 15 to 120 minutes.
 **API Timeout** – How long Grout waits for responses from your RomM server before giving up. If you have a slow
 connection or are a completionist with a heavily loaded server, increase this. Options range from 15 to 300 seconds.
 
+**Kid Mode** – Hides some of the more advanced settings. When enabled, kid mode will hide the settings screen, BIOS
+screen, and game option screen. You can turn this off on a per-session basis by pressing `L1`, `R1` and `Menu` during the
+Grout splash screen. To turn off permanently, return to this menu.
+
 **Log Level** – Set to Debug if you're troubleshooting issues and want detailed logs. Otherwise, Error is fine.
 
 ---
