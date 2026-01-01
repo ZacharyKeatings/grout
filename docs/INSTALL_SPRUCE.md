@@ -1,6 +1,6 @@
 # Grout Installation Guide for Spruce
 
-This guide will help you install Grout on TrimUI devices running Spruce.
+This guide will help you install Grout on TrimUI devices running Spruce v4.
 
 ## Tested Devices
 
