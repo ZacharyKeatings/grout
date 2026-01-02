@@ -8,6 +8,8 @@ import (
 
 	"grout/constants"
 	"grout/romm"
+
+	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
 )
 
 func GetCFW() constants.CFW {
@@ -32,7 +34,7 @@ func GetRomDirectory() string {
 	switch cfw {
 	case constants.MuOS:
 		// For MuOS, use union path in production, or derive from base path in dev
-		if os.Getenv("BASE_PATH") != "" || os.Getenv("MUOS_BASE_PATH") != "" {
+		if os.Getenv("BASE_PATH") != "" {
 			return filepath.Join(getBasePath(constants.MuOS), "ROMS")
 		}
 		return constants.MuOSRomsFolderUnion
@@ -187,38 +189,33 @@ func RomFolderBase(path string) string {
 }
 
 func getBasePath(cfw constants.CFW) string {
-	if basePath := os.Getenv("BASE_PATH"); basePath != "" {
-		return basePath
-	}
-
 	switch cfw {
 	case constants.MuOS:
-		if os.Getenv("MUOS_BASE_PATH") != "" {
-			return os.Getenv("MUOS_BASE_PATH")
+		sd1 := constants.MuOSSD1
+		sd2 := constants.MuOSSD2
+
+		if basePath := os.Getenv("BASE_PATH"); basePath != "" {
+			sd1 = filepath.Join(basePath, "mmc")
+			sd2 = filepath.Join(basePath, "sdcard")
 		}
+
 		// Hack to see if there is actually content
-		sd2InfoDir := filepath.Join(constants.MuOSSD2, "MuOS", "info")
+		sd2InfoDir := filepath.Join(sd2, "MUOS", "info")
 		if _, err := os.Stat(sd2InfoDir); err == nil {
-			return constants.MuOSSD2
+			gaba.GetLogger().Debug("Using MUOS Base Path", "path", sd2)
+			return sd2
 		}
-		return constants.MuOSSD1
+
+		gaba.GetLogger().Debug("Using MUOS Base Path", "path", sd1)
+		return sd1
 
 	case constants.NextUI:
-		if os.Getenv("NEXTUI_BASE_PATH") != "" {
-			return os.Getenv("NEXTUI_BASE_PATH")
-		}
 		return "/mnt/SDCARD"
 
 	case constants.Knulli:
-		if os.Getenv("KNULLI_BASE_PATH") != "" {
-			return os.Getenv("KNULLI_BASE_PATH")
-		}
 		return "/userdata"
 
 	case constants.Spruce:
-		if os.Getenv("SPRUCE_BASE_PATH") != "" {
-			return os.Getenv("SPRUCE_BASE_PATH")
-		}
 		return "/mnt/SDCARD"
 	default:
 		return ""

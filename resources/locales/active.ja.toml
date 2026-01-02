@@ -491,6 +491,9 @@ other = "{{.Name}}（RomMでROMが見つかりません）"
 hash = "sha1-6e0e349d1314bd7909fa32d8c46698b412601d19"
 other = "セーブファイルをスキャン中..."
 
+[save_sync_scanning_roms]
+other = "ROMをスキャン中..."
+
 [save_sync_settings_title]
 hash = "sha1-d3cc05947f3967eb75f60603d7fe6d6d88dbcf7f"
 other = "セーブ同期マッピング"

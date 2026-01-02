@@ -491,6 +491,9 @@ other = "{{.Name}} (ROM não encontrada no RomM)"
 hash = "sha1-6e0e349d1314bd7909fa32d8c46698b412601d19"
 other = "Escaneando arquivos de save..."
 
+[save_sync_scanning_roms]
+other = "Escaneando ROMs..."
+
 [save_sync_settings_title]
 hash = "sha1-d3cc05947f3967eb75f60603d7fe6d6d88dbcf7f"
 other = "Mapeamentos de Sincronização"

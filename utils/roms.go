@@ -67,6 +67,14 @@ func (lrf localRomFile) lastRemoteSave() romm.Save {
 	return lrf.RemoteSaves[0]
 }
 
+// LocalRomScan holds the results of scanning local ROMs
+type LocalRomScan map[string][]localRomFile
+
+// ScanRoms scans all local ROM directories and calculates hashes
+func ScanRoms() LocalRomScan {
+	return scanRoms()
+}
+
 func scanRoms() map[string][]localRomFile {
 	logger := gaba.GetLogger()
 	result := make(map[string][]localRomFile)
@@ -249,13 +257,10 @@ func scanRomDirectory(slug, romDir string, saveFileMap map[string]*localSave) []
 			saveFile = sf
 		}
 
-		// Only calculate SHA1 for ROMs that have save files (saves significant time)
-		var hash string
-		if saveFile != nil {
-			hash, err = calculateSHA1(romPath)
-			if err != nil {
-				logger.Warn("Failed to calculate SHA1 for ROM", "path", romPath, "error", err)
-			}
+		// Calculate SHA1 for all ROMs to enable matching with remote saves
+		hash, err := calculateSHA1(romPath)
+		if err != nil {
+			logger.Warn("Failed to calculate SHA1 for ROM", "path", romPath, "error", err)
 		}
 
 		rom := localRomFile{
@@ -271,65 +276,4 @@ func scanRomDirectory(slug, romDir string, saveFileMap map[string]*localSave) []
 	}
 
 	return roms
-}
-
-func getRomDirectoriesForSlug(slug string) ([]string, error) {
-	logger := gaba.GetLogger()
-	cfw := GetCFW()
-	baseRomDir := GetRomDirectory()
-	config, _ := LoadConfig()
-
-	var romDirs []string
-
-	if config != nil {
-		if mapping, ok := config.DirectoryMappings[slug]; ok && mapping.RelativePath != "" {
-			romDir := filepath.Join(baseRomDir, mapping.RelativePath)
-			romDirs = append(romDirs, romDir)
-			return romDirs, nil
-		}
-	}
-
-	if cfw == constants.NextUI {
-		platformMap := GetPlatformMap(cfw)
-		if cfwDirs, ok := platformMap[slug]; ok {
-			entries, err := os.ReadDir(baseRomDir)
-			if err != nil {
-				return nil, err
-			}
-
-			for _, entry := range entries {
-				if !entry.IsDir() || strings.HasPrefix(entry.Name(), ".") {
-					continue
-				}
-
-				dirName := entry.Name()
-				tag := ParseTag(dirName)
-				if tag == "" {
-					continue
-				}
-
-				for _, cfwDir := range cfwDirs {
-					cfwTag := ParseTag(cfwDir)
-					if cfwTag == tag {
-						romDirs = append(romDirs, filepath.Join(baseRomDir, dirName))
-						break
-					}
-				}
-			}
-		}
-	} else {
-		romFolderName := RomMSlugToCFW(slug)
-		if romFolderName != "" {
-			romDir := filepath.Join(baseRomDir, romFolderName)
-			if _, err := os.Stat(romDir); err == nil {
-				romDirs = append(romDirs, romDir)
-			}
-		}
-	}
-
-	if len(romDirs) == 0 {
-		logger.Debug("No ROM directories found for platform", "slug", slug)
-	}
-
-	return romDirs, nil
 }

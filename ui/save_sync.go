@@ -26,13 +26,25 @@ func NewSaveSyncScreen() *SaveSyncScreen {
 func (s *SaveSyncScreen) Draw(input SaveSyncInput) (ScreenResult[SaveSyncOutput], error) {
 	output := SaveSyncOutput{}
 
+	// First, scan local ROMs (this involves hashing which can be slow)
+	romScan, _ := gaba.ProcessMessage(i18n.Localize(&goi18n.Message{ID: "save_sync_scanning_roms", Other: "Scanning ROMs..."}, nil), gaba.ProcessMessageOptions{}, func() (interface{}, error) {
+		return utils.ScanRoms(), nil
+	})
+
 	type scanResult struct {
 		Syncs     []utils.SaveSync
 		Unmatched []utils.UnmatchedSave
 	}
 
+	// Then, find save syncs using the pre-scanned ROM data
 	scanData, _ := gaba.ProcessMessage(i18n.Localize(&goi18n.Message{ID: "save_sync_scanning", Other: "Scanning save files..."}, nil), gaba.ProcessMessageOptions{}, func() (interface{}, error) {
-		syncs, unmatched, err := utils.FindSaveSyncs(input.Host)
+		localRoms, ok := romScan.(utils.LocalRomScan)
+		if !ok {
+			gaba.GetLogger().Error("Unable to scan ROMs!")
+			return nil, nil
+		}
+
+		syncs, unmatched, err := utils.FindSaveSyncsFromScan(input.Host, localRoms)
 		if err != nil {
 			gaba.GetLogger().Error("Unable to scan save files!", "error", err)
 			return nil, nil

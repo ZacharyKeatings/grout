@@ -223,10 +223,13 @@ func lookupRomID(romFile *localRomFile, rc *romm.Client) (int, string, error) {
 }
 
 func FindSaveSyncs(host romm.Host) ([]SaveSync, []UnmatchedSave, error) {
+	return FindSaveSyncsFromScan(host, scanRoms())
+}
+
+func FindSaveSyncsFromScan(host romm.Host, scanLocal LocalRomScan) ([]SaveSync, []UnmatchedSave, error) {
 	logger := gaba.GetLogger()
 	rc := GetRommClient(host)
 
-	scanLocal := scanRoms()
 	logger.Debug("FindSaveSyncs: Scanned local ROMs", "platformCount", len(scanLocal))
 
 	allSaves, err := rc.GetSaves(romm.SaveQuery{})
@@ -334,6 +337,13 @@ func FindSaveSyncs(host romm.Host) ([]SaveSync, []UnmatchedSave, error) {
 	syncMap := make(map[string]SaveSync) // key: save file path or romID for downloads
 	for slug, roms := range scanLocal {
 		for _, r := range roms {
+			if r.RomID > 0 {
+				logger.Debug("Evaluating ROM for sync",
+					"romName", r.RomName,
+					"romID", r.RomID,
+					"hasLocalSave", r.SaveFile != nil,
+					"remoteSaveCount", len(r.RemoteSaves))
+			}
 			action := r.syncAction()
 			if action == Upload || action == Download {
 				baseName := strings.TrimSuffix(r.FileName, filepath.Ext(r.FileName))

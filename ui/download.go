@@ -263,6 +263,16 @@ func (s *DownloadScreen) draw(input downloadInput) (ScreenResult[downloadOutput]
 			return d.DisplayName == g.Name
 		}) {
 			downloadedGames = append(downloadedGames, g)
+
+			// Cache ROM hash for future save sync lookups
+			hash := g.Sha1Hash
+			if hash == "" && len(g.Files) > 0 {
+				hash = g.Files[0].Sha1Hash
+			}
+			if hash != "" {
+				utils.CacheRomID(g.PlatformSlug, hash, g.ID, g.Name)
+				logger.Debug("Cached ROM hash", "name", g.Name, "hash", hash[:8], "id", g.ID)
+			}
 		}
 	}
 
