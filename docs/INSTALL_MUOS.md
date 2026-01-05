@@ -30,7 +30,7 @@ _Please help verify compatibility on other devices by reporting your results!_
 
 ## Update
 
-### In-App update
+### In-App update (Recommended)
 Grout has a built-in update mechanism. To update Grout, launch the application and navigate to the `Settings` menu. From there,
 select `Check for Updates`. If a new version is available, follow the on-screen prompts to download and install the update.
 
