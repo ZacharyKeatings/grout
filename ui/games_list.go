@@ -459,27 +459,6 @@ func (s *GameListScreen) loadGames(input GameListInput) (loadGamesResult, error)
 	return result, nil
 }
 
-func getCacheKeyForFetch(id int, ft fetchType) string {
-	switch ft {
-	case ftPlatform:
-		return cache.GetPlatformCacheKey(id)
-	case ftCollection:
-		return cache.GetCacheKey(cache.Collection, fmt.Sprintf("%d", id))
-	}
-	return ""
-}
-
-func getQueryForFetch(id int, ft fetchType) romm.GetRomsQuery {
-	query := romm.GetRomsQuery{}
-	switch ft {
-	case ftPlatform:
-		query.PlatformID = id
-	case ftCollection:
-		query.CollectionID = id
-	}
-	return query
-}
-
 func (s *GameListScreen) showEmptyMessage(platformName, searchFilter string) {
 	var message string
 	if searchFilter != "" {

@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	gaba "github.com/BrandonKowalski/gabagool/v2/pkg/gabagool"
 )
@@ -217,56 +216,4 @@ func SyncArtworkInBackground(host romm.Host, games []romm.Rom) {
 			logger.Debug("Failed to download artwork", "rom", rom.Name, "error", err)
 		}
 	}
-}
-
-func CheckRemoteArtworkLastModified(url string, authHeader string) (time.Time, error) {
-	req, err := http.NewRequest("HEAD", url, nil)
-	if err != nil {
-		return time.Time{}, err
-	}
-	if authHeader != "" {
-		req.Header.Set("Authorization", authHeader)
-	}
-
-	client := &http.Client{Timeout: 10 * constants.DefaultHTTPTimeout}
-	resp, err := client.Do(req)
-	if err != nil {
-		return time.Time{}, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return time.Time{}, fmt.Errorf("bad status: %s", resp.Status)
-	}
-
-	lastModified := resp.Header.Get("Last-Modified")
-	if lastModified == "" {
-		return time.Time{}, nil
-	}
-
-	return http.ParseTime(lastModified)
-}
-
-func ArtworkNeedsUpdate(rom romm.Rom, host romm.Host) bool {
-	cachePath := GetArtworkCachePath(rom.PlatformFSSlug, rom.ID)
-
-	localInfo, err := os.Stat(cachePath)
-	if err != nil {
-		return true
-	}
-
-	coverPath := GetArtworkCoverPath(rom)
-	if coverPath == "" {
-		return false
-	}
-
-	artURL := host.URL() + coverPath
-	artURL = strings.ReplaceAll(artURL, " ", "%20")
-
-	remoteModTime, err := CheckRemoteArtworkLastModified(artURL, host.BasicAuthHeader())
-	if err != nil || remoteModTime.IsZero() {
-		return false // On error or no Last-Modified header, skip re-download
-	}
-
-	return remoteModTime.After(localInfo.ModTime())
 }
